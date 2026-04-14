@@ -1,0 +1,130 @@
+{
+  "nav": {
+    "galleries": "Galeries",
+    "programme": "Programme",
+    "tours": "Visites guidées",
+    "map": "Carte",
+    "about": "À propos",
+    "contact": "Contact",
+    "accessibility": "Accessibilité"
+  },
+  "home": {
+    "galleries": "Galeries",
+    "galleriesComingSoon": "Les galeries seront bientôt affichées ici.",
+    "programmeComingSoon": "Le programme sera bientôt affiché ici."
+  },
+  "seo": {
+    "home": {
+      "title": "Irekiak - Gallery Weekend Donostia / San Sebastián",
+      "description": "Irekiak Gallery Weekend, l'événement officiel du week-end des galeries d'art de Donostia. Visites guidées, expositions et programme culturel."
+    },
+    "galleries": {
+      "title": "Galeries - Irekiak Gallery Weekend",
+      "description": "Découvrez les galeries participant au Irekiak Gallery Weekend."
+    },
+    "programme": {
+      "title": "Programme - Irekiak Gallery Weekend",
+      "description": "Programme complet du Irekiak Gallery Weekend : expositions, visites guidées, projections et plus."
+    },
+    "tours": {
+      "title": "Visites guidées - Irekiak Gallery Weekend",
+      "description": "Inscrivez-vous aux visites guidées gratuites pour découvrir les galeries d'art de Donostia."
+    },
+    "map": {
+      "title": "Carte - Irekiak Gallery Weekend",
+      "description": "Localisation de toutes les galeries du Irekiak Gallery Weekend sur la carte."
+    },
+    "about": {
+      "title": "À propos - Gallery Weekend Donostia",
+      "description": "Découvrez l'histoire et les objectifs du Irekiak Gallery Weekend."
+    },
+    "contact": {
+      "title": "Contact - Irekiak Gallery Weekend",
+      "description": "Contactez-nous."
+    },
+    "accessibility": {
+      "title": "Accessibilité - Irekiak Gallery Weekend",
+      "description": "Déclaration d'accessibilité du site web Irekiak."
+    }
+  },
+  "footer": {
+    "links": "Liens",
+    "contact": "Contact"
+  },
+  "a11y": {
+    "skipToContent": "Aller au contenu",
+    "openMenu": "Ouvrir le menu",
+    "closeMenu": "Fermer le menu"
+  },
+  "common": {
+    "learnMore": "En savoir plus",
+    "register": "S'inscrire",
+    "back": "Retour",
+    "continue": "Continuer",
+    "loading": "Chargement...",
+    "free": "Gratuit",
+    "spotsLeft": "{count} places disponibles",
+    "full": "Complet"
+  },
+  "tours": {
+    "galleries": "Galeries sur cet itinéraire",
+    "availableSlots": "Créneaux disponibles",
+    "spots": "places",
+    "bookingComingSoon": "La réservation sera bientôt disponible.",
+    "notFound": "Itinéraire introuvable."
+  },
+  "booking": {
+    "title": "Inscription à la visite guidée",
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "email": "Adresse e-mail",
+    "phone": "Téléphone",
+    "numberOfPeople": "Nombre de personnes",
+    "language": "Langue",
+    "specialNeeds": "Besoins spécifiques",
+    "acceptTerms": "J'accepte les conditions",
+    "submit": "M'inscrire",
+    "submitting": "Envoi en cours...",
+    "confirm": "Confirmer la réservation",
+    "confirmation": "Votre inscription a été confirmée",
+    "confirmed": "Réservation confirmée",
+    "emailSentTo": "Une confirmation a été envoyée à {email}.",
+    "backToTours": "Retour aux visites",
+    "route": "Itinéraire",
+    "date": "Date",
+    "time": "Horaire",
+    "maxPeople": "Maximum {max} personnes par inscription",
+    "selectDate": "Choisissez une date",
+    "selectDateHint": "Sélectionnez une date disponible dans le calendrier.",
+    "selectSlot": "Choisissez un créneau",
+    "fillInfo": "Vos informations",
+    "stepDate": "Date",
+    "stepSlot": "Créneau",
+    "stepInfo": "Informations",
+    "noSlots": "Aucun créneau disponible pour cette date.",
+    "previousMonth": "Mois précédent",
+    "nextMonth": "Mois suivant",
+    "errors": {
+      "required": "Ce champ est requis",
+      "invalidEmail": "Adresse e-mail invalide",
+      "invalidPeople": "Entre 1 et 4 personnes",
+      "acceptTerms": "Vous devez accepter les conditions",
+      "slotFull": "Créneau complet. Places restantes : {remaining}.",
+      "slotNotFound": "Créneau introuvable.",
+      "notFound": "Réservation introuvable.",
+      "generic": "Une erreur est survenue. Veuillez réessayer."
+    },
+    "addToCalendar": "Ajouter au calendrier",
+    "share": "Partager",
+    "shareSubject": "Réservation confirmée - Irekiak Gallery Weekend",
+    "shareBody": "J'ai réservé ma visite guidée :"
+  },
+  "contact": {
+    "title": "Contact",
+    "name": "Nom",
+    "email": "Adresse e-mail",
+    "message": "Message",
+    "send": "Envoyer",
+    "success": "Votre message a été envoyé. Merci !"
+  }
+}

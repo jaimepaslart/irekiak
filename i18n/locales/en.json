@@ -1,0 +1,130 @@
+{
+  "nav": {
+    "galleries": "Galleries",
+    "programme": "Programme",
+    "tours": "Guided Tours",
+    "map": "Map",
+    "about": "About",
+    "contact": "Contact",
+    "accessibility": "Accessibility"
+  },
+  "home": {
+    "galleries": "Galleries",
+    "galleriesComingSoon": "Galleries will be displayed here soon.",
+    "programmeComingSoon": "Programme will be displayed here soon."
+  },
+  "seo": {
+    "home": {
+      "title": "Irekiak - Gallery Weekend Donostia / San Sebastián",
+      "description": "Irekiak Gallery Weekend, the official art gallery weekend event of Donostia. Guided tours, exhibitions and cultural programme."
+    },
+    "galleries": {
+      "title": "Galleries - Irekiak Gallery Weekend",
+      "description": "Discover the galleries participating in Irekiak Gallery Weekend."
+    },
+    "programme": {
+      "title": "Programme - Irekiak Gallery Weekend",
+      "description": "Full programme of Irekiak Gallery Weekend: exhibitions, guided tours, screenings and more."
+    },
+    "tours": {
+      "title": "Guided Tours - Irekiak Gallery Weekend",
+      "description": "Register for free guided tours to discover the art galleries of Donostia."
+    },
+    "map": {
+      "title": "Map - Irekiak Gallery Weekend",
+      "description": "Location of all Irekiak Gallery Weekend galleries on the map."
+    },
+    "about": {
+      "title": "About - Gallery Weekend Donostia",
+      "description": "Learn about the history and goals of Irekiak Gallery Weekend."
+    },
+    "contact": {
+      "title": "Contact - Irekiak Gallery Weekend",
+      "description": "Get in touch with us."
+    },
+    "accessibility": {
+      "title": "Accessibility - Irekiak Gallery Weekend",
+      "description": "Accessibility statement for the Irekiak website."
+    }
+  },
+  "footer": {
+    "links": "Links",
+    "contact": "Contact"
+  },
+  "a11y": {
+    "skipToContent": "Skip to content",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
+  },
+  "common": {
+    "learnMore": "Learn more",
+    "register": "Register",
+    "back": "Back",
+    "continue": "Continue",
+    "loading": "Loading...",
+    "free": "Free",
+    "spotsLeft": "{count} spots left",
+    "full": "Full"
+  },
+  "tours": {
+    "galleries": "Galleries on this route",
+    "availableSlots": "Available time slots",
+    "spots": "spots",
+    "bookingComingSoon": "Booking will be available soon.",
+    "notFound": "Route not found."
+  },
+  "booking": {
+    "title": "Guided tour registration",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "email": "Email address",
+    "phone": "Phone",
+    "numberOfPeople": "Number of people",
+    "language": "Language",
+    "specialNeeds": "Special needs",
+    "acceptTerms": "I accept the terms",
+    "submit": "Register",
+    "submitting": "Submitting...",
+    "confirm": "Reserve",
+    "confirmation": "Your registration has been confirmed",
+    "confirmed": "Booking confirmed",
+    "emailSentTo": "A confirmation was sent to {email}.",
+    "backToTours": "Back to tours",
+    "route": "Route",
+    "date": "Date",
+    "time": "Time",
+    "maxPeople": "Maximum {max} people per registration",
+    "selectDate": "Select a date",
+    "selectDateHint": "Pick an available date in the calendar.",
+    "selectSlot": "Select a time slot",
+    "fillInfo": "Your details",
+    "stepDate": "Date",
+    "stepSlot": "Slot",
+    "stepInfo": "Details",
+    "noSlots": "No slots available for this date.",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "errors": {
+      "required": "This field is required",
+      "invalidEmail": "Invalid email address",
+      "invalidPeople": "Between 1 and 4 people",
+      "acceptTerms": "You must accept the terms",
+      "slotFull": "Slot is full. Remaining: {remaining}.",
+      "slotNotFound": "Slot not found.",
+      "notFound": "Booking not found.",
+      "generic": "An error occurred. Please try again."
+    },
+    "addToCalendar": "Add to calendar",
+    "share": "Share",
+    "shareSubject": "Booking confirmed - Irekiak Gallery Weekend",
+    "shareBody": "I booked my guided tour:"
+  },
+  "contact": {
+    "title": "Contact",
+    "name": "Name",
+    "email": "Email address",
+    "message": "Message",
+    "send": "Send",
+    "success": "Your message has been sent. Thank you!"
+  }
+}

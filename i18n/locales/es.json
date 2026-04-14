@@ -1,0 +1,130 @@
+{
+  "nav": {
+    "galleries": "Galerías",
+    "programme": "Programa",
+    "tours": "Visitas guiadas",
+    "map": "Mapa",
+    "about": "Sobre Irekiak",
+    "contact": "Contacto",
+    "accessibility": "Accesibilidad"
+  },
+  "home": {
+    "galleries": "Galerías",
+    "galleriesComingSoon": "Próximamente se mostrarán las galerías aquí.",
+    "programmeComingSoon": "Próximamente se mostrará el programa aquí."
+  },
+  "seo": {
+    "home": {
+      "title": "Irekiak - Gallery Weekend Donostia / San Sebastián",
+      "description": "Irekiak Gallery Weekend, el evento oficial del fin de semana de galerías de arte de Donostia. Visitas guiadas, exposiciones y programa cultural."
+    },
+    "galleries": {
+      "title": "Galerías - Irekiak Gallery Weekend",
+      "description": "Descubre las galerías que participan en Irekiak Gallery Weekend."
+    },
+    "programme": {
+      "title": "Programa - Irekiak Gallery Weekend",
+      "description": "Programa completo de Irekiak Gallery Weekend: exposiciones, visitas guiadas, proyecciones y más."
+    },
+    "tours": {
+      "title": "Visitas guiadas - Irekiak Gallery Weekend",
+      "description": "Inscríbete en visitas guiadas gratuitas para conocer las galerías de arte de Donostia."
+    },
+    "map": {
+      "title": "Mapa - Irekiak Gallery Weekend",
+      "description": "Ubicación de todas las galerías de Irekiak Gallery Weekend en el mapa."
+    },
+    "about": {
+      "title": "Sobre Irekiak - Gallery Weekend Donostia",
+      "description": "Conoce la historia y los objetivos de Irekiak Gallery Weekend."
+    },
+    "contact": {
+      "title": "Contacto - Irekiak Gallery Weekend",
+      "description": "Ponte en contacto con nosotros."
+    },
+    "accessibility": {
+      "title": "Accesibilidad - Irekiak Gallery Weekend",
+      "description": "Declaración de accesibilidad del sitio web de Irekiak."
+    }
+  },
+  "footer": {
+    "links": "Enlaces",
+    "contact": "Contacto"
+  },
+  "a11y": {
+    "skipToContent": "Ir al contenido",
+    "openMenu": "Abrir menú",
+    "closeMenu": "Cerrar menú"
+  },
+  "common": {
+    "learnMore": "Saber más",
+    "register": "Inscribirse",
+    "back": "Volver",
+    "continue": "Continuar",
+    "loading": "Cargando...",
+    "free": "Gratuito",
+    "spotsLeft": "{count} plazas libres",
+    "full": "Completo"
+  },
+  "tours": {
+    "galleries": "Galerías en este recorrido",
+    "availableSlots": "Franjas disponibles",
+    "spots": "plazas",
+    "bookingComingSoon": "La reserva estará disponible pronto.",
+    "notFound": "Recorrido no encontrado."
+  },
+  "booking": {
+    "title": "Inscripción a visita guiada",
+    "firstName": "Nombre",
+    "lastName": "Apellido",
+    "email": "Correo electrónico",
+    "phone": "Teléfono",
+    "numberOfPeople": "Número de personas",
+    "language": "Idioma",
+    "specialNeeds": "Necesidades especiales",
+    "acceptTerms": "Acepto las condiciones",
+    "submit": "Inscribirme",
+    "submitting": "Enviando...",
+    "confirm": "Confirmar reserva",
+    "confirmation": "Tu inscripción ha sido confirmada",
+    "confirmed": "Reserva confirmada",
+    "emailSentTo": "Se ha enviado una confirmación a {email}.",
+    "backToTours": "Volver a las visitas",
+    "route": "Recorrido",
+    "date": "Fecha",
+    "time": "Horario",
+    "maxPeople": "Máximo {max} personas por inscripción",
+    "selectDate": "Elige una fecha",
+    "selectDateHint": "Selecciona una fecha disponible en el calendario.",
+    "selectSlot": "Elige un horario",
+    "fillInfo": "Tus datos",
+    "stepDate": "Fecha",
+    "stepSlot": "Horario",
+    "stepInfo": "Datos",
+    "noSlots": "No hay horarios disponibles para esta fecha.",
+    "previousMonth": "Mes anterior",
+    "nextMonth": "Mes siguiente",
+    "errors": {
+      "required": "Este campo es obligatorio",
+      "invalidEmail": "Correo electrónico no válido",
+      "invalidPeople": "Entre 1 y 4 personas",
+      "acceptTerms": "Debes aceptar las condiciones",
+      "slotFull": "Franja completa. Plazas restantes: {remaining}.",
+      "slotNotFound": "Franja no encontrada.",
+      "notFound": "Reserva no encontrada.",
+      "generic": "Se ha producido un error. Inténtalo de nuevo."
+    },
+    "addToCalendar": "Añadir al calendario",
+    "share": "Compartir",
+    "shareSubject": "Reserva confirmada - Irekiak Gallery Weekend",
+    "shareBody": "He reservado mi visita guiada:"
+  },
+  "contact": {
+    "title": "Contacto",
+    "name": "Nombre",
+    "email": "Correo electrónico",
+    "message": "Mensaje",
+    "send": "Enviar",
+    "success": "Tu mensaje ha sido enviado. ¡Gracias!"
+  }
+}

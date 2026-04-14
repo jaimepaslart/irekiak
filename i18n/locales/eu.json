@@ -1,0 +1,130 @@
+{
+  "nav": {
+    "galleries": "Galeriak",
+    "programme": "Programa",
+    "tours": "Bisita gidatuak",
+    "map": "Mapa",
+    "about": "Irekiaki buruz",
+    "contact": "Kontaktua",
+    "accessibility": "Irisgarritasuna"
+  },
+  "home": {
+    "galleries": "Galeriak",
+    "galleriesComingSoon": "Laster galeriak hemen agertuko dira.",
+    "programmeComingSoon": "Laster programa hemen agertuko da."
+  },
+  "seo": {
+    "home": {
+      "title": "Irekiak - Gallery Weekend Donostia / San Sebastián",
+      "description": "Irekiak Gallery Weekend, Donostiako arte galeria astebururaren ekitaldi ofiziala. Bisita gidatuak, erakusketak eta programa kulturala."
+    },
+    "galleries": {
+      "title": "Galeriak - Irekiak Gallery Weekend",
+      "description": "Irekiak Gallery Weekend-en parte hartzen duten galeriak ezagutu."
+    },
+    "programme": {
+      "title": "Programa - Irekiak Gallery Weekend",
+      "description": "Irekiak Gallery Weekend-aren programa osoa: erakusketak, bisita gidatuak, emanaldia eta gehiago."
+    },
+    "tours": {
+      "title": "Bisita gidatuak - Irekiak Gallery Weekend",
+      "description": "Erregistratu doako bisita gidatuetan Donostiako arte galeriak ezagutzeko."
+    },
+    "map": {
+      "title": "Mapa - Irekiak Gallery Weekend",
+      "description": "Irekiak Gallery Weekend-eko galeria guztien kokapena mapan."
+    },
+    "about": {
+      "title": "Irekiaki buruz - Gallery Weekend Donostia",
+      "description": "Irekiak Gallery Weekend-aren historia eta helburuak ezagutu."
+    },
+    "contact": {
+      "title": "Kontaktua - Irekiak Gallery Weekend",
+      "description": "Jarri gurekin harremanetan."
+    },
+    "accessibility": {
+      "title": "Irisgarritasuna - Irekiak Gallery Weekend",
+      "description": "Irekiak webgunearen irisgarritasun adierazpena."
+    }
+  },
+  "footer": {
+    "links": "Estekak",
+    "contact": "Kontaktua"
+  },
+  "a11y": {
+    "skipToContent": "Edukira joan",
+    "openMenu": "Menua ireki",
+    "closeMenu": "Menua itxi"
+  },
+  "common": {
+    "learnMore": "Gehiago ikusi",
+    "register": "Izena eman",
+    "back": "Atzera",
+    "continue": "Jarraitu",
+    "loading": "Kargatzen...",
+    "free": "Doako",
+    "spotsLeft": "{count} leku libre",
+    "full": "Beteta"
+  },
+  "tours": {
+    "galleries": "Ibilbide honetako galeriak",
+    "availableSlots": "Ordu tarte eskuragarriak",
+    "spots": "leku",
+    "bookingComingSoon": "Erreserba laster egongo da eskuragarri.",
+    "notFound": "Ibilbidea ez da aurkitu."
+  },
+  "booking": {
+    "title": "Bisita gidaturako erregistroa",
+    "firstName": "Izena",
+    "lastName": "Abizena",
+    "email": "Helbide elektronikoa",
+    "phone": "Telefonoa",
+    "numberOfPeople": "Pertsona kopurua",
+    "language": "Hizkuntza",
+    "specialNeeds": "Behar bereziak",
+    "acceptTerms": "Baldintzak onartzen ditut",
+    "submit": "Erregistratu",
+    "submitting": "Bidaltzen...",
+    "confirm": "Erreserba baieztatu",
+    "confirmation": "Zure erregistroa baieztatu da",
+    "confirmed": "Erreserba baieztatuta",
+    "emailSentTo": "Baieztapena {email} helbidera bidali da.",
+    "backToTours": "Bisitetara itzuli",
+    "route": "Ibilbidea",
+    "date": "Data",
+    "time": "Ordua",
+    "maxPeople": "Gehienez {max} pertsona erregistro bakoitzeko",
+    "selectDate": "Aukeratu data",
+    "selectDateHint": "Aukeratu data eskuragarri bat egutegian.",
+    "selectSlot": "Aukeratu ordu tartea",
+    "fillInfo": "Zure datuak",
+    "stepDate": "Data",
+    "stepSlot": "Ordua",
+    "stepInfo": "Datuak",
+    "noSlots": "Ez dago ordu tarterik eskuragarri data honetarako.",
+    "previousMonth": "Aurreko hilabetea",
+    "nextMonth": "Hurrengo hilabetea",
+    "errors": {
+      "required": "Eremu hau beharrezkoa da",
+      "invalidEmail": "Helbide elektroniko baliogabea",
+      "invalidPeople": "1 eta 4 pertsona artean",
+      "acceptTerms": "Baldintzak onartu behar dituzu",
+      "slotFull": "Ordu tartea beteta. Geratzen direnak: {remaining}.",
+      "slotNotFound": "Ordu tartea ez da aurkitu.",
+      "notFound": "Erreserba ez da aurkitu.",
+      "generic": "Errore bat gertatu da. Saiatu berriro."
+    },
+    "addToCalendar": "Egutegira",
+    "share": "Partekatu",
+    "shareSubject": "Erreserba baieztatua - Irekiak Gallery Weekend",
+    "shareBody": "Zure bisita gidatua erreserbatu dut:"
+  },
+  "contact": {
+    "title": "Kontaktua",
+    "name": "Izena",
+    "email": "Helbide elektronikoa",
+    "message": "Mezua",
+    "send": "Bidali",
+    "success": "Zure mezua bidali da. Eskerrik asko!"
+  }
+}

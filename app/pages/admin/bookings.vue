@@ -249,7 +249,10 @@ function statusClass(s: string) {
           <h1 class="m-0 text-2xl">Admin · Réservations</h1>
           <p class="text-sm text-white/50 mt-1">Irekiak 2026 · 29-31 mai</p>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 flex-wrap">
+          <NuxtLink to="/admin/audit" class="text-sm px-4 py-2 border border-white/20 rounded-sm hover:bg-white/10 transition-colors">
+            Audit log
+          </NuxtLink>
           <button type="button" class="text-sm px-4 py-2 border border-white/20 rounded-sm hover:bg-white/10 transition-colors" @click="loadAll">
             ↻ Rafraîchir
           </button>
@@ -292,6 +295,21 @@ function statusClass(s: string) {
           <p class="text-xs uppercase tracking-wider text-white/40 font-mono mb-1">31 mai</p>
           <p class="text-2xl font-bold text-white">{{ stats.byDate['2026-05-31'] ?? 0 }}</p>
           <p class="text-xs text-white/40">participants dimanche</p>
+        </div>
+      </div>
+
+      <!-- Check-in shortcuts (per slot with bookings) -->
+      <div v-if="stats && stats.fillRate.some(f => f.booked > 0)" class="bg-edition-dark border border-white/10 rounded-sm p-4 mb-6">
+        <p class="text-xs uppercase tracking-wider text-white/40 font-mono mb-3">Check-in rapide</p>
+        <div class="flex flex-wrap gap-2">
+          <NuxtLink
+            v-for="slot in stats.fillRate.filter(f => f.booked > 0)"
+            :key="slot.slotId"
+            :to="`/admin/checkin/${slot.slotId}`"
+            class="text-xs px-3 py-1.5 border border-white/15 rounded-sm hover:bg-white/10 transition-colors font-mono"
+          >
+            {{ slot.date.slice(5) }} · {{ slot.startTime }} · {{ slot.language.toUpperCase() }} · {{ slot.routeId.replace('route-', '') }} ({{ slot.booked }}/{{ slot.max }})
+          </NuxtLink>
         </div>
       </div>
 

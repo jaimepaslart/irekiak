@@ -41,6 +41,7 @@ export const bookings = sqliteTable('bookings', {
   specialNeeds: text('special_needs'),
   status: text('status', { enum: ['confirmed', 'cancelled', 'waitlist'] }).notNull(),
   confirmToken: text('confirm_token').notNull().unique(),
+  acceptsMarketing: integer('accepts_marketing', { mode: 'boolean' }).notNull().default(false),
   createdAt: text('created_at').notNull().default(sql`CURRENT_TIMESTAMP`),
 })
 

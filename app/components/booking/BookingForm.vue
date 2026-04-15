@@ -12,6 +12,7 @@ const emit = defineEmits<{
 }>()
 
 const { t, locale } = useI18n()
+const localePath = useLocalePath()
 
 type BookingLanguage = 'eu' | 'es' | 'fr' | 'en'
 
@@ -23,7 +24,8 @@ interface FormState {
   numberOfPeople: number
   language: BookingLanguage
   specialNeeds: string
-  acceptsTerms: boolean
+  acceptsPrivacyPolicy: boolean
+  acceptsMarketing: boolean
 }
 
 const form = reactive<FormState>({
@@ -36,7 +38,8 @@ const form = reactive<FormState>({
     ? (locale.value as BookingLanguage)
     : 'eu',
   specialNeeds: '',
-  acceptsTerms: false,
+  acceptsPrivacyPolicy: false,
+  acceptsMarketing: false,
 })
 
 const errors = reactive<Record<string, string>>({})
@@ -62,7 +65,7 @@ function validate(): boolean {
   if (form.numberOfPeople < 1 || form.numberOfPeople > 4) {
     errors.numberOfPeople = t('booking.errors.invalidPeople')
   }
-  if (!form.acceptsTerms) errors.acceptsTerms = t('booking.errors.acceptTerms')
+  if (!form.acceptsPrivacyPolicy) errors.acceptsPrivacyPolicy = t('booking.errors.acceptPrivacy') || t('booking.errors.acceptTerms')
 
   return Object.keys(errors).length === 0
 }
@@ -80,7 +83,7 @@ async function onSubmit() {
   touched.firstName = true
   touched.lastName = true
   touched.email = true
-  touched.acceptsTerms = true
+  touched.acceptsPrivacyPolicy = true
 
   if (!validate()) return
 
@@ -95,7 +98,8 @@ async function onSubmit() {
       numberOfPeople: Number(form.numberOfPeople),
       language: form.language,
       specialNeeds: form.specialNeeds.trim() || undefined,
-      acceptsTerms: true as const,
+      acceptsPrivacyPolicy: true as const,
+      acceptsMarketing: form.acceptsMarketing,
     }
 
     const res = await $fetch<{ bookingId: string, confirmToken: string, status: string }>(
@@ -265,16 +269,16 @@ async function onSubmit() {
       />
     </div>
 
-    <!-- Accept terms - custom checkbox -->
+    <!-- Consent: privacy policy (required) -->
     <div class="sm:col-span-2 form-appear" style="--d: 480ms">
       <label class="flex items-start gap-3 cursor-pointer text-sm text-white/80 group/check">
         <span class="relative mt-[3px] shrink-0">
           <input
-            v-model="form.acceptsTerms"
+            v-model="form.acceptsPrivacyPolicy"
             type="checkbox"
             required
             class="peer sr-only"
-            :aria-invalid="!!errors.acceptsTerms"
+            :aria-invalid="!!errors.acceptsPrivacyPolicy"
           >
           <span
             class="block w-[18px] h-[18px] border border-white/30 rounded-sm transition-all duration-200
@@ -294,9 +298,48 @@ async function onSubmit() {
             <polyline points="20 6 9 17 4 12" />
           </svg>
         </span>
-        <span class="leading-relaxed">{{ t('booking.acceptTerms') }} *</span>
+        <span class="leading-relaxed">
+          {{ t('booking.acceptPrivacy') || "J'accepte la" }}
+          <NuxtLink :to="localePath('/privacy')" class="underline hover:text-white" target="_blank">
+            {{ t('booking.privacyPolicy') || 'politique de confidentialité' }}
+          </NuxtLink>
+          *
+        </span>
       </label>
-      <p v-if="errors.acceptsTerms" class="form-error ml-7">{{ errors.acceptsTerms }}</p>
+      <p v-if="errors.acceptsPrivacyPolicy" class="form-error ml-7">{{ errors.acceptsPrivacyPolicy }}</p>
+    </div>
+
+    <!-- Consent: marketing (optional, unchecked by default) -->
+    <div class="sm:col-span-2 form-appear" style="--d: 520ms">
+      <label class="flex items-start gap-3 cursor-pointer text-sm text-white/60 group/check">
+        <span class="relative mt-[3px] shrink-0">
+          <input
+            v-model="form.acceptsMarketing"
+            type="checkbox"
+            class="peer sr-only"
+          >
+          <span
+            class="block w-[18px] h-[18px] border border-white/30 rounded-sm transition-all duration-200
+                   peer-checked:bg-white peer-checked:border-white
+                   peer-focus-visible:ring-2 peer-focus-visible:ring-white/60
+                   group-hover/check:border-white/60"
+          />
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="absolute inset-0 m-auto w-3 h-3 text-[var(--color-edition)] opacity-0 transition-opacity duration-200 peer-checked:opacity-100"
+          >
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        </span>
+        <span class="leading-relaxed">
+          {{ t('booking.acceptMarketing') || 'Je souhaite être informé·e des prochaines éditions Irekiak (optionnel)' }}
+        </span>
+      </label>
     </div>
 
     <!-- Server error -->

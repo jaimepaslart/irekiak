@@ -112,6 +112,7 @@ export default defineNuxtConfig({
     resendApiKey: '',
     contactEmail: 'irekiak@irekiak.eus',
     adminTokenSecret: '', // NUXT_ADMIN_TOKEN_SECRET
+    cronSecret: '',       // NUXT_CRON_SECRET (for /api/cron/* auth)
     public: {
       siteUrl: 'https://irekiak.eus',
     },

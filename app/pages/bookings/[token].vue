@@ -54,6 +54,8 @@ const { data, pending, error, refresh } = await useFetch<BookingPayload>(
 const cancelling = ref(false)
 const cancelError = ref<string | null>(null)
 const cancelConfirmOpen = ref(false)
+const purgeConfirmOpen = ref(false)
+const purging = ref(false)
 
 async function confirmCancel() {
   cancelling.value = true
@@ -68,6 +70,23 @@ async function confirmCancel() {
   }
   finally {
     cancelling.value = false
+  }
+}
+
+async function confirmPurge() {
+  purging.value = true
+  try {
+    await $fetch(`/api/bookings/${token.value}/purge`, { method: 'POST' })
+    purgeConfirmOpen.value = false
+    // Data is now purged: show info message and redirect home
+    alert(t('booking.purgeDone') || 'Vos données ont été effacées. Merci.')
+    window.location.href = localePath('/')
+  }
+  catch (err: unknown) {
+    alert((err as { statusMessage?: string })?.statusMessage ?? 'Purge failed')
+  }
+  finally {
+    purging.value = false
   }
 }
 
@@ -196,6 +215,73 @@ function distanceLabel(meters: number) {
       >
         {{ t('booking.alreadyCancelled') || 'Cette réservation a été annulée.' }}
       </div>
+
+      <!-- GDPR rights -->
+      <section class="mt-12 pt-8 border-t border-white/10">
+        <details class="text-sm">
+          <summary class="cursor-pointer text-white/50 hover:text-white transition-colors font-mono uppercase tracking-wider text-xs">
+            {{ t('booking.gdprRights') || 'Mes droits RGPD' }}
+          </summary>
+          <div class="mt-4 flex flex-wrap gap-3">
+            <a
+              :href="`/api/bookings/${data.booking.confirmToken}/data`"
+              class="inline-flex items-center gap-2 px-4 py-2 text-xs font-medium border border-white/20 text-white/80 hover:bg-white/10 transition-colors rounded-sm"
+            >
+              {{ t('booking.exportData') || 'Exporter mes données (JSON)' }}
+            </a>
+            <button
+              v-if="data.booking.status !== 'cancelled' || !data.booking.email.startsWith('purged-')"
+              type="button"
+              class="inline-flex items-center gap-2 px-4 py-2 text-xs font-medium border border-red-400/30 text-red-300 hover:bg-red-500/10 transition-colors rounded-sm"
+              @click="purgeConfirmOpen = true"
+            >
+              {{ t('booking.purgeData') || 'Effacer toutes mes données' }}
+            </button>
+          </div>
+          <p class="mt-3 text-xs text-white/40 leading-relaxed">
+            {{ t('booking.gdprIntro') || 'Conformément au RGPD, vous pouvez à tout moment exporter ou effacer vos données personnelles.' }}
+            <NuxtLink :to="localePath('/privacy')" class="underline hover:text-white/70">
+              {{ t('common.privacyPolicy') || 'Politique de confidentialité' }}
+            </NuxtLink>
+          </p>
+        </details>
+      </section>
+
+      <!-- Purge confirm modal -->
+      <Transition name="fade">
+        <div
+          v-if="purgeConfirmOpen"
+          class="fixed inset-0 z-[1001] flex items-center justify-center bg-black/70 backdrop-blur-sm px-6"
+          @click.self="purgeConfirmOpen = false"
+        >
+          <div class="max-w-md w-full bg-[var(--color-edition)] border border-red-400/40 rounded-sm p-6 md:p-8">
+            <h3 class="text-lg font-semibold text-white mb-3">
+              {{ t('booking.purgeConfirmTitle') || 'Effacer toutes mes données ?' }}
+            </h3>
+            <p class="text-sm text-white/70 mb-6 leading-relaxed">
+              {{ t('booking.purgeConfirmBody') || 'Toutes tes données personnelles (nom, email, téléphone) seront effacées définitivement. Ta réservation sera annulée. Cette action est irréversible.' }}
+            </p>
+            <div class="flex flex-wrap gap-3 justify-end">
+              <button
+                type="button"
+                class="px-4 py-2 text-sm text-white/70 hover:text-white transition-colors"
+                :disabled="purging"
+                @click="purgeConfirmOpen = false"
+              >
+                {{ t('common.cancel') || 'Annuler' }}
+              </button>
+              <button
+                type="button"
+                class="px-5 py-2 text-sm font-medium bg-red-500 text-white hover:bg-red-600 transition-colors rounded-sm disabled:opacity-50"
+                :disabled="purging"
+                @click="confirmPurge"
+              >
+                {{ purging ? (t('common.loading') || '…') : (t('booking.confirmPurge') || 'Effacer définitivement') }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
 
       <!-- Cancel confirm modal -->
       <Transition name="fade">

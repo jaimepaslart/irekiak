@@ -55,6 +55,7 @@ sqlite.exec(`
     special_needs TEXT,
     status TEXT NOT NULL DEFAULT 'confirmed',
     confirm_token TEXT NOT NULL UNIQUE,
+    accepts_marketing INTEGER NOT NULL DEFAULT 0,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
   CREATE INDEX IF NOT EXISTS idx_bookings_slot ON bookings(slot_id);
@@ -72,6 +73,21 @@ sqlite.exec(`
   CREATE INDEX IF NOT EXISTS idx_audit_log_timestamp ON audit_log(timestamp);
   CREATE INDEX IF NOT EXISTS idx_audit_log_target ON audit_log(target_type, target_id);
 `)
+
+// Idempotent additive migrations (SQLite: ALTER TABLE ADD COLUMN only runs
+// if the column doesn't already exist — we catch the "duplicate column" error).
+function safeAddColumn(table: string, columnDef: string): void {
+  try {
+    sqlite.exec(`ALTER TABLE ${table} ADD COLUMN ${columnDef}`)
+  }
+  catch (err) {
+    const msg = (err as Error).message ?? ''
+    if (!msg.includes('duplicate column')) {
+      console.warn(`[db] migration ALTER ${table} failed:`, msg)
+    }
+  }
+}
+safeAddColumn('bookings', 'accepts_marketing INTEGER NOT NULL DEFAULT 0')
 
 // Auto-seed if tables are empty (idempotent)
 try {

@@ -49,6 +49,8 @@ useSeoMeta({
 })
 
 const STORAGE_KEY = 'irekiak_admin_token'
+const STORAGE_KEY_TS = 'irekiak_admin_token_ts'
+const SESSION_TIMEOUT_MS = 60 * 60 * 1000 // 1 hour
 
 const token = ref('')
 const tokenInput = ref('')
@@ -108,9 +110,17 @@ watch([statusFilter, routeFilter, languageFilter, dateFilter, searchQuery], () =
 onMounted(() => {
   if (typeof window === 'undefined') return
   const stored = window.localStorage.getItem(STORAGE_KEY)
-  if (stored) {
+  const storedTs = window.localStorage.getItem(STORAGE_KEY_TS)
+  const age = storedTs ? Date.now() - Number(storedTs) : Infinity
+  if (stored && age < SESSION_TIMEOUT_MS) {
     token.value = stored
     void loadAll()
+  }
+  else if (stored) {
+    // Expired
+    window.localStorage.removeItem(STORAGE_KEY)
+    window.localStorage.removeItem(STORAGE_KEY_TS)
+    errorMessage.value = 'Session expirée, reconnecte-toi.'
   }
 })
 
@@ -150,6 +160,7 @@ function login() {
   token.value = value
   if (typeof window !== 'undefined') {
     window.localStorage.setItem(STORAGE_KEY, value)
+    window.localStorage.setItem(STORAGE_KEY_TS, String(Date.now()))
   }
   tokenInput.value = ''
   void loadAll()
@@ -161,6 +172,7 @@ function logout(clearStorage = true) {
   stats.value = null
   if (clearStorage && typeof window !== 'undefined') {
     window.localStorage.removeItem(STORAGE_KEY)
+    window.localStorage.removeItem(STORAGE_KEY_TS)
   }
 }
 

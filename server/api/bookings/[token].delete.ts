@@ -3,11 +3,14 @@ import { createError, defineEventHandler, getRouterParam } from 'h3'
 import { db } from '../../db'
 import { bookings, timeSlots, tourRoutes } from '../../db/schema'
 import { cancelBooking } from '../../utils/cancel-booking'
+import { enforceRateLimit } from '../../utils/rate-limit'
 
 /**
  * DELETE /api/bookings/:token — Public cancel flow. Idempotent.
  */
 export default defineEventHandler(async (event) => {
+  enforceRateLimit(event, { key: 'booking.cancel', windowMs: 5 * 60 * 1000, max: 3 })
+
   const token = getRouterParam(event, 'token')
   if (!token) {
     throw createError({ statusCode: 400, statusMessage: 'Missing token' })

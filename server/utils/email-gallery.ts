@@ -1,5 +1,6 @@
 import { Resend } from 'resend'
 import { useRuntimeConfig } from '#imports'
+import { withEmailRetry } from './email-retry'
 
 type Language = 'eu' | 'es' | 'fr' | 'en'
 
@@ -207,17 +208,22 @@ export async function sendGalleryBookingNotification(params: GalleryNotification
       ? strings.subjectBooked(params.route.name, params.slot.date)
       : strings.subjectCancelled(params.route.name, params.slot.date)
     const html = buildHtml(params, strings)
-    const { error } = await resend.emails.send({
-      from: 'Irekiak <irekiak@irekiak.eus>',
-      to: params.to,
-      subject,
-      html,
+    await withEmailRetry(async () => {
+      const { error } = await resend.emails.send({
+        from: 'Irekiak <irekiak@irekiak.eus>',
+        to: params.to,
+        subject,
+        html,
+      })
+      if (error) throw new Error(`Resend: ${error.message ?? 'unknown'}`)
+    }, {
+      channel: `gallery.${params.action}`,
+      targetType: 'booking',
+      targetId: params.booking.id,
+      recipient: params.to,
     })
-    if (error) {
-      console.error('[email-gallery] Resend error:', error)
-    }
   }
   catch (err) {
-    console.error('[email-gallery] unexpected failure:', err)
+    console.error('[email-gallery] final failure:', err)
   }
 }

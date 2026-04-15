@@ -1,5 +1,6 @@
 import { Resend } from 'resend'
 import { useRuntimeConfig } from '#imports'
+import { withEmailRetry } from './email-retry'
 
 type BookingLanguage = 'eu' | 'es' | 'fr' | 'en'
 
@@ -186,24 +187,29 @@ export async function sendBookingConfirmation(params: SendBookingConfirmationPar
 
   const html = buildHtml(params, strings, confirmUrl)
 
-  const { error } = await resend.emails.send({
-    from: 'Irekiak <irekiak@irekiak.eus>',
-    to: params.to,
-    subject: strings.subject,
-    html,
-    attachments: [
-      {
-        filename: 'irekiak-booking.ics',
-        content: Buffer.from(params.icsContent, 'utf8'),
-        contentType: 'text/calendar; charset=utf-8; method=REQUEST',
-      },
-    ],
+  await withEmailRetry(async () => {
+    const { error } = await resend.emails.send({
+      from: 'Irekiak <irekiak@irekiak.eus>',
+      to: params.to,
+      subject: strings.subject,
+      html,
+      attachments: [
+        {
+          filename: 'irekiak-booking.ics',
+          content: Buffer.from(params.icsContent, 'utf8'),
+          contentType: 'text/calendar; charset=utf-8; method=REQUEST',
+        },
+      ],
+    })
+    if (error) {
+      throw new Error(`Resend: ${error.message ?? 'unknown error'}`)
+    }
+  }, {
+    channel: 'booking.confirmation',
+    targetType: 'booking',
+    targetId: params.bookingId,
+    recipient: params.to,
   })
-
-  if (error) {
-    console.error('[email] Resend error:', error)
-    throw new Error(`Failed to send booking email: ${error.message ?? 'unknown error'}`)
-  }
 }
 
 interface SendBookingCancellationParams {
@@ -314,17 +320,22 @@ export async function sendBookingCancellation(params: SendBookingCancellationPar
 </html>`
 
     const resend = new Resend(config.resendApiKey)
-    const { error } = await resend.emails.send({
-      from: 'Irekiak <irekiak@irekiak.eus>',
-      to: params.to,
-      subject: s.subject,
-      html,
+    await withEmailRetry(async () => {
+      const { error } = await resend.emails.send({
+        from: 'Irekiak <irekiak@irekiak.eus>',
+        to: params.to,
+        subject: s.subject,
+        html,
+      })
+      if (error) throw new Error(`Resend: ${error.message ?? 'unknown'}`)
+    }, {
+      channel: 'booking.cancellation',
+      targetType: 'booking',
+      targetId: params.bookingId,
+      recipient: params.to,
     })
-    if (error) {
-      console.error('[email] cancellation Resend error:', error)
-    }
   }
   catch (err) {
-    console.error('[email] cancellation unexpected failure:', err)
+    console.error('[email] cancellation final failure:', err)
   }
 }

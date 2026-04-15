@@ -9,6 +9,7 @@ import { sendBookingConfirmation } from '../../utils/email'
 import { generateBookingIcs } from '../../utils/ics'
 import { notifyGalleriesForBooking } from '../../utils/notify-galleries'
 import { pickRouteName } from '../../utils/pick-locale'
+import { enforceRateLimit } from '../../utils/rate-limit'
 import { bookingRequestSchema } from '../../utils/validation'
 
 /**
@@ -27,6 +28,8 @@ import { bookingRequestSchema } from '../../utils/validation'
  * slot does not exist, 400 if the payload is invalid.
  */
 export default defineEventHandler(async (event) => {
+  enforceRateLimit(event, { key: 'booking.create', windowMs: 10 * 60 * 1000, max: 5 })
+
   const parsed = await readValidatedBody(event, (body) => {
     const result = bookingRequestSchema.safeParse(body)
     if (!result.success) {

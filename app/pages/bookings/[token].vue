@@ -56,6 +56,22 @@ const cancelError = ref<string | null>(null)
 const cancelConfirmOpen = ref(false)
 const purgeConfirmOpen = ref(false)
 const purging = ref(false)
+const resending = ref(false)
+
+async function resendEmail() {
+  resending.value = true
+  try {
+    await $fetch(`/api/bookings/${token.value}/resend`, { method: 'POST' })
+    alert(t('booking.resendDone') || 'Email renvoyé à ton adresse. Vérifie ta boîte (et les spams).')
+  }
+  catch (err: unknown) {
+    const msg = (err as { statusMessage?: string })?.statusMessage
+    alert(msg ?? 'Failed to resend email')
+  }
+  finally {
+    resending.value = false
+  }
+}
 
 async function confirmCancel() {
   cancelling.value = true
@@ -192,6 +208,28 @@ function distanceLabel(meters: number) {
         </dl>
       </section>
 
+      <!-- QR code -->
+      <section v-if="data.booking.status === 'confirmed'" class="bg-edition-dark p-6 md:p-8 rounded-sm mb-6">
+        <h2 class="text-base font-semibold text-white mb-4 flex items-center gap-2">
+          <span class="inline-block w-1 h-4 rounded-full" :style="{ backgroundColor: data.route.color }" />
+          {{ t('booking.qrTitle') || 'Code à présenter le jour J' }}
+        </h2>
+        <div class="flex flex-col md:flex-row gap-6 items-center md:items-start">
+          <div class="bg-white p-3 rounded-sm shrink-0">
+            <img
+              :src="`/api/bookings/${data.booking.confirmToken}/qr`"
+              :alt="t('booking.qrAlt') || 'QR code de réservation'"
+              width="200"
+              height="200"
+              class="block w-[200px] h-[200px]"
+            >
+          </div>
+          <p class="text-sm text-white/60 leading-relaxed">
+            {{ t('booking.qrHelp') || 'Montrez ce QR code au guide au point de rendez-vous. Il scanne pour marquer votre présence en quelques secondes.' }}
+          </p>
+        </div>
+      </section>
+
       <!-- Actions -->
       <section v-if="data.booking.status === 'confirmed'" class="flex flex-wrap items-center gap-3">
         <a
@@ -200,6 +238,14 @@ function distanceLabel(meters: number) {
         >
           {{ t('booking.addToCalendar') || 'Ajouter au calendrier' }}
         </a>
+        <button
+          type="button"
+          class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium border border-white/25 text-white/80 hover:bg-white/10 transition-colors rounded-sm disabled:opacity-50"
+          :disabled="resending"
+          @click="resendEmail"
+        >
+          {{ resending ? (t('common.loading') || '…') : (t('booking.resendEmail') || 'Renvoyer le lien par email') }}
+        </button>
         <button
           type="button"
           class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium border border-red-500/40 text-red-300 hover:bg-red-500/10 transition-colors rounded-sm"

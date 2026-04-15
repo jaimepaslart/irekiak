@@ -30,10 +30,10 @@ async function load() {
   try {
     const [s, a] = await Promise.all([
       $fetch<StatsPayload>('/api/admin/stats', { headers: { 'x-admin-token': token.value } }),
-      $fetch<AuditEntry[]>('/api/admin/audit?limit=10', { headers: { 'x-admin-token': token.value } }),
+      $fetch<{ entries: AuditEntry[], total: number }>('/api/admin/audit?limit=10', { headers: { 'x-admin-token': token.value } }),
     ])
     stats.value = s
-    audit.value = a
+    audit.value = a.entries
   }
   catch (err: unknown) {
     errorMessage.value = (err as { statusMessage?: string })?.statusMessage ?? 'Failed to load'

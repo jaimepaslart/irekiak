@@ -62,8 +62,41 @@ export const attendance = sqliteTable('attendance', {
   notes: text('notes'),
 })
 
+export const appSettings = sqliteTable('app_settings', {
+  key: text('key').primaryKey(),
+  value: text('value').notNull(),
+  updatedAt: text('updated_at').notNull().default(sql`(datetime('now'))`),
+  updatedBy: text('updated_by').notNull(),
+})
+
+export const galleryContactOverrides = sqliteTable('gallery_contact_overrides', {
+  galleryId: text('gallery_id').primaryKey(),
+  email: text('email'),
+  name: text('name'),
+  phone: text('phone'),
+  preferredLanguage: text('preferred_language'),
+  notifyOnBooking: integer('notify_on_booking', { mode: 'boolean' }),
+  receiveDailyDigest: integer('receive_daily_digest', { mode: 'boolean' }),
+  updatedAt: text('updated_at').notNull().default(sql`(datetime('now'))`),
+  updatedBy: text('updated_by').notNull(),
+})
+
+export const emailEvents = sqliteTable('email_events', {
+  id: text('id').primaryKey(),
+  bookingId: text('booking_id'),
+  resendId: text('resend_id'),
+  channel: text('channel').notNull(),
+  recipient: text('recipient').notNull(),
+  eventType: text('event_type').notNull(),
+  timestamp: text('timestamp').notNull().default(sql`(datetime('now'))`),
+  metadata: text('metadata'),
+})
+
 export type TourRouteRow = typeof tourRoutes.$inferSelect
 export type TimeSlotRow = typeof timeSlots.$inferSelect
 export type BookingRow = typeof bookings.$inferSelect
 export type AuditLogRow = typeof auditLog.$inferSelect
 export type AttendanceRow = typeof attendance.$inferSelect
+export type AppSettingRow = typeof appSettings.$inferSelect
+export type GalleryContactOverrideRow = typeof galleryContactOverrides.$inferSelect
+export type EmailEventRow = typeof emailEvents.$inferSelect

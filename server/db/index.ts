@@ -79,6 +79,38 @@ sqlite.exec(`
     checked_in_by TEXT NOT NULL,
     notes TEXT
   );
+
+  CREATE TABLE IF NOT EXISTS app_settings (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL,
+    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_by TEXT NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS gallery_contact_overrides (
+    gallery_id TEXT PRIMARY KEY,
+    email TEXT,
+    name TEXT,
+    phone TEXT,
+    preferred_language TEXT,
+    notify_on_booking INTEGER,
+    receive_daily_digest INTEGER,
+    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_by TEXT NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS email_events (
+    id TEXT PRIMARY KEY,
+    booking_id TEXT,
+    resend_id TEXT,
+    channel TEXT NOT NULL,
+    recipient TEXT NOT NULL,
+    event_type TEXT NOT NULL,
+    timestamp TEXT NOT NULL DEFAULT (datetime('now')),
+    metadata TEXT
+  );
+  CREATE INDEX IF NOT EXISTS idx_email_events_booking ON email_events(booking_id);
+  CREATE INDEX IF NOT EXISTS idx_email_events_type ON email_events(event_type);
 `)
 
 // Idempotent additive migrations (SQLite: ALTER TABLE ADD COLUMN only runs

@@ -3,6 +3,7 @@ import { and, eq } from 'drizzle-orm'
 import { createError, defineEventHandler, readValidatedBody } from 'h3'
 import { db, sqlite } from '../../db'
 import { bookings, timeSlots, tourRoutes } from '../../db/schema'
+import { getSettingBool } from '../../utils/admin-settings'
 import { logAudit } from '../../utils/audit'
 import { withSlotLock } from '../../utils/booking-lock'
 import { sendBookingConfirmation } from '../../utils/email'
@@ -28,6 +29,12 @@ import { bookingRequestSchema } from '../../utils/validation'
  * slot does not exist, 400 if the payload is invalid.
  */
 export default defineEventHandler(async (event) => {
+  if (!getSettingBool('bookings.accept', true)) {
+    throw createError({
+      statusCode: 503,
+      statusMessage: 'Bookings are temporarily paused, please try again later',
+    })
+  }
   enforceRateLimit(event, { key: 'booking.create', windowMs: 10 * 60 * 1000, max: 5 })
 
   const parsed = await readValidatedBody(event, (body) => {

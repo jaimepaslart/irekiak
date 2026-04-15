@@ -9,11 +9,21 @@ interface AuditEntry {
   metadata: Record<string, unknown> | null
 }
 
+interface AuditPayload {
+  entries: AuditEntry[]
+  total: number
+  limit: number
+  offset: number
+}
+
 definePageMeta({ layout: 'admin' })
 useSeoMeta({ title: 'Admin · Audit log', robots: 'noindex, nofollow' })
 
 const token = inject<Ref<string>>('adminToken')!
 const entries = ref<AuditEntry[]>([])
+const total = ref(0)
+const page = ref(1)
+const pageSize = 50
 const errorMessage = ref<string | null>(null)
 const actorFilter = ref<string>('all')
 const actionFilter = ref<string>('all')
@@ -27,16 +37,24 @@ const filtered = computed(() => entries.value.filter((e) => {
 const actors = computed(() => Array.from(new Set(entries.value.map(e => e.actor))).sort())
 const actions = computed(() => Array.from(new Set(entries.value.map(e => e.action))).sort())
 
-onMounted(async () => {
+async function load() {
   try {
-    entries.value = await $fetch<AuditEntry[]>('/api/admin/audit?limit=500', {
+    const offset = (page.value - 1) * pageSize
+    const res = await $fetch<AuditPayload>(`/api/admin/audit?limit=${pageSize}&offset=${offset}`, {
       headers: { 'x-admin-token': token.value },
     })
+    entries.value = res.entries
+    total.value = res.total
   }
   catch (err: unknown) {
     errorMessage.value = (err as { statusMessage?: string })?.statusMessage ?? 'Failed'
   }
-})
+}
+
+onMounted(() => { void load() })
+watch(page, () => { void load() })
+
+const totalPages = computed(() => Math.max(1, Math.ceil(total.value / pageSize)))
 
 function actionColor(a: string): string {
   if (a.includes('cancel')) return 'text-red-300 bg-red-500/10 border-red-500/30'
@@ -65,6 +83,13 @@ function actionColor(a: string): string {
     </div>
 
     <div class="bg-edition-dark border border-white/10 rounded-sm overflow-hidden">
+      <div class="flex items-center justify-between px-4 py-3 border-b border-white/10 text-xs text-white/50 font-mono">
+        <span>{{ entries.length }} entrées (page {{ page }} / {{ totalPages }}) · {{ total }} total</span>
+        <div class="flex items-center gap-2">
+          <button type="button" class="px-3 py-1 border border-white/15 rounded-sm disabled:opacity-30" :disabled="page <= 1" @click="page--">←</button>
+          <button type="button" class="px-3 py-1 border border-white/15 rounded-sm disabled:opacity-30" :disabled="page >= totalPages" @click="page++">→</button>
+        </div>
+      </div>
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
           <thead class="bg-white/5">

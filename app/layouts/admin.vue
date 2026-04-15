@@ -56,6 +56,10 @@ const navItems = [
   { to: '/admin', label: 'Dashboard' },
   { to: '/admin/bookings', label: 'Réservations' },
   { to: '/admin/bookings/new', label: '+ Nouveau' },
+  { to: '/admin/checkin', label: 'Check-in' },
+  { to: '/admin/galleries', label: 'Galeries' },
+  { to: '/admin/blast', label: 'Blast' },
+  { to: '/admin/settings', label: 'Settings' },
   { to: '/admin/audit', label: 'Audit' },
 ]
 </script>

@@ -2,6 +2,7 @@ import { galleries } from '@data/galleries'
 import { tourRoutes as tourRouteData } from '@data/tours'
 import type { Language } from './pick-locale'
 import { sendGalleryBookingNotification } from './email-gallery'
+import { getGalleryContact } from './gallery-contacts'
 
 interface NotifyParams {
   routeId: string
@@ -32,11 +33,12 @@ export function notifyGalleriesForBooking(params: NotifyParams): void {
   const galleryNames = routeGalleries.map(g => g.name)
 
   for (const gallery of routeGalleries) {
-    if (!gallery.contact?.notifyOnBooking || !gallery.contact?.email) continue
+    const contact = getGalleryContact(gallery.id)
+    if (!contact || !contact.notifyOnBooking || !contact.email) continue
     void sendGalleryBookingNotification({
-      to: gallery.contact.email,
-      galleryName: gallery.contact.name ?? gallery.name,
-      contactLanguage: gallery.contact.preferredLanguage,
+      to: contact.email,
+      galleryName: contact.name ?? gallery.name,
+      contactLanguage: contact.preferredLanguage,
       booking: params.bookingData,
       slot: params.slot,
       route: { name: params.localizedRouteName, galleries: galleryNames },

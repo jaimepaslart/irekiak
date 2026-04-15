@@ -222,7 +222,7 @@ usePageSeo('tours')
               {{ selectedDate }}
             </p>
 
-            <TimeSlotPicker
+            <BookingTimeSlotPicker
               v-model="selectedSlotId"
               :slots="availableSlotsForDate"
             />

@@ -132,7 +132,7 @@ const statusStyles: Record<AdminBookingRow['status'], string> = {
           </span>
           <button
             type="button"
-            class="px-4 py-2 text-sm rounded-md bg-[#4E0041] hover:bg-[#660056] text-white border border-white/15 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+            class="px-4 py-2 text-sm rounded-md bg-[#003153] hover:bg-[#004A7E] text-white border border-white/15 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
             :disabled="loading"
             @click="fetchBookings"
           >
@@ -158,7 +158,7 @@ const statusStyles: Record<AdminBookingRow['status'], string> = {
 
       <section
         v-if="!token"
-        class="max-w-md mx-auto bg-[#4E0041] border border-white/15 rounded-lg p-8 mt-8"
+        class="max-w-md mx-auto bg-[#003153] border border-white/15 rounded-lg p-8 mt-8"
       >
         <h2 class="text-xl font-semibold text-white mb-2">
           Admin login
@@ -184,7 +184,7 @@ const statusStyles: Record<AdminBookingRow['status'], string> = {
           >
           <button
             type="submit"
-            class="mt-4 w-full px-4 py-2 rounded-md bg-white text-[#4E0041] font-semibold hover:bg-white/90 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+            class="mt-4 w-full px-4 py-2 rounded-md bg-white text-[#003153] font-semibold hover:bg-white/90 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
           >
             Log in
           </button>
@@ -215,7 +215,7 @@ const statusStyles: Record<AdminBookingRow['status'], string> = {
             <caption class="sr-only">
               All Irekiak Gallery Weekend bookings
             </caption>
-            <thead class="bg-[#4E0041] text-white/80 uppercase text-xs tracking-wide">
+            <thead class="bg-[#003153] text-white/80 uppercase text-xs tracking-wide">
               <tr>
                 <th scope="col" class="px-4 py-3 border-b border-white/15">
                   Created

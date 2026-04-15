@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { galleries } from '@data/galleries'
 import { tourRoutes } from '@data/tours'
+import { currentEdition } from '@data/editions'
 
 const { t } = useI18n()
 const localePath = useLocalePath()
@@ -39,7 +40,7 @@ usePageSeo('home')
         </p>
 
         <p class="text-xl md:text-2xl text-white font-mono font-bold mb-14 animate-fade-in-up" style="animation-delay: 300ms">
-          11.09 &gt; 14.09.2025
+          {{ currentEdition.dateRangeLabel }}
         </p>
 
         <div class="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up" style="animation-delay: 400ms">
@@ -108,27 +109,22 @@ usePageSeo('home')
       <div class="max-w-[1200px] mx-auto">
         <div class="reveal-on-scroll mb-16">
           <p class="text-xs uppercase tracking-[0.2em] text-white/40 font-mono mb-3">
-            11 &gt; 14 Sept 2025
+            {{ currentEdition.dateRangeLabelShort }}
           </p>
           <h2>{{ t('nav.programme') }}</h2>
         </div>
 
-        <div class="reveal-on-scroll grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div class="reveal-on-scroll grid grid-cols-1 sm:grid-cols-3 gap-6">
           <NuxtLink
-            v-for="(info, i) in [
-              { date: '11.09', day: 'Ostegun', hours: '19:00-21:00' },
-              { date: '12.09', day: 'Ostiral', hours: '17:00-20:00' },
-              { date: '13.09', day: 'Larunbat', hours: '11:00-19:00' },
-              { date: '14.09', day: 'Igande', hours: '11:00-14:00' },
-            ]"
-            :key="info.date"
+            v-for="day in currentEdition.days"
+            :key="day.id"
             :to="localePath('/programme')"
             class="group p-6 md:p-8 border border-white/15 rounded-sm
                    transition-all duration-300 hover:bg-white/10 hover:border-white/30"
           >
-            <p class="text-3xl md:text-4xl font-bold mb-2 text-white">{{ info.date }}</p>
-            <p class="text-xs text-white/40 uppercase tracking-wider font-mono mb-4">{{ info.day }}</p>
-            <p class="text-sm text-white/60 font-mono">{{ info.hours }}</p>
+            <p class="text-3xl md:text-4xl font-bold mb-2 text-white">{{ day.dateShort }}</p>
+            <p class="text-xs text-white/40 uppercase tracking-wider font-mono mb-4">{{ tr(day.label) }}</p>
+            <p class="text-sm text-white/60 font-mono">{{ day.hours }}</p>
           </NuxtLink>
         </div>
 
@@ -245,7 +241,7 @@ usePageSeo('home')
         </div>
         <div>
           <p class="text-xs uppercase tracking-wider text-white/30 font-mono mb-3">Donostia</p>
-          <p class="text-white/60">Kale berria 5, 20001</p>
+          <p class="text-white/60">Alkolea Pasaia 1, 20012</p>
         </div>
       </div>
     </section>

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { currentEdition } from '@data/editions'
+
 const { t } = useI18n()
 const localePath = useLocalePath()
 const currentYear = new Date().getFullYear()
@@ -14,7 +16,7 @@ const currentYear = new Date().getFullYear()
           Donostia / San Sebastián
         </p>
         <p class="text-sm text-white/40 mt-4 font-mono">
-          11.09 &gt; 14.09.2025
+          {{ currentEdition.dateRangeLabel }}
         </p>
       </div>
 
@@ -38,7 +40,7 @@ const currentYear = new Date().getFullYear()
         <ul class="space-y-3 text-sm text-white/60">
           <li><a href="mailto:irekiak@irekiak.eus" class="hover:text-white transition-colors">irekiak@irekiak.eus</a></li>
           <li><a href="https://www.instagram.com/irekiak.gallery.weekend" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">@irekiak.gallery.weekend</a></li>
-          <li class="pt-2 text-white/40">Kale berria 5<br>20001 Donostia / San Sebastián</li>
+          <li class="pt-2 text-white/40">Alkolea Pasaia 1<br>20012 Donostia / San Sebastián</li>
         </ul>
       </div>
     </div>

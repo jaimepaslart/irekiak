@@ -1,55 +1,28 @@
 import type { ScheduleEvent } from '~/types/schedule'
 
+// Irekiak Gallery Weekend 2026 — 29-31 May
+// Friday: Opening. Saturday + Sunday: galleries open + guided tours.
+// No film screenings at Kursaal this edition.
+
 export const schedule: ScheduleEvent[] = [
-  // Thursday
+  // Friday 29 May — Opening of all galleries
   {
-    id: 'evt-001',
-    day: 'thursday',
-    startTime: '19:00',
+    id: 'evt-opening',
+    day: 'friday',
+    startTime: '17:30',
     endTime: '21:00',
     type: 'opening',
     title: {
-      eu: 'Inaugurazio ekitaldia',
-      es: 'Evento de inauguración',
-      fr: 'Événement d\'inauguration',
-      en: 'Opening event',
+      eu: 'Galeriak inauguratzea',
+      es: 'Inauguración de las galerías',
+      fr: 'Inauguration des galeries',
+      en: 'Galleries opening',
     },
     description: {
-      eu: 'Irekiak Gallery Weekend 2025aren inaugurazio ofiziala Tabakalera-n, bisita gidariekin eta harrera cocktailarekin.',
-      es: 'Inauguración oficial de Irekiak Gallery Weekend 2025 en Tabakalera, con visitas guiadas y cóctel de bienvenida.',
-      fr: 'Inauguration officielle de Irekiak Gallery Weekend 2025 à Tabakalera, avec visites guidées et cocktail de bienvenue.',
-      en: 'Official opening of Irekiak Gallery Weekend 2025 at Tabakalera, with guided visits and welcome cocktail.',
-    },
-    galleryId: 'gal-007',
-    location: {
-      eu: 'Tabakalera',
-      es: 'Tabakalera',
-      fr: 'Tabakalera',
-      en: 'Tabakalera',
-    },
-    address: 'Plaza de las Cigarreras 1, Donostia',
-    isFree: true,
-    requiresBooking: false,
-  },
-
-  // Friday
-  {
-    id: 'evt-002',
-    day: 'friday',
-    startTime: '17:00',
-    endTime: '20:00',
-    type: 'special',
-    title: {
-      eu: 'Galeriak irekita',
-      es: 'Galerías abiertas',
-      fr: 'Galeries ouvertes',
-      en: 'Open galleries',
-    },
-    description: {
-      eu: 'Galeria guztiak irekita daude bisitarientzat, artistekin zuzeneko elkarrizketa posibilitatearekin.',
-      es: 'Todas las galerías abiertas para visitantes, con posibilidad de conversar directamente con los artistas.',
-      fr: 'Toutes les galeries ouvertes aux visiteurs, avec possibilité de dialoguer directement avec les artistes.',
-      en: 'All galleries open for visitors, with the opportunity to engage directly with the artists.',
+      eu: 'Irekiak 2026aren inaugurazio ofiziala. Galeria guztiak irekita daude bisitarientzat, artistekin zuzeneko elkarrizketa posibilitatearekin.',
+      es: 'Inauguración oficial de Irekiak 2026. Todas las galerías abiertas para visitantes, con posibilidad de conversar directamente con los artistas.',
+      fr: 'Inauguration officielle d\'Irekiak 2026. Toutes les galeries ouvertes aux visiteurs, avec possibilité de dialoguer directement avec les artistes.',
+      en: 'Official opening of Irekiak 2026. All galleries open for visitors, with the opportunity to engage directly with the artists.',
     },
     location: {
       eu: 'Galeria guztiak',
@@ -60,84 +33,25 @@ export const schedule: ScheduleEvent[] = [
     isFree: true,
     requiresBooking: false,
   },
-  {
-    id: 'evt-003',
-    day: 'friday',
-    startTime: '20:30',
-    endTime: '22:30',
-    type: 'special',
-    title: {
-      eu: 'Zinema emanaldia',
-      es: 'Proyección cinematográfica',
-      fr: 'Projection cinématographique',
-      en: 'Film screening',
-    },
-    description: {
-      eu: 'Hlynur Pálmasonen filmen emanaldia Kursaal aretoan.',
-      es: 'Proyección de películas de Hlynur Pálmason en la sala Kursaal.',
-      fr: 'Projection des films de Hlynur Pálmason dans la salle Kursaal.',
-      en: 'Screening of Hlynur Pálmason\'s films at the Kursaal auditorium.',
-    },
-    galleryId: 'gal-008',
-    location: {
-      eu: 'Kursaal',
-      es: 'Kursaal',
-      fr: 'Kursaal',
-      en: 'Kursaal',
-    },
-    address: 'Av. de Zurriola 1, Donostia',
-    isFree: false,
-    requiresBooking: true,
-    maxParticipants: 200,
-  },
 
-  // Saturday
+  // Saturday 30 May — Guided tours morning
   {
-    id: 'evt-004',
+    id: 'evt-sat-tour-morning',
     day: 'saturday',
     startTime: '11:00',
-    endTime: '13:00',
-    type: 'performance',
-    title: {
-      eu: 'Artista esku-hartzea',
-      es: 'Intervención artística',
-      fr: 'Intervention artistique',
-      en: 'Artist intervention',
-    },
-    description: {
-      eu: 'Artisten zuzeneko esku-hartzea galeria espazio batean.',
-      es: 'Intervención artística en directo en uno de los espacios de galería.',
-      fr: 'Intervention artistique en direct dans un des espaces de galerie.',
-      en: 'Live artist intervention in one of the gallery spaces.',
-    },
-    location: {
-      eu: 'Tabakalera',
-      es: 'Tabakalera',
-      fr: 'Tabakalera',
-      en: 'Tabakalera',
-    },
-    galleryId: 'gal-007',
-    address: 'Plaza de las Cigarreras 1, Donostia',
-    isFree: true,
-    requiresBooking: false,
-  },
-  {
-    id: 'evt-005',
-    day: 'saturday',
-    startTime: '11:30',
-    endTime: '13:00',
+    endTime: '12:30',
     type: 'guided-tour',
     title: {
-      eu: 'Bisita gidatua (goizekoa)',
-      es: 'Visita guiada (mañana)',
-      fr: 'Visite guidée (matin)',
-      en: 'Guided tour (morning)',
+      eu: 'Bisita gidatuak (goizekoak)',
+      es: 'Visitas guiadas (mañana)',
+      fr: 'Visites guidées (matin)',
+      en: 'Guided tours (morning)',
     },
     description: {
-      eu: 'Galerietako bisita gidatua, ibilbide ezberdinetan antolatua.',
-      es: 'Visita guiada por las galerías, organizada en diferentes rutas.',
-      fr: 'Visite guidée des galeries, organisée en différents itinéraires.',
-      en: 'Guided gallery tour, organized along different routes.',
+      eu: 'Bisita gidatuak hiru ibilbidetan: Gros, Parte Zaharra / Antigua, eta Egia.',
+      es: 'Visitas guiadas en tres rutas: Gros, Parte Vieja / Antigua y Egia.',
+      fr: 'Visites guidées sur trois itinéraires : Gros, Vieille Ville / Antigua et Egia.',
+      en: 'Guided tours on three routes: Gros, Old Town / Antigua and Egia.',
     },
     location: {
       eu: 'Ibilbide desberdinak',
@@ -149,23 +63,25 @@ export const schedule: ScheduleEvent[] = [
     requiresBooking: true,
     maxParticipants: 12,
   },
+
+  // Saturday 30 May — Guided tours afternoon
   {
-    id: 'evt-006',
+    id: 'evt-sat-tour-afternoon',
     day: 'saturday',
     startTime: '17:00',
     endTime: '18:30',
     type: 'guided-tour',
     title: {
-      eu: 'Bisita gidatua (arratsaldekoa)',
-      es: 'Visita guiada (tarde)',
-      fr: 'Visite guidée (après-midi)',
-      en: 'Guided tour (afternoon)',
+      eu: 'Bisita gidatuak (arratsaldekoak)',
+      es: 'Visitas guiadas (tarde)',
+      fr: 'Visites guidées (après-midi)',
+      en: 'Guided tours (afternoon)',
     },
     description: {
-      eu: 'Arratsaldeko bisita gidatua galerietara.',
-      es: 'Visita guiada vespertina a las galerías.',
-      fr: 'Visite guidée de l\'après-midi dans les galeries.',
-      en: 'Afternoon guided tour of the galleries.',
+      eu: 'Arratsaldeko bisita gidatuak hiru ibilbidetan.',
+      es: 'Visitas guiadas vespertinas en tres rutas.',
+      fr: 'Visites guidées de l\'après-midi sur trois itinéraires.',
+      en: 'Afternoon guided tours on three routes.',
     },
     location: {
       eu: 'Ibilbide desberdinak',
@@ -176,56 +92,26 @@ export const schedule: ScheduleEvent[] = [
     isFree: true,
     requiresBooking: true,
     maxParticipants: 12,
-  },
-  {
-    id: 'evt-007',
-    day: 'saturday',
-    startTime: '20:30',
-    endTime: '22:30',
-    type: 'special',
-    title: {
-      eu: 'Zinema emanaldia',
-      es: 'Proyección cinematográfica',
-      fr: 'Projection cinématographique',
-      en: 'Film screening',
-    },
-    description: {
-      eu: 'Hlynur Pálmasonen filmen emanaldia Kursaal aretoan.',
-      es: 'Proyección de películas de Hlynur Pálmason en la sala Kursaal.',
-      fr: 'Projection des films de Hlynur Pálmason dans la salle Kursaal.',
-      en: 'Screening of Hlynur Pálmason\'s films at the Kursaal auditorium.',
-    },
-    galleryId: 'gal-008',
-    location: {
-      eu: 'Kursaal',
-      es: 'Kursaal',
-      fr: 'Kursaal',
-      en: 'Kursaal',
-    },
-    address: 'Av. de Zurriola 1, Donostia',
-    isFree: false,
-    requiresBooking: true,
-    maxParticipants: 200,
   },
 
-  // Sunday
+  // Sunday 31 May — Guided tours morning
   {
-    id: 'evt-008',
+    id: 'evt-sun-tour-morning',
     day: 'sunday',
-    startTime: '11:30',
-    endTime: '13:00',
+    startTime: '11:00',
+    endTime: '12:30',
     type: 'guided-tour',
     title: {
-      eu: 'Bisita gidatua (igandea)',
-      es: 'Visita guiada (domingo)',
-      fr: 'Visite guidée (dimanche)',
-      en: 'Guided tour (Sunday)',
+      eu: 'Bisita gidatuak (igandea)',
+      es: 'Visitas guiadas (domingo)',
+      fr: 'Visites guidées (dimanche)',
+      en: 'Guided tours (Sunday)',
     },
     description: {
-      eu: 'Igandeko bisita gidatua galerietara.',
-      es: 'Visita guiada dominical a las galerías.',
-      fr: 'Visite guidée du dimanche dans les galeries.',
-      en: 'Sunday guided tour of the galleries.',
+      eu: 'Igandeko bisita gidatuak hiru ibilbidetan.',
+      es: 'Visitas guiadas dominicales en tres rutas.',
+      fr: 'Visites guidées du dimanche sur trois itinéraires.',
+      en: 'Sunday guided tours on three routes.',
     },
     location: {
       eu: 'Ibilbide desberdinak',
@@ -236,35 +122,5 @@ export const schedule: ScheduleEvent[] = [
     isFree: true,
     requiresBooking: true,
     maxParticipants: 12,
-  },
-  {
-    id: 'evt-009',
-    day: 'sunday',
-    startTime: '20:30',
-    endTime: '22:30',
-    type: 'special',
-    title: {
-      eu: 'Zinema emanaldia',
-      es: 'Proyección cinematográfica',
-      fr: 'Projection cinématographique',
-      en: 'Film screening',
-    },
-    description: {
-      eu: 'Hlynur Pálmasonen filmen emanaldia Kursaal aretoan.',
-      es: 'Proyección de películas de Hlynur Pálmason en la sala Kursaal.',
-      fr: 'Projection des films de Hlynur Pálmason dans la salle Kursaal.',
-      en: 'Screening of Hlynur Pálmason\'s films at the Kursaal auditorium.',
-    },
-    galleryId: 'gal-008',
-    location: {
-      eu: 'Kursaal',
-      es: 'Kursaal',
-      fr: 'Kursaal',
-      en: 'Kursaal',
-    },
-    address: 'Av. de Zurriola 1, Donostia',
-    isFree: false,
-    requiresBooking: true,
-    maxParticipants: 200,
   },
 ]

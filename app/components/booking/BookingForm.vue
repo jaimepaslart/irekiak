@@ -220,7 +220,7 @@ async function onSubmit() {
         required
         class="form-input appearance-none cursor-pointer pr-10"
       >
-        <option v-for="n in 4" :key="n" :value="n" class="bg-[#4E0041] text-white">
+        <option v-for="n in 4" :key="n" :value="n" class="bg-[var(--color-edition)] text-white">
           {{ n }}
         </option>
       </select>
@@ -241,10 +241,10 @@ async function onSubmit() {
         required
         class="form-input appearance-none cursor-pointer pr-10"
       >
-        <option value="eu" class="bg-[#4E0041] text-white">Euskara</option>
-        <option value="es" class="bg-[#4E0041] text-white">Español</option>
-        <option value="fr" class="bg-[#4E0041] text-white">Français</option>
-        <option value="en" class="bg-[#4E0041] text-white">English</option>
+        <option value="eu" class="bg-[var(--color-edition)] text-white">Euskara</option>
+        <option value="es" class="bg-[var(--color-edition)] text-white">Español</option>
+        <option value="fr" class="bg-[var(--color-edition)] text-white">Français</option>
+        <option value="en" class="bg-[var(--color-edition)] text-white">English</option>
       </select>
       <span class="form-chevron" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">

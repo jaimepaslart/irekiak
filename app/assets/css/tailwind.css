@@ -4,9 +4,9 @@
 /* Changer --color-edition pour chaque edition annuelle              */
 
 @theme {
-  /* Edition 2025 : Violet */
-  --color-edition: #4E0041;
-  --color-edition-dark: #3D0034;
+  /* Edition 2026 : Bleu de Prusse */
+  --color-edition: #003153;
+  --color-edition-dark: #001E33;
 
   /* Palette derivee (blanc sur fond edition) */
   --color-gallery-bg: var(--color-edition);

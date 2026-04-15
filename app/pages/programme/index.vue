@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ScheduleEvent, EventDay } from '#types/schedule'
 import { schedule } from '@data/schedule'
+import { currentEdition } from '@data/editions'
 
 const { t } = useI18n()
 const localePath = useLocalePath()
@@ -9,12 +10,14 @@ const tr = useTranslated()
 usePageSeo('programme')
 useScrollReveal()
 
-const dayLabels: { day: EventDay; label: string; date: string }[] = [
-  { day: 'thursday', label: 'Ostegun', date: '11.09' },
-  { day: 'friday', label: 'Ostiral', date: '12.09' },
-  { day: 'saturday', label: 'Larunbat', date: '13.09' },
-  { day: 'sunday', label: 'Igande', date: '14.09' },
-]
+// Derive tabs from the current edition (only days present in the edition).
+const dayLabels = computed(() =>
+  currentEdition.days.map(d => ({
+    day: d.id as EventDay,
+    label: tr(d.label),
+    date: d.dateShort,
+  })),
+)
 
 const eventsByDay = computed(() => {
   const grouped: Record<EventDay, ScheduleEvent[]> = {
@@ -26,16 +29,14 @@ const eventsByDay = computed(() => {
   for (const event of schedule) {
     grouped[event.day].push(event)
   }
-  // Sort each day by startTime
   for (const day of Object.keys(grouped) as EventDay[]) {
     grouped[day].sort((a, b) => a.startTime.localeCompare(b.startTime))
   }
   return grouped
 })
 
-// Default to first day that has events
 const activeDay = ref<EventDay>(
-  dayLabels.find((d) => eventsByDay.value[d.day].length > 0)?.day ?? 'thursday',
+  dayLabels.value.find(d => eventsByDay.value[d.day].length > 0)?.day ?? currentEdition.days[0]!.id as EventDay,
 )
 
 const activeEvents = computed(() => eventsByDay.value[activeDay.value])
@@ -55,7 +56,7 @@ function eventIcon(type: string): string {
     <!-- Title -->
     <div class="reveal-on-scroll mb-16 text-center">
       <p class="text-xs uppercase tracking-[0.2em] text-white/40 font-mono mb-3">
-        11 &gt; 14 Sept 2025
+        {{ currentEdition.dateRangeLabelShort }}
       </p>
       <h1>{{ t('nav.programme') }}</h1>
     </div>

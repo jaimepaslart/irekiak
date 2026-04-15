@@ -334,7 +334,7 @@ onBeforeUnmount(() => {
 
 /* Popup styling aligned with violet theme */
 .leaflet-popup-content-wrapper {
-  background-color: #4E0041;
+  background-color: #003153;
   color: #ffffff;
   border-radius: 2px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
@@ -347,7 +347,7 @@ onBeforeUnmount(() => {
   color: #ffffff;
 }
 .leaflet-popup-tip {
-  background-color: #4E0041;
+  background-color: #003153;
 }
 .leaflet-popup-close-button {
   color: rgba(255, 255, 255, 0.7) !important;
@@ -356,25 +356,25 @@ onBeforeUnmount(() => {
 /* Controls dark style */
 .leaflet-bar a,
 .leaflet-bar a:hover {
-  background-color: #4E0041;
+  background-color: #003153;
   color: #ffffff;
   border-bottom-color: rgba(255, 255, 255, 0.1);
 }
 
 /* GeoSearch bar */
 .leaflet-control-geosearch form {
-  background-color: #4E0041;
+  background-color: #003153;
   border-color: rgba(255, 255, 255, 0.15);
 }
 .leaflet-control-geosearch form input {
   color: #ffffff;
-  background-color: #4E0041;
+  background-color: #003153;
 }
 .leaflet-control-geosearch form input::placeholder {
   color: rgba(255, 255, 255, 0.5);
 }
 .leaflet-control-geosearch .results > * {
-  background-color: #4E0041;
+  background-color: #003153;
   color: #ffffff;
   border-color: rgba(255, 255, 255, 0.1);
 }
@@ -392,7 +392,7 @@ onBeforeUnmount(() => {
 .marker-cluster-small div,
 .marker-cluster-medium div,
 .marker-cluster-large div {
-  background-color: #4E0041;
+  background-color: #003153;
   color: #ffffff;
   font-weight: 600;
 }

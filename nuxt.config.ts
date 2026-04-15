@@ -110,9 +110,10 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     resendApiKey: '',
+    resendWebhookSecret: '', // NUXT_RESEND_WEBHOOK_SECRET
     contactEmail: 'irekiak@irekiak.eus',
-    adminTokenSecret: '', // NUXT_ADMIN_TOKEN_SECRET
-    cronSecret: '',       // NUXT_CRON_SECRET (for /api/cron/* auth)
+    adminTokenSecret: '',    // NUXT_ADMIN_TOKEN_SECRET
+    cronSecret: '',          // NUXT_CRON_SECRET
     public: {
       siteUrl: 'https://irekiak.eus',
     },

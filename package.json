@@ -38,6 +38,7 @@
     "nuxt-leaflet": "^0.0.27",
     "qrcode": "^1.5.4",
     "resend": "^6.10.0",
+    "svix": "^1.90.0",
     "vue": "^3.5.32",
     "vue-email": "^0.8.11",
     "vue-router": "^5.0.4",

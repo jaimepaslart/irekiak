@@ -68,6 +68,30 @@ pnpm seo:check      # Audit SEO
 pnpm data:check     # Vérification données
 ```
 
+## Booking system (refactor avril 2026)
+
+Auth admin : header `x-admin-token` (NUXT_ADMIN_TOKEN_SECRET), session localStorage 1h. Middleware `server/utils/require-admin.ts` sur tous les `/api/admin/*`. Layout partagé `app/layouts/admin.vue` avec nav + keyboard shortcuts.
+
+Tables DB (auto-migrated dans `server/db/index.ts`) :
+- `tour_routes`, `time_slots`, `bookings` (+ `accepts_marketing`)
+- `audit_log` (tous les actes admin + visiteur loggés)
+- `attendance` (check-in persistant)
+- `app_settings` (key-value : `bookings.accept`, `emergency.message`, `notifications.enabled`)
+- `gallery_contact_overrides` (override contacts galeries sans git commit)
+- `email_events` (populé par webhook Resend si NUXT_RESEND_WEBHOOK_SECRET)
+
+Helpers serveur : `audit.ts`, `admin-settings.ts` (cache 30s), `gallery-contacts.ts` (merge override+data), `notify-galleries.ts`, `cancel-booking.ts` (logique partagée visiteur+admin), `email-retry.ts` (3× backoff 1s/5s/15s), `rate-limit.ts` (sliding window per-IP), `pick-locale.ts`, `require-admin.ts`.
+
+Concurrency : mutex in-memory per-slot (`booking-lock.ts`) + optimistic lock via `version` column → 409 si modifié concurremment.
+
+Pages admin (sous `/admin/*`, layout `admin`) : `index` dashboard, `bookings` liste+bulk, `bookings/[id]` détail+edit, `bookings/new` manual, `checkin` overview, `checkin/[slotId]` persistent check-in, `galleries`, `blast`, `emails`, `settings`, `audit`.
+
+Pages publiques : `/visites/[route]` 3-step flow · `/bookings/[token]` confirmation + QR + cancel + resend + RGPD export/purge · `/privacy` politique RGPD.
+
+Env vars : `NUXT_RESEND_API_KEY`, `NUXT_RESEND_WEBHOOK_SECRET`, `NUXT_ADMIN_TOKEN_SECRET`, `NUXT_CRON_SECRET`, `NUXT_PUBLIC_SITE_URL`, `NUXT_CONTACT_EMAIL`.
+
+Raccourcis clavier admin : `d` dashboard · `b` bookings · `c` create · `k` check-in · `s` settings · `a` audit · `/` search · `?` help · `Esc` blur.
+
 ## Langue de communication
 Répondre en français.
 Toujours utiliser Opus 4.6.

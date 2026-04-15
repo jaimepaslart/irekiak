@@ -27,9 +27,18 @@ onMounted(() => {
   else errorMessage.value = null
 })
 
-function login() {
+async function login() {
   const value = tokenInput.value.trim()
   if (!value) return
+  // Verify via a lightweight endpoint before persisting
+  try {
+    await $fetch('/api/admin/stats', { headers: { 'x-admin-token': value } })
+  }
+  catch (err: unknown) {
+    const code = (err as { statusCode?: number })?.statusCode
+    errorMessage.value = code === 401 ? 'Token invalide.' : 'Erreur serveur.'
+    return
+  }
   token.value = value
   if (typeof window !== 'undefined') {
     window.localStorage.setItem(STORAGE_KEY, value)
@@ -59,9 +68,46 @@ const navItems = [
   { to: '/admin/checkin', label: 'Check-in' },
   { to: '/admin/galleries', label: 'Galeries' },
   { to: '/admin/blast', label: 'Blast' },
+  { to: '/admin/emails', label: 'Emails' },
   { to: '/admin/settings', label: 'Settings' },
   { to: '/admin/audit', label: 'Audit' },
 ]
+
+// Keyboard shortcuts: b = bookings, c = create, k = check-in, d = dashboard,
+// s = settings, a = audit, ? = help modal, / = focus search
+const helpOpen = ref(false)
+function handleKeyDown(e: KeyboardEvent) {
+  if (!token.value) return
+  const target = e.target as HTMLElement | null
+  const tag = target?.tagName
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || target?.isContentEditable) {
+    if (e.key === 'Escape') (target as HTMLInputElement).blur()
+    return
+  }
+  if (e.metaKey || e.ctrlKey || e.altKey) return
+  switch (e.key) {
+    case 'd': navigateTo('/admin'); break
+    case 'b': navigateTo('/admin/bookings'); break
+    case 'c': navigateTo('/admin/bookings/new'); break
+    case 'k': navigateTo('/admin/checkin'); break
+    case 's': navigateTo('/admin/settings'); break
+    case 'a': navigateTo('/admin/audit'); break
+    case '?': helpOpen.value = true; break
+    case '/': {
+      e.preventDefault()
+      const search = document.querySelector<HTMLInputElement>('input[type="search"]')
+      search?.focus()
+      break
+    }
+  }
+}
+
+onMounted(() => {
+  if (typeof window !== 'undefined') window.addEventListener('keydown', handleKeyDown)
+})
+onBeforeUnmount(() => {
+  if (typeof window !== 'undefined') window.removeEventListener('keydown', handleKeyDown)
+})
 </script>
 
 <template>
@@ -137,6 +183,29 @@ const navItems = [
       <main class="max-w-[1400px] mx-auto px-4 md:px-8 py-6 md:py-10">
         <slot />
       </main>
+
+      <!-- Keyboard shortcuts help modal -->
+      <Transition name="fade">
+        <div v-if="helpOpen" class="fixed inset-0 z-[1000] flex items-center justify-center bg-black/70 backdrop-blur-sm px-6" @click.self="helpOpen = false">
+          <div class="max-w-md w-full bg-[var(--color-edition)] border border-white/15 rounded-sm p-6 md:p-8">
+            <h3 class="text-lg font-semibold mb-4">Raccourcis clavier</h3>
+            <dl class="space-y-2 text-sm">
+              <div class="flex justify-between"><dt><kbd class="kbd">d</kbd></dt><dd>Dashboard</dd></div>
+              <div class="flex justify-between"><dt><kbd class="kbd">b</kbd></dt><dd>Réservations</dd></div>
+              <div class="flex justify-between"><dt><kbd class="kbd">c</kbd></dt><dd>Nouvelle réservation</dd></div>
+              <div class="flex justify-between"><dt><kbd class="kbd">k</kbd></dt><dd>Check-in</dd></div>
+              <div class="flex justify-between"><dt><kbd class="kbd">s</kbd></dt><dd>Settings</dd></div>
+              <div class="flex justify-between"><dt><kbd class="kbd">a</kbd></dt><dd>Audit log</dd></div>
+              <div class="flex justify-between"><dt><kbd class="kbd">/</kbd></dt><dd>Focus recherche</dd></div>
+              <div class="flex justify-between"><dt><kbd class="kbd">?</kbd></dt><dd>Cette aide</dd></div>
+              <div class="flex justify-between"><dt><kbd class="kbd">Esc</kbd></dt><dd>Sortir d'un champ</dd></div>
+            </dl>
+            <div class="mt-6 text-right">
+              <button type="button" class="px-4 py-2 text-sm bg-white text-[var(--color-edition)] rounded-sm hover:bg-white/90" @click="helpOpen = false">Fermer</button>
+            </div>
+          </div>
+        </div>
+      </Transition>
     </div>
   </div>
 </template>
@@ -144,4 +213,14 @@ const navItems = [
 <style scoped>
 .fade-enter-active, .fade-leave-active { transition: opacity 200ms ease; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
+.kbd {
+  display: inline-block;
+  padding: 2px 8px;
+  font-family: ui-monospace, 'JetBrains Mono', monospace;
+  font-size: 12px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.1);
+}
 </style>

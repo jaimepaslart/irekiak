@@ -22,6 +22,13 @@ export const galleries: Gallery[] = [
       en: 'Friday: 5:30 PM - 9:00 PM | Saturday-Sunday: 11:00 AM - 7:00 PM',
     },
     image: '/images/exhibitions/zatixak.jpg',
+    contact: {
+      // TODO: remplacer par le vrai email de la galerie quand communiqué
+      email: 'irekiak@irekiak.eus',
+      preferredLanguage: 'es',
+      notifyOnBooking: true,
+      receiveDailyDigest: true,
+    },
   },
   {
     id: 'gal-002',
@@ -44,6 +51,13 @@ export const galleries: Gallery[] = [
       en: 'Friday: 5:30 PM - 9:00 PM | Saturday-Sunday: 11:00 AM - 7:00 PM',
     },
     image: '/images/exhibitions/trashvertising.jpg',
+    contact: {
+      // TODO: remplacer par le vrai email de la galerie quand communiqué
+      email: 'irekiak@irekiak.eus',
+      preferredLanguage: 'es',
+      notifyOnBooking: true,
+      receiveDailyDigest: true,
+    },
   },
   {
     id: 'gal-003',
@@ -66,6 +80,13 @@ export const galleries: Gallery[] = [
       en: 'Friday: 5:30 PM - 9:00 PM | Saturday-Sunday: 11:00 AM - 7:00 PM',
     },
     image: '/images/exhibitions/cibrian.jpg',
+    contact: {
+      // TODO: remplacer par le vrai email de la galerie quand communiqué
+      email: 'irekiak@irekiak.eus',
+      preferredLanguage: 'es',
+      notifyOnBooking: true,
+      receiveDailyDigest: true,
+    },
   },
   {
     id: 'gal-004',
@@ -88,6 +109,13 @@ export const galleries: Gallery[] = [
       en: 'Friday: 5:30 PM - 9:00 PM | Saturday-Sunday: 11:00 AM - 7:00 PM',
     },
     image: '/images/exhibitions/barne-begirada.jpg',
+    contact: {
+      // TODO: remplacer par le vrai email de la galerie quand communiqué
+      email: 'irekiak@irekiak.eus',
+      preferredLanguage: 'es',
+      notifyOnBooking: true,
+      receiveDailyDigest: true,
+    },
   },
   {
     id: 'gal-005',
@@ -110,6 +138,13 @@ export const galleries: Gallery[] = [
       en: 'Friday: 5:30 PM - 9:00 PM | Saturday-Sunday: 11:00 AM - 7:00 PM',
     },
     image: '/images/exhibitions/basoan-zehar.jpg',
+    contact: {
+      // TODO: remplacer par le vrai email de la galerie quand communiqué
+      email: 'irekiak@irekiak.eus',
+      preferredLanguage: 'es',
+      notifyOnBooking: true,
+      receiveDailyDigest: true,
+    },
   },
   {
     id: 'gal-006',
@@ -132,6 +167,13 @@ export const galleries: Gallery[] = [
       en: 'Friday: 5:30 PM - 9:00 PM | Saturday-Sunday: 11:00 AM - 7:00 PM',
     },
     image: '/images/exhibitions/sakana.jpg',
+    contact: {
+      // TODO: remplacer par le vrai email de la galerie quand communiqué
+      email: 'irekiak@irekiak.eus',
+      preferredLanguage: 'es',
+      notifyOnBooking: true,
+      receiveDailyDigest: true,
+    },
   },
   {
     id: 'gal-007',
@@ -154,6 +196,13 @@ export const galleries: Gallery[] = [
       en: 'Friday: 5:30 PM - 9:00 PM | Saturday-Sunday: 11:00 AM - 8:00 PM',
     },
     image: '/images/exhibitions/palmason.jpg',
+    contact: {
+      // TODO: remplacer par le vrai email de la galerie quand communiqué
+      email: 'irekiak@irekiak.eus',
+      preferredLanguage: 'es',
+      notifyOnBooking: true,
+      receiveDailyDigest: true,
+    },
   },
   {
     id: 'gal-008',
@@ -176,5 +225,12 @@ export const galleries: Gallery[] = [
       en: 'Friday: 5:30 PM - 9:00 PM | Saturday-Sunday: 11:00 AM - 7:00 PM',
     },
     image: '/images/galleries/kursaal.png',
+    contact: {
+      // TODO: remplacer par le vrai email de la galerie quand communiqué
+      email: 'irekiak@irekiak.eus',
+      preferredLanguage: 'es',
+      notifyOnBooking: true,
+      receiveDailyDigest: true,
+    },
   },
 ]

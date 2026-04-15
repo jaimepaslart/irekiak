@@ -1,6 +1,15 @@
 export type { TranslatedText, SupportedLocale } from './common'
 import type { TranslatedText } from './common'
 
+export interface GalleryContact {
+  email: string
+  name?: string
+  phone?: string
+  preferredLanguage: 'eu' | 'es' | 'fr' | 'en'
+  notifyOnBooking: boolean
+  receiveDailyDigest: boolean
+}
+
 export interface Gallery {
   id: string
   slug: string
@@ -16,4 +25,5 @@ export interface Gallery {
   openingHours: TranslatedText
   image: string
   logo?: string
+  contact?: GalleryContact
 }

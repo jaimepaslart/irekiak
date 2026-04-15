@@ -59,6 +59,18 @@ sqlite.exec(`
   );
   CREATE INDEX IF NOT EXISTS idx_bookings_slot ON bookings(slot_id);
   CREATE INDEX IF NOT EXISTS idx_bookings_token ON bookings(confirm_token);
+
+  CREATE TABLE IF NOT EXISTS audit_log (
+    id TEXT PRIMARY KEY,
+    timestamp TEXT NOT NULL DEFAULT (datetime('now')),
+    actor TEXT NOT NULL,
+    action TEXT NOT NULL,
+    target_type TEXT,
+    target_id TEXT,
+    metadata TEXT
+  );
+  CREATE INDEX IF NOT EXISTS idx_audit_log_timestamp ON audit_log(timestamp);
+  CREATE INDEX IF NOT EXISTS idx_audit_log_target ON audit_log(target_type, target_id);
 `)
 
 // Auto-seed if tables are empty (idempotent)

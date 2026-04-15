@@ -44,6 +44,17 @@ export const bookings = sqliteTable('bookings', {
   createdAt: text('created_at').notNull().default(sql`CURRENT_TIMESTAMP`),
 })
 
+export const auditLog = sqliteTable('audit_log', {
+  id: text('id').primaryKey(),
+  timestamp: text('timestamp').notNull().default(sql`(datetime('now'))`),
+  actor: text('actor').notNull(),
+  action: text('action').notNull(),
+  targetType: text('target_type'),
+  targetId: text('target_id'),
+  metadata: text('metadata'),
+})
+
 export type TourRouteRow = typeof tourRoutes.$inferSelect
 export type TimeSlotRow = typeof timeSlots.$inferSelect
 export type BookingRow = typeof bookings.$inferSelect
+export type AuditLogRow = typeof auditLog.$inferSelect

@@ -1,10 +1,13 @@
 import { randomUUID } from 'node:crypto'
 import { eq } from 'drizzle-orm'
 import { createError, defineEventHandler, readValidatedBody } from 'h3'
+import { galleries } from '@data/galleries'
+import { tourRoutes as tourRouteData } from '@data/tours'
 import { db, sqlite } from '../../db'
 import { bookings, timeSlots, tourRoutes } from '../../db/schema'
 import { withSlotLock } from '../../utils/booking-lock'
 import { sendBookingConfirmation } from '../../utils/email'
+import { sendGalleryBookingNotification } from '../../utils/email-gallery'
 import { generateBookingIcs } from '../../utils/ics'
 import { bookingRequestSchema } from '../../utils/validation'
 
@@ -132,6 +135,42 @@ export default defineEventHandler(async (event) => {
           language: parsed.language,
           icsContent,
         })
+
+        // Notify every gallery on this route that has notifyOnBooking=true
+        const staticRoute = tourRouteData.find(r => r.id === slotWithRoute.route.id)
+        if (staticRoute) {
+          const routeGalleries = galleries.filter(g => staticRoute.galleryIds.includes(g.id))
+          const galleryNames = routeGalleries.map(g => g.name)
+          for (const gallery of routeGalleries) {
+            if (gallery.contact?.notifyOnBooking && gallery.contact.email) {
+              void sendGalleryBookingNotification({
+                to: gallery.contact.email,
+                galleryName: gallery.contact.name ?? gallery.name,
+                contactLanguage: gallery.contact.preferredLanguage,
+                booking: {
+                  id: bookingId,
+                  firstName: parsed.firstName,
+                  lastName: parsed.lastName,
+                  email: parsed.email,
+                  phone: parsed.phone ?? null,
+                  numberOfPeople: parsed.numberOfPeople,
+                  language: parsed.language,
+                  specialNeeds: parsed.specialNeeds ?? null,
+                },
+                slot: {
+                  date: slotWithRoute.slot.date,
+                  startTime: slotWithRoute.slot.startTime,
+                  endTime: slotWithRoute.slot.endTime,
+                },
+                route: {
+                  name: routeName,
+                  galleries: galleryNames,
+                },
+                action: 'booked',
+              })
+            }
+          }
+        }
       }
       catch (err) {
         console.error('[bookings] confirmation email failed:', err)

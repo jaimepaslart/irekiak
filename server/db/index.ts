@@ -72,6 +72,13 @@ sqlite.exec(`
   );
   CREATE INDEX IF NOT EXISTS idx_audit_log_timestamp ON audit_log(timestamp);
   CREATE INDEX IF NOT EXISTS idx_audit_log_target ON audit_log(target_type, target_id);
+
+  CREATE TABLE IF NOT EXISTS attendance (
+    booking_id TEXT PRIMARY KEY REFERENCES bookings(id),
+    checked_in_at TEXT NOT NULL DEFAULT (datetime('now')),
+    checked_in_by TEXT NOT NULL,
+    notes TEXT
+  );
 `)
 
 // Idempotent additive migrations (SQLite: ALTER TABLE ADD COLUMN only runs

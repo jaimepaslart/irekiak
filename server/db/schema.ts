@@ -55,7 +55,15 @@ export const auditLog = sqliteTable('audit_log', {
   metadata: text('metadata'),
 })
 
+export const attendance = sqliteTable('attendance', {
+  bookingId: text('booking_id').primaryKey().references(() => bookings.id),
+  checkedInAt: text('checked_in_at').notNull().default(sql`(datetime('now'))`),
+  checkedInBy: text('checked_in_by').notNull(),
+  notes: text('notes'),
+})
+
 export type TourRouteRow = typeof tourRoutes.$inferSelect
 export type TimeSlotRow = typeof timeSlots.$inferSelect
 export type BookingRow = typeof bookings.$inferSelect
 export type AuditLogRow = typeof auditLog.$inferSelect
+export type AttendanceRow = typeof attendance.$inferSelect

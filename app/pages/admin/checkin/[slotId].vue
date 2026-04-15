@@ -9,6 +9,8 @@ interface Participant {
   language: string
   specialNeeds: string | null
   confirmToken: string
+  attended: boolean
+  attendanceNotes: string | null
 }
 
 interface CheckinData {
@@ -16,36 +18,20 @@ interface CheckinData {
   route: { id: string, nameEu: string, nameEs: string, nameFr: string, nameEn: string, color: string }
   participants: Participant[]
   totalGuests: number
+  attendedCount: number
 }
 
 const routeParam = useRoute()
 const slotId = computed(() => String(routeParam.params.slotId))
 
-definePageMeta({ layout: 'default' })
+definePageMeta({ layout: 'admin' })
 useSeoMeta({ title: 'Admin · Check-in', robots: 'noindex, nofollow' })
 
-const STORAGE_KEY = 'irekiak_admin_token'
-const STORAGE_KEY_TS = 'irekiak_admin_token_ts'
-const SESSION_TIMEOUT_MS = 60 * 60 * 1000
-
-const token = ref('')
+const token = inject<Ref<string>>('adminToken')!
 const data = ref<CheckinData | null>(null)
 const errorMessage = ref<string | null>(null)
 
-const checked = reactive<Record<string, boolean>>({})
-
-onMounted(async () => {
-  if (typeof window === 'undefined') return
-  const stored = window.localStorage.getItem(STORAGE_KEY)
-  const storedTs = window.localStorage.getItem(STORAGE_KEY_TS)
-  const age = storedTs ? Date.now() - Number(storedTs) : Infinity
-  if (!stored || age >= SESSION_TIMEOUT_MS) {
-    errorMessage.value = 'Session expirée, reconnecte-toi sur /admin/bookings.'
-    return
-  }
-  token.value = stored
-  await load()
-})
+onMounted(() => { void load() })
 
 async function load() {
   try {
@@ -58,15 +44,35 @@ async function load() {
   }
 }
 
+async function toggleAttendance(p: Participant) {
+  const nextPresent = !p.attended
+  // Optimistic update
+  p.attended = nextPresent
+  try {
+    await $fetch(`/api/admin/checkin/${slotId.value}/attendance`, {
+      method: 'POST',
+      headers: { 'x-admin-token': token.value, 'Content-Type': 'application/json' },
+      body: { bookingId: p.id, present: nextPresent },
+    })
+    if (data.value) {
+      data.value.attendedCount += nextPresent ? 1 : -1
+    }
+  }
+  catch (err: unknown) {
+    p.attended = !nextPresent
+    alert('Save failed: ' + ((err as { statusMessage?: string })?.statusMessage ?? 'unknown'))
+  }
+}
+
 function printList() {
   window.print()
 }
 </script>
 
 <template>
-  <div class="max-w-[900px] mx-auto px-6 md:px-12 py-12 pt-24">
-    <NuxtLink to="/admin/bookings" class="inline-flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors mb-8 no-print">
-      ← Admin
+  <div>
+    <NuxtLink to="/admin/bookings" class="inline-flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors mb-6 no-print">
+      ← Réservations
     </NuxtLink>
 
     <p v-if="errorMessage" class="text-sm text-red-300">{{ errorMessage }}</p>
@@ -80,7 +86,8 @@ function printList() {
           <span>📅 {{ data.slot.date }}</span>
           <span>🕐 {{ data.slot.startTime }} — {{ data.slot.endTime }}</span>
           <span>🗣 {{ data.slot.language.toUpperCase() }}</span>
-          <span>👥 {{ data.totalGuests }}/{{ data.slot.maxParticipants }} participants</span>
+          <span>👥 {{ data.totalGuests }}/{{ data.slot.maxParticipants }} inscrits</span>
+          <span class="text-emerald-300">✓ {{ data.attendedCount }} présents</span>
         </div>
       </div>
 
@@ -91,10 +98,10 @@ function printList() {
       </div>
 
       <!-- Participants table -->
-      <table class="w-full text-sm print-table">
+      <table class="w-full text-sm print-table bg-edition-dark border border-white/10 rounded-sm">
         <thead>
-          <tr class="text-left text-xs uppercase tracking-wider text-white/50 font-mono border-b border-white/20">
-            <th class="py-3 pr-2 w-10">☐</th>
+          <tr class="text-left text-xs uppercase tracking-wider text-white/50 font-mono border-b border-white/20 bg-white/5">
+            <th class="py-3 pr-2 w-12"></th>
             <th class="py-3 px-2">Nom</th>
             <th class="py-3 px-2">Pers.</th>
             <th class="py-3 px-2">Contact</th>
@@ -105,16 +112,30 @@ function printList() {
           <tr v-if="data.participants.length === 0">
             <td colspan="5" class="py-8 text-center text-white/40">Aucun participant pour ce créneau.</td>
           </tr>
-          <tr v-for="p in data.participants" :key="p.id" class="border-b border-white/10 align-top">
-            <td class="py-3 pr-2">
-              <input v-model="checked[p.id]" type="checkbox" class="w-4 h-4 accent-white">
+          <tr
+            v-for="p in data.participants"
+            :key="p.id"
+            class="border-b border-white/10 align-top cursor-pointer hover:bg-white/5"
+            :class="{ 'bg-emerald-500/5': p.attended }"
+            @click.prevent="toggleAttendance(p)"
+          >
+            <td class="py-3 pr-2 pl-3">
+              <input
+                :checked="p.attended"
+                type="checkbox"
+                class="w-5 h-5 accent-emerald-400"
+                @click.stop="toggleAttendance(p)"
+              >
             </td>
             <td class="py-3 px-2">
               <div class="font-medium">{{ p.lastName.toUpperCase() }}, {{ p.firstName }}</div>
+              <NuxtLink :to="`/admin/bookings/${p.id}`" class="text-[10px] text-white/40 hover:text-white font-mono no-print" @click.stop>
+                {{ p.id.slice(0, 8) }}
+              </NuxtLink>
             </td>
             <td class="py-3 px-2 font-mono">{{ p.guests }}</td>
             <td class="py-3 px-2 text-xs">
-              <div><a :href="`mailto:${p.email}`" class="text-white hover:underline">{{ p.email }}</a></div>
+              <div><a :href="`mailto:${p.email}`" class="text-white hover:underline" @click.stop>{{ p.email }}</a></div>
               <div v-if="p.phone" class="text-white/60">{{ p.phone }}</div>
             </td>
             <td class="py-3 px-2 text-xs text-white/70">

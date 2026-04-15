@@ -9,14 +9,10 @@ interface AuditEntry {
   metadata: Record<string, unknown> | null
 }
 
-definePageMeta({ layout: 'default' })
+definePageMeta({ layout: 'admin' })
 useSeoMeta({ title: 'Admin · Audit log', robots: 'noindex, nofollow' })
 
-const STORAGE_KEY = 'irekiak_admin_token'
-const STORAGE_KEY_TS = 'irekiak_admin_token_ts'
-const SESSION_TIMEOUT_MS = 60 * 60 * 1000
-
-const token = ref('')
+const token = inject<Ref<string>>('adminToken')!
 const entries = ref<AuditEntry[]>([])
 const errorMessage = ref<string | null>(null)
 const actorFilter = ref<string>('all')
@@ -32,18 +28,9 @@ const actors = computed(() => Array.from(new Set(entries.value.map(e => e.actor)
 const actions = computed(() => Array.from(new Set(entries.value.map(e => e.action))).sort())
 
 onMounted(async () => {
-  if (typeof window === 'undefined') return
-  const stored = window.localStorage.getItem(STORAGE_KEY)
-  const storedTs = window.localStorage.getItem(STORAGE_KEY_TS)
-  const age = storedTs ? Date.now() - Number(storedTs) : Infinity
-  if (!stored || age >= SESSION_TIMEOUT_MS) {
-    errorMessage.value = 'Session expirée.'
-    return
-  }
-  token.value = stored
   try {
     entries.value = await $fetch<AuditEntry[]>('/api/admin/audit?limit=500', {
-      headers: { 'x-admin-token': stored },
+      headers: { 'x-admin-token': token.value },
     })
   }
   catch (err: unknown) {
@@ -61,11 +48,8 @@ function actionColor(a: string): string {
 </script>
 
 <template>
-  <div class="max-w-[1400px] mx-auto px-6 md:px-12 py-12 pt-24">
-    <NuxtLink to="/admin/bookings" class="inline-flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors mb-8">
-      ← Admin
-    </NuxtLink>
-    <h1 class="m-0 text-2xl mb-8">Admin · Audit log</h1>
+  <div>
+    <h1 class="m-0 text-2xl mb-8">Audit log</h1>
     <p v-if="errorMessage" class="text-sm text-red-300 mb-6">{{ errorMessage }}</p>
 
     <div class="flex flex-wrap gap-3 mb-6">

@@ -1,7 +1,7 @@
-import { and, eq, ne } from 'drizzle-orm'
+import { and, eq, inArray, ne } from 'drizzle-orm'
 import { createError, defineEventHandler, getRouterParam } from 'h3'
 import { db } from '../../../db'
-import { bookings, timeSlots, tourRoutes } from '../../../db/schema'
+import { attendance, bookings, timeSlots, tourRoutes } from '../../../db/schema'
 import { requireAdminToken } from '../../../utils/require-admin'
 
 /**
@@ -47,6 +47,19 @@ export default defineEventHandler(async (event) => {
 
   const totalGuests = participants.reduce((acc, p) => acc + p.guests, 0)
 
+  // Attendance state
+  const ids = participants.map(p => p.id)
+  const attendanceRows = ids.length
+    ? await db.select().from(attendance).where(inArray(attendance.bookingId, ids)).all()
+    : []
+  const attendanceMap = new Map(attendanceRows.map(r => [r.bookingId, r]))
+  const participantsWithAttendance = participants.map(p => ({
+    ...p,
+    attended: attendanceMap.has(p.id),
+    attendanceNotes: attendanceMap.get(p.id)?.notes ?? null,
+  }))
+  const attendedCount = attendanceRows.length
+
   return {
     slot: {
       id: slot.slot.id,
@@ -65,7 +78,8 @@ export default defineEventHandler(async (event) => {
       nameEn: slot.route.nameEn,
       color: slot.route.color,
     },
-    participants,
+    participants: participantsWithAttendance,
     totalGuests,
+    attendedCount,
   }
 })

@@ -24,7 +24,7 @@ export const galleries: Gallery[] = [
     image: '/images/exhibitions/zatixak.jpg',
     contact: {
       // TODO: remplacer par le vrai email de la galerie quand communiqué
-      email: 'irekiak@irekiak.eus',
+      email: 'bihrpaul@gmail.com',
       preferredLanguage: 'es',
       notifyOnBooking: true,
       receiveDailyDigest: true,
@@ -53,7 +53,7 @@ export const galleries: Gallery[] = [
     image: '/images/exhibitions/trashvertising.jpg',
     contact: {
       // TODO: remplacer par le vrai email de la galerie quand communiqué
-      email: 'irekiak@irekiak.eus',
+      email: 'bihrpaul@gmail.com',
       preferredLanguage: 'es',
       notifyOnBooking: true,
       receiveDailyDigest: true,
@@ -82,7 +82,7 @@ export const galleries: Gallery[] = [
     image: '/images/exhibitions/cibrian.jpg',
     contact: {
       // TODO: remplacer par le vrai email de la galerie quand communiqué
-      email: 'irekiak@irekiak.eus',
+      email: 'bihrpaul@gmail.com',
       preferredLanguage: 'es',
       notifyOnBooking: true,
       receiveDailyDigest: true,
@@ -111,7 +111,7 @@ export const galleries: Gallery[] = [
     image: '/images/exhibitions/barne-begirada.jpg',
     contact: {
       // TODO: remplacer par le vrai email de la galerie quand communiqué
-      email: 'irekiak@irekiak.eus',
+      email: 'bihrpaul@gmail.com',
       preferredLanguage: 'es',
       notifyOnBooking: true,
       receiveDailyDigest: true,
@@ -140,7 +140,7 @@ export const galleries: Gallery[] = [
     image: '/images/exhibitions/basoan-zehar.jpg',
     contact: {
       // TODO: remplacer par le vrai email de la galerie quand communiqué
-      email: 'irekiak@irekiak.eus',
+      email: 'bihrpaul@gmail.com',
       preferredLanguage: 'es',
       notifyOnBooking: true,
       receiveDailyDigest: true,
@@ -169,7 +169,7 @@ export const galleries: Gallery[] = [
     image: '/images/exhibitions/sakana.jpg',
     contact: {
       // TODO: remplacer par le vrai email de la galerie quand communiqué
-      email: 'irekiak@irekiak.eus',
+      email: 'bihrpaul@gmail.com',
       preferredLanguage: 'es',
       notifyOnBooking: true,
       receiveDailyDigest: true,
@@ -198,7 +198,7 @@ export const galleries: Gallery[] = [
     image: '/images/exhibitions/palmason.jpg',
     contact: {
       // TODO: remplacer par le vrai email de la galerie quand communiqué
-      email: 'irekiak@irekiak.eus',
+      email: 'bihrpaul@gmail.com',
       preferredLanguage: 'es',
       notifyOnBooking: true,
       receiveDailyDigest: true,
@@ -227,7 +227,7 @@ export const galleries: Gallery[] = [
     image: '/images/galleries/kursaal.png',
     contact: {
       // TODO: remplacer par le vrai email de la galerie quand communiqué
-      email: 'irekiak@irekiak.eus',
+      email: 'bihrpaul@gmail.com',
       preferredLanguage: 'es',
       notifyOnBooking: true,
       receiveDailyDigest: true,

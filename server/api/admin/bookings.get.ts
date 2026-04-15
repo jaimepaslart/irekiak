@@ -1,36 +1,16 @@
 import { desc, eq } from 'drizzle-orm'
-import { createError, defineEventHandler, getHeader } from 'h3'
-import { useRuntimeConfig } from '#imports'
+import { defineEventHandler } from 'h3'
 import { db } from '../../db'
 import { bookings, timeSlots, tourRoutes } from '../../db/schema'
+import { requireAdminToken } from '../../utils/require-admin'
 
 /**
- * GET /api/admin/bookings
- *
- * Lists every booking in the system with joined slot + route data, newest first.
- * Requires an `x-admin-token` header matching `runtimeConfig.adminTokenSecret`.
- * Returns 401 if the header is missing or invalid, 503 if no secret is configured.
+ * GET /api/admin/bookings — Lists every booking with joined slot + route data, newest first.
  */
 export default defineEventHandler(async (event) => {
-  const config = useRuntimeConfig()
-  const expected = config.adminTokenSecret
+  requireAdminToken(event)
 
-  if (!expected) {
-    throw createError({
-      statusCode: 503,
-      statusMessage: 'Admin access not configured',
-    })
-  }
-
-  const provided = getHeader(event, 'x-admin-token')
-  if (!provided || provided !== expected) {
-    throw createError({
-      statusCode: 401,
-      statusMessage: 'Unauthorized',
-    })
-  }
-
-  const rows = await db
+  return db
     .select({
       id: bookings.id,
       createdAt: bookings.createdAt,
@@ -51,6 +31,4 @@ export default defineEventHandler(async (event) => {
     .innerJoin(timeSlots, eq(bookings.slotId, timeSlots.id))
     .innerJoin(tourRoutes, eq(timeSlots.tourRouteId, tourRoutes.id))
     .orderBy(desc(bookings.createdAt))
-
-  return rows
 })

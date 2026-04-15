@@ -1,25 +1,14 @@
 import { desc, eq } from 'drizzle-orm'
-import { createError, defineEventHandler, getHeader } from 'h3'
-import { useRuntimeConfig } from '#imports'
+import { defineEventHandler } from 'h3'
 import { db } from '../../db'
 import { bookings, timeSlots, tourRoutes } from '../../db/schema'
+import { requireAdminToken } from '../../utils/require-admin'
 
 /**
- * GET /api/admin/stats
- *
- * Returns aggregate stats for the admin dashboard.
- * Requires `x-admin-token` header matching runtimeConfig.adminTokenSecret.
+ * GET /api/admin/stats — Aggregate stats for the admin dashboard.
  */
 export default defineEventHandler(async (event) => {
-  const config = useRuntimeConfig()
-  const expected = config.adminTokenSecret
-  if (!expected) {
-    throw createError({ statusCode: 503, statusMessage: 'Admin access not configured' })
-  }
-  const provided = getHeader(event, 'x-admin-token')
-  if (!provided || provided !== expected) {
-    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
-  }
+  requireAdminToken(event)
 
   // Active bookings (exclude cancelled for capacity counts)
   const allBookings = await db.select().from(bookings)

@@ -1,14 +1,14 @@
 import { randomUUID } from 'node:crypto'
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import { createError, defineEventHandler, readValidatedBody } from 'h3'
-import { galleries } from '@data/galleries'
-import { tourRoutes as tourRouteData } from '@data/tours'
 import { db, sqlite } from '../../db'
 import { bookings, timeSlots, tourRoutes } from '../../db/schema'
+import { logAudit } from '../../utils/audit'
 import { withSlotLock } from '../../utils/booking-lock'
 import { sendBookingConfirmation } from '../../utils/email'
-import { sendGalleryBookingNotification } from '../../utils/email-gallery'
 import { generateBookingIcs } from '../../utils/ics'
+import { notifyGalleriesForBooking } from '../../utils/notify-galleries'
+import { pickRouteName } from '../../utils/pick-locale'
 import { bookingRequestSchema } from '../../utils/validation'
 
 /**
@@ -17,11 +17,14 @@ import { bookingRequestSchema } from '../../utils/validation'
  * Creates a confirmed booking for a given time slot.
  *
  * Concurrency strategy:
- *  1. An in-memory per-slot mutex serializes competing requests within the process.
- *  2. Inside the lock we run a SQLite transaction that re-reads the slot, verifies
- *     capacity, inserts the booking and increments booked_count + version.
+ *  1. In-memory per-slot mutex serializes competing requests within the process.
+ *  2. Inside the lock we run a SQLite transaction that re-reads the slot,
+ *     verifies capacity, inserts the booking and updates booked_count using
+ *     optimistic locking on `version` (the UPDATE only matches if version
+ *     hasn't changed under our feet).
  *
- * Returns 409 if the slot is full, 404 if the slot does not exist.
+ * Returns 409 if the slot is full or was modified concurrently, 404 if the
+ * slot does not exist, 400 if the payload is invalid.
  */
 export default defineEventHandler(async (event) => {
   const parsed = await readValidatedBody(event, (body) => {
@@ -45,19 +48,13 @@ export default defineEventHandler(async (event) => {
         .get()
 
       if (!slot) {
-        throw createError({
-          statusCode: 404,
-          statusMessage: 'Tour slot not found',
-        })
+        throw createError({ statusCode: 404, statusMessage: 'Tour slot not found' })
       }
-
       if (slot.bookedCount + parsed.numberOfPeople > slot.maxParticipants) {
         throw createError({
           statusCode: 409,
           statusMessage: 'Tour slot is full',
-          data: {
-            remaining: Math.max(0, slot.maxParticipants - slot.bookedCount),
-          },
+          data: { remaining: Math.max(0, slot.maxParticipants - slot.bookedCount) },
         })
       }
 
@@ -80,22 +77,43 @@ export default defineEventHandler(async (event) => {
         })
         .run()
 
-      db.update(timeSlots)
+      // Optimistic lock: only update if version unchanged. Throws if another
+      // request bumped version first (mutex should prevent this but defense
+      // in depth against future horizontal scaling).
+      const updated = db.update(timeSlots)
         .set({
           bookedCount: slot.bookedCount + parsed.numberOfPeople,
           version: slot.version + 1,
         })
-        .where(eq(timeSlots.id, slot.id))
+        .where(and(eq(timeSlots.id, slot.id), eq(timeSlots.version, slot.version)))
         .run()
 
-      return { bookingId, confirmToken }
+      if (updated.changes === 0) {
+        throw createError({
+          statusCode: 409,
+          statusMessage: 'Slot was modified concurrently, please retry',
+        })
+      }
+
+      return { bookingId, confirmToken, slotId: slot.id }
     })
 
-    const { bookingId, confirmToken } = tx()
+    const { bookingId, confirmToken, slotId } = tx()
 
-    // Fire-and-forget confirmation email. We look up the localized route name,
-    // build an ICS attachment, and send via Resend. Errors are logged and do
-    // not block the HTTP response.
+    void logAudit({
+      actor: 'visitor',
+      action: 'booking.create',
+      targetType: 'booking',
+      targetId: bookingId,
+      metadata: {
+        email: parsed.email,
+        numberOfPeople: parsed.numberOfPeople,
+        language: parsed.language,
+        slotId,
+      },
+    })
+
+    // Fire-and-forget confirmation email + gallery notifications
     void (async () => {
       try {
         const slotWithRoute = db
@@ -104,14 +122,9 @@ export default defineEventHandler(async (event) => {
           .innerJoin(tourRoutes, eq(timeSlots.tourRouteId, tourRoutes.id))
           .where(eq(timeSlots.id, parsed.tourSlotId))
           .get()
-
         if (!slotWithRoute) return
 
-        const routeName
-          = parsed.language === 'eu' ? slotWithRoute.route.nameEu
-            : parsed.language === 'es' ? slotWithRoute.route.nameEs
-              : parsed.language === 'fr' ? slotWithRoute.route.nameFr
-                : slotWithRoute.route.nameEn
+        const routeName = pickRouteName(slotWithRoute.route, parsed.language)
 
         const icsContent = generateBookingIcs({
           bookingId,
@@ -136,41 +149,26 @@ export default defineEventHandler(async (event) => {
           icsContent,
         })
 
-        // Notify every gallery on this route that has notifyOnBooking=true
-        const staticRoute = tourRouteData.find(r => r.id === slotWithRoute.route.id)
-        if (staticRoute) {
-          const routeGalleries = galleries.filter(g => staticRoute.galleryIds.includes(g.id))
-          const galleryNames = routeGalleries.map(g => g.name)
-          for (const gallery of routeGalleries) {
-            if (gallery.contact?.notifyOnBooking && gallery.contact.email) {
-              void sendGalleryBookingNotification({
-                to: gallery.contact.email,
-                galleryName: gallery.contact.name ?? gallery.name,
-                contactLanguage: gallery.contact.preferredLanguage,
-                booking: {
-                  id: bookingId,
-                  firstName: parsed.firstName,
-                  lastName: parsed.lastName,
-                  email: parsed.email,
-                  phone: parsed.phone ?? null,
-                  numberOfPeople: parsed.numberOfPeople,
-                  language: parsed.language,
-                  specialNeeds: parsed.specialNeeds ?? null,
-                },
-                slot: {
-                  date: slotWithRoute.slot.date,
-                  startTime: slotWithRoute.slot.startTime,
-                  endTime: slotWithRoute.slot.endTime,
-                },
-                route: {
-                  name: routeName,
-                  galleries: galleryNames,
-                },
-                action: 'booked',
-              })
-            }
-          }
-        }
+        notifyGalleriesForBooking({
+          routeId: slotWithRoute.route.id,
+          bookingData: {
+            id: bookingId,
+            firstName: parsed.firstName,
+            lastName: parsed.lastName,
+            email: parsed.email,
+            phone: parsed.phone ?? null,
+            numberOfPeople: parsed.numberOfPeople,
+            language: parsed.language,
+            specialNeeds: parsed.specialNeeds ?? null,
+          },
+          slot: {
+            date: slotWithRoute.slot.date,
+            startTime: slotWithRoute.slot.startTime,
+            endTime: slotWithRoute.slot.endTime,
+          },
+          localizedRouteName: routeName,
+          action: 'booked',
+        })
       }
       catch (err) {
         console.error('[bookings] confirmation email failed:', err)

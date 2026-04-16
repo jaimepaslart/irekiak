@@ -5,6 +5,9 @@ import { useRuntimeConfig } from '#imports'
 import { logAudit } from '../../utils/audit'
 import { enforceRateLimit } from '../../utils/rate-limit'
 import { requireAdminToken } from '../../utils/require-admin'
+import { buildConfirmationEmail, buildCancellationEmail } from '../../utils/email'
+import { buildGalleryNotificationEmail } from '../../utils/email-gallery'
+import { cta, dataTable, footer, header, hero, paragraph, shell } from '../../utils/email-templates'
 
 const LANGUAGES = ['eu', 'es', 'fr', 'en'] as const
 const TEMPLATES = ['plain', 'confirmation', 'cancellation', 'gallery_notification'] as const
@@ -18,157 +21,130 @@ const schema = z.object({
   template: z.enum(TEMPLATES),
 })
 
-function esc(v: string): string {
-  return v
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;')
-}
-
-function buildShellHtml(title: string, body: string): string {
-  return `<!doctype html>
-<html><body style="margin:0;padding:0;background-color:#001E33;font-family:Inter,Arial,sans-serif;color:#ffffff;">
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#001E33;padding:32px 0;">
-  <tr><td align="center">
-    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;background-color:#003153;border-radius:12px;padding:32px;">
-      <tr><td>
-        <p style="margin:0 0 8px 0;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#ffd86b;">TEST EMAIL</p>
-        <h1 style="margin:0 0 8px 0;font-size:22px;color:#ffffff;">${esc(title)}</h1>
-        <p style="margin:0 0 24px 0;font-size:14px;color:rgba(255,255,255,0.7);">Irekiak Gallery Weekend — Donostia / San Sebastián</p>
-        ${body}
-        <p style="margin:32px 0 0 0;font-size:12px;color:rgba(255,255,255,0.5);border-top:1px solid rgba(255,255,255,0.15);padding-top:16px;">Ceci est un email de test envoyé depuis l'admin Irekiak.</p>
-      </td></tr>
-    </table>
-  </td></tr>
-</table></body></html>`
-}
-
-function plainText(title: string, lines: string[]): string {
-  return `[TEST] ${title}\n\n${lines.join('\n')}\n\n— Irekiak Gallery Weekend`
-}
-
 interface Preview {
   subject: string
   html: string
   text: string
 }
 
-function buildPreview(template: Template, language: Language): Preview {
-  // Fake fixture data
-  const fake = {
-    firstName: 'Test',
-    lastName: 'Visitor',
-    email: 'test@example.com',
-    phone: '+34 600 000 000',
-    guests: 2,
-    routeName: 'Arteko + Cibrián',
-    date: '2026-05-30',
-    startTime: '11:30',
-    endTime: '13:00',
+const PLAIN_LOCALES: Record<Language, { eyebrow: string, title: string, lead: string, ctaLabel: string }> = {
+  eu: { eyebrow: 'Proba', title: 'Konfigurazio proba', lead: 'Mezu hau Resend konfigurazioa egiaztatzeko bidaltzen da (DKIM, domeinua, igorlearen helbidea).', ctaLabel: 'Webgunea ireki' },
+  es: { eyebrow: 'Prueba', title: 'Prueba de configuración', lead: 'Este mensaje se envía para verificar la configuración de Resend (DKIM, dominio, dirección de envío).', ctaLabel: 'Abrir el sitio' },
+  fr: { eyebrow: 'Test', title: 'Test de configuration', lead: 'Ce message est envoyé pour vérifier la configuration Resend (DKIM, domaine, adresse d\'expédition).', ctaLabel: 'Ouvrir le site' },
+  en: { eyebrow: 'Test', title: 'Configuration test', lead: 'This message is sent to verify the Resend configuration (DKIM, domain, sending address).', ctaLabel: 'Open the site' },
+}
+
+function buildPlainTest(language: Language): Preview {
+  const s = PLAIN_LOCALES[language]
+  const html = shell({
+    title: s.title,
+    preheader: s.lead,
+    lang: language,
+    body: [
+      header({}),
+      hero({ eyebrow: `[TEST] ${s.eyebrow}`, title: s.title, lead: s.lead }),
+      dataTable({
+        rows: [
+          { label: 'Environment', value: 'test' },
+          { label: 'Language', value: language.toUpperCase() },
+          { label: 'Template', value: 'plain' },
+        ],
+      }),
+      cta({ href: 'https://irekiak.eus', label: s.ctaLabel, variant: 'primary' }),
+      paragraph({ text: 'Email envoyé depuis l\'admin Irekiak — aucun visiteur n\'est concerné.', muted: true }),
+      footer({ locale: language }),
+    ].join('\n'),
+  })
+  const text = `[TEST] ${s.title}\n\n${s.lead}\n\nLanguage: ${language.toUpperCase()}\nTemplate: plain\n\n— Irekiak Gallery Weekend`
+  return { subject: `[TEST] Irekiak · plain · ${language.toUpperCase()}`, html, text }
+}
+
+function buildConfirmationTest(language: Language): Preview {
+  const built = buildConfirmationEmail(
+    {
+      to: 'test@example.com',
+      bookingId: 'TEST-1234-ABCD',
+      confirmToken: 'preview-token',
+      routeName: 'Arteko + Cibrián',
+      date: '2026-05-30',
+      startTime: '11:30',
+      endTime: '13:00',
+      guests: 2,
+      language,
+      icsContent: '',
+      galleries: ['Arteko', 'Cibrián', 'Galería Test'],
+      meetingPoint: 'Plaza de la Constitución, 1 — Donostia',
+    },
+    'https://irekiak.eus/bookings/preview-token',
+  )
+  return {
+    subject: `[TEST] ${built.subject}`,
+    html: built.html,
+    text: `[TEST]\n\n${built.text}`,
+  }
+}
+
+function buildCancellationTest(language: Language): Preview {
+  const built = buildCancellationEmail(
+    {
+      to: 'test@example.com',
+      bookingId: 'TEST-1234-ABCD',
+      routeName: 'Arteko + Cibrián',
+      date: '2026-05-30',
+      startTime: '11:30',
+      endTime: '13:00',
+      guests: 2,
+      language,
+    },
+    'https://irekiak.eus/visites',
+  )
+  return {
+    subject: `[TEST] ${built.subject}`,
+    html: built.html,
+    text: `[TEST]\n\n${built.text}`,
+  }
+}
+
+function buildGalleryTest(language: Language): Preview {
+  const built = buildGalleryNotificationEmail({
+    to: 'test@example.com',
     galleryName: 'Galería Test',
-    bookingRef: 'TEST-1234-ABCD',
-    galleries: ['Arteko', 'Cibrián'],
+    contactLanguage: language,
+    booking: {
+      id: 'TEST-1234-ABCD',
+      firstName: 'Test',
+      lastName: 'Visitor',
+      email: 'visitor@example.com',
+      phone: '+34 600 000 000',
+      numberOfPeople: 2,
+      language,
+      specialNeeds: 'Accès PMR souhaité',
+    },
+    slot: {
+      date: '2026-05-30',
+      startTime: '11:30',
+      endTime: '13:00',
+    },
+    route: {
+      name: 'Arteko + Cibrián',
+      galleries: ['Arteko', 'Cibrián', 'Galería Test'],
+    },
+    action: 'booked',
+  })
+  return {
+    subject: `[TEST] ${built.subject}`,
+    html: built.html,
+    text: `[TEST]\n\n${built.text}`,
   }
+}
 
-  const langLabel = language.toUpperCase()
-
-  if (template === 'plain') {
-    const subject = `[TEST] Irekiak · plain`
-    const htmlBody = `
-        <p style="margin:0 0 16px 0;font-size:15px;line-height:1.6;">Bonjour,</p>
-        <p style="margin:0 0 16px 0;font-size:15px;line-height:1.6;">Ceci est un email de test simple (template "plain") envoyé en <strong>${esc(langLabel)}</strong>.</p>
-        <p style="margin:0 0 16px 0;font-size:15px;line-height:1.6;">Il sert à vérifier que la configuration Resend fonctionne correctement (domaine, DKIM, adresse d'expédition).</p>
-    `
-    const text = plainText(subject, [
-      'Ceci est un email de test simple (template "plain").',
-      `Langue demandée : ${langLabel}`,
-      'Il sert à vérifier la configuration Resend.',
-    ])
-    return { subject, html: buildShellHtml('Test · plain', htmlBody), text }
+function buildPreview(template: Template, language: Language): Preview {
+  switch (template) {
+    case 'plain': return buildPlainTest(language)
+    case 'confirmation': return buildConfirmationTest(language)
+    case 'cancellation': return buildCancellationTest(language)
+    case 'gallery_notification': return buildGalleryTest(language)
   }
-
-  if (template === 'confirmation') {
-    const subject = `[TEST] Irekiak · confirmation`
-    const htmlBody = `
-        <p style="margin:0 0 16px 0;font-size:15px;line-height:1.6;">Bonjour ${esc(fake.firstName)},</p>
-        <p style="margin:0 0 24px 0;font-size:15px;line-height:1.6;">Aperçu du template <strong>confirmation</strong> de réservation (langue : ${esc(langLabel)}).</p>
-        <h2 style="margin:24px 0 12px 0;font-size:16px;border-top:1px solid rgba(255,255,255,0.15);padding-top:16px;">Détails de la réservation</h2>
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="font-size:14px;">
-          <tr><td style="padding:6px 0;color:rgba(255,255,255,0.7);">Parcours</td><td style="padding:6px 0;text-align:right;">${esc(fake.routeName)}</td></tr>
-          <tr><td style="padding:6px 0;color:rgba(255,255,255,0.7);">Date</td><td style="padding:6px 0;text-align:right;">${esc(fake.date)}</td></tr>
-          <tr><td style="padding:6px 0;color:rgba(255,255,255,0.7);">Horaire</td><td style="padding:6px 0;text-align:right;">${esc(fake.startTime)} — ${esc(fake.endTime)}</td></tr>
-          <tr><td style="padding:6px 0;color:rgba(255,255,255,0.7);">Participants</td><td style="padding:6px 0;text-align:right;">${fake.guests}</td></tr>
-          <tr><td style="padding:6px 0;color:rgba(255,255,255,0.7);">Référence</td><td style="padding:6px 0;text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;">${esc(fake.bookingRef)}</td></tr>
-        </table>
-    `
-    const text = plainText(subject, [
-      `Bonjour ${fake.firstName},`,
-      `Aperçu confirmation (langue : ${langLabel}).`,
-      `Parcours : ${fake.routeName}`,
-      `Date : ${fake.date}`,
-      `Horaire : ${fake.startTime} — ${fake.endTime}`,
-      `Participants : ${fake.guests}`,
-      `Référence : ${fake.bookingRef}`,
-    ])
-    return { subject, html: buildShellHtml('Test · confirmation', htmlBody), text }
-  }
-
-  if (template === 'cancellation') {
-    const subject = `[TEST] Irekiak · cancellation`
-    const htmlBody = `
-        <p style="margin:0 0 16px 0;font-size:15px;line-height:1.6;">Bonjour ${esc(fake.firstName)},</p>
-        <p style="margin:0 0 24px 0;font-size:15px;line-height:1.6;">Aperçu du template <strong>annulation</strong> (langue : ${esc(langLabel)}).</p>
-        <h2 style="margin:24px 0 12px 0;font-size:16px;border-top:1px solid rgba(255,255,255,0.15);padding-top:16px;">Réservation annulée</h2>
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="font-size:14px;">
-          <tr><td style="padding:6px 0;color:rgba(255,255,255,0.7);">Parcours</td><td style="padding:6px 0;text-align:right;">${esc(fake.routeName)}</td></tr>
-          <tr><td style="padding:6px 0;color:rgba(255,255,255,0.7);">Date</td><td style="padding:6px 0;text-align:right;">${esc(fake.date)}</td></tr>
-          <tr><td style="padding:6px 0;color:rgba(255,255,255,0.7);">Horaire</td><td style="padding:6px 0;text-align:right;">${esc(fake.startTime)} — ${esc(fake.endTime)}</td></tr>
-          <tr><td style="padding:6px 0;color:rgba(255,255,255,0.7);">Référence</td><td style="padding:6px 0;text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;">${esc(fake.bookingRef)}</td></tr>
-        </table>
-    `
-    const text = plainText(subject, [
-      `Bonjour ${fake.firstName},`,
-      `Aperçu annulation (langue : ${langLabel}).`,
-      `Parcours : ${fake.routeName}`,
-      `Date : ${fake.date} · ${fake.startTime} — ${fake.endTime}`,
-      `Référence : ${fake.bookingRef}`,
-    ])
-    return { subject, html: buildShellHtml('Test · cancellation', htmlBody), text }
-  }
-
-  // gallery_notification
-  const subject = `[TEST] Irekiak · gallery_notification`
-  const htmlBody = `
-        <p style="margin:0 0 16px 0;font-size:15px;line-height:1.6;">Bonjour ${esc(fake.galleryName)},</p>
-        <p style="margin:0 0 24px 0;font-size:15px;line-height:1.6;">Aperçu du template <strong>notification galerie</strong> (langue : ${esc(langLabel)}).</p>
-        <h2 style="margin:24px 0 12px 0;font-size:16px;border-top:1px solid rgba(255,255,255,0.15);padding-top:16px;">Détails</h2>
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="font-size:14px;">
-          <tr><td style="padding:6px 0;color:rgba(255,255,255,0.7);">Parcours</td><td style="padding:6px 0;text-align:right;"><strong>${esc(fake.routeName)}</strong></td></tr>
-          <tr><td style="padding:6px 0;color:rgba(255,255,255,0.7);">Galeries du parcours</td><td style="padding:6px 0;text-align:right;">${esc(fake.galleries.join(' · '))}</td></tr>
-          <tr><td style="padding:6px 0;color:rgba(255,255,255,0.7);">Date</td><td style="padding:6px 0;text-align:right;">${esc(fake.date)}</td></tr>
-          <tr><td style="padding:6px 0;color:rgba(255,255,255,0.7);">Horaire</td><td style="padding:6px 0;text-align:right;">${esc(fake.startTime)} — ${esc(fake.endTime)}</td></tr>
-        </table>
-        <h2 style="margin:24px 0 12px 0;font-size:16px;border-top:1px solid rgba(255,255,255,0.15);padding-top:16px;">Visiteur</h2>
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="font-size:14px;">
-          <tr><td style="padding:6px 0;color:rgba(255,255,255,0.7);">Nom</td><td style="padding:6px 0;text-align:right;"><strong>${esc(fake.firstName)} ${esc(fake.lastName)}</strong></td></tr>
-          <tr><td style="padding:6px 0;color:rgba(255,255,255,0.7);">Email</td><td style="padding:6px 0;text-align:right;">${esc(fake.email)}</td></tr>
-          <tr><td style="padding:6px 0;color:rgba(255,255,255,0.7);">Téléphone</td><td style="padding:6px 0;text-align:right;">${esc(fake.phone)}</td></tr>
-          <tr><td style="padding:6px 0;color:rgba(255,255,255,0.7);">Participants</td><td style="padding:6px 0;text-align:right;">${fake.guests}</td></tr>
-          <tr><td style="padding:6px 0;color:rgba(255,255,255,0.7);">Référence</td><td style="padding:6px 0;text-align:right;font-family:'JetBrains Mono',monospace;font-size:11px;">${esc(fake.bookingRef)}</td></tr>
-        </table>
-  `
-  const text = plainText(subject, [
-    `Bonjour ${fake.galleryName},`,
-    `Aperçu notification galerie (langue : ${langLabel}).`,
-    `Parcours : ${fake.routeName} (${fake.galleries.join(' · ')})`,
-    `Date : ${fake.date} · ${fake.startTime} — ${fake.endTime}`,
-    `Visiteur : ${fake.firstName} ${fake.lastName} (${fake.email}, ${fake.phone})`,
-    `Participants : ${fake.guests}`,
-    `Référence : ${fake.bookingRef}`,
-  ])
-  return { subject, html: buildShellHtml('Test · gallery_notification', htmlBody), text }
 }
 
 /**

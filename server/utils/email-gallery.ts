@@ -1,6 +1,16 @@
 import { Resend } from 'resend'
 import { useRuntimeConfig } from '#imports'
 import { withEmailRetry } from './email-retry'
+import {
+  dataTable,
+  escapeHtml,
+  footer,
+  header,
+  hero,
+  paragraph,
+  shell,
+  type DataRow,
+} from './email-templates'
 
 type Language = 'eu' | 'es' | 'fr' | 'en'
 
@@ -31,164 +41,223 @@ interface GalleryNotificationParams {
 }
 
 interface Strings {
-  subjectBooked: (route: string, date: string) => string
-  subjectCancelled: (route: string, date: string) => string
-  greeting: (gallery: string) => string
-  introBooked: string
-  introCancelled: string
-  details: string
-  route: string
-  galleriesInRoute: string
-  dateLabel: string
-  time: string
-  visitor: string
-  guests: string
-  language: string
-  contactEmail: string
-  contactPhone: string
-  specialNeeds: string
-  bookingRef: string
-  footer: string
+  subjectBooked: (gallery: string, date: string, time: string) => string
+  subjectCancelled: (gallery: string, date: string, time: string) => string
+  preheaderBooked: (name: string) => string
+  preheaderCancelled: (name: string) => string
+  eyebrowBooked: string
+  eyebrowCancelled: string
+  titleBooked: string
+  titleCancelled: string
+  leadBooked: string
+  leadCancelled: string
+  sectionVisit: string
+  sectionVisitor: string
+  rowRoute: string
+  rowGalleries: string
+  rowDate: string
+  rowTime: string
+  rowVisitor: string
+  rowGuests: string
+  rowLanguage: string
+  rowEmail: string
+  rowPhone: string
+  rowNotes: string
+  rowReference: string
+  greetingLead: (gallery: string) => string
 }
 
 const locales: Record<Language, Strings> = {
   eu: {
-    subjectBooked: (r, d) => `[Irekiak] Erreserba berria: ${r} — ${d}`,
-    subjectCancelled: (r, d) => `[Irekiak] Erreserba bertan behera: ${r} — ${d}`,
-    greeting: g => `Kaixo ${g},`,
-    introBooked: 'Erreserba berri bat jaso duzue zure galerian egingo den bisita gidatu baterako.',
-    introCancelled: 'Bisita gidatu baterako erreserba bat bertan behera utzi da.',
-    details: 'Xehetasunak',
-    route: 'Ibilbidea',
-    galleriesInRoute: 'Ibilbideko galeriak',
-    dateLabel: 'Data',
-    time: 'Ordua',
-    visitor: 'Bisitaria',
-    guests: 'Parte-hartzaileak',
-    language: 'Hizkuntza',
-    contactEmail: 'Emaila',
-    contactPhone: 'Telefonoa',
-    specialNeeds: 'Behar bereziak',
-    bookingRef: 'Erreferentzia',
-    footer: 'Irekiak Gallery Weekend — DAGGE',
+    subjectBooked: (g, d, t) => `Irekiak · Erreserba berria · ${g} · ${d} ${t}`,
+    subjectCancelled: (g, d, t) => `Irekiak · Erreserba bertan behera · ${g} · ${d} ${t}`,
+    preheaderBooked: n => `${n}-k bisita bat erreserbatu du.`,
+    preheaderCancelled: n => `${n}-k bere erreserba bertan behera utzi du.`,
+    eyebrowBooked: 'Erreserba',
+    eyebrowCancelled: 'Bertan behera',
+    titleBooked: 'Bisitari berri bat',
+    titleCancelled: 'Erreserba bat bertan behera',
+    leadBooked: 'Bisita gidatu baten erreserba jaso duzue. Hona hemen xehetasunak.',
+    leadCancelled: 'Bisita gidatu baten erreserba bertan behera utzi da.',
+    sectionVisit: 'Bisita',
+    sectionVisitor: 'Bisitaria',
+    rowRoute: 'Ibilbidea',
+    rowGalleries: 'Galeriak',
+    rowDate: 'Data',
+    rowTime: 'Ordua',
+    rowVisitor: 'Izena',
+    rowGuests: 'Lagunkide',
+    rowLanguage: 'Hizkuntza',
+    rowEmail: 'Emaila',
+    rowPhone: 'Telefonoa',
+    rowNotes: 'Oharrak',
+    rowReference: 'Erref.',
+    greetingLead: g => `Kaixo ${g},`,
   },
   es: {
-    subjectBooked: (r, d) => `[Irekiak] Nueva reserva: ${r} — ${d}`,
-    subjectCancelled: (r, d) => `[Irekiak] Reserva cancelada: ${r} — ${d}`,
-    greeting: g => `Hola ${g},`,
-    introBooked: 'Se ha realizado una nueva reserva para una visita guiada que pasará por vuestra galería.',
-    introCancelled: 'Una reserva de visita guiada ha sido cancelada.',
-    details: 'Detalles',
-    route: 'Recorrido',
-    galleriesInRoute: 'Galerías del recorrido',
-    dateLabel: 'Fecha',
-    time: 'Hora',
-    visitor: 'Visitante',
-    guests: 'Participantes',
-    language: 'Idioma',
-    contactEmail: 'Email',
-    contactPhone: 'Teléfono',
-    specialNeeds: 'Necesidades especiales',
-    bookingRef: 'Referencia',
-    footer: 'Irekiak Gallery Weekend — DAGGE',
+    subjectBooked: (g, d, t) => `Irekiak · Nueva reserva · ${g} · ${d} ${t}`,
+    subjectCancelled: (g, d, t) => `Irekiak · Reserva cancelada · ${g} · ${d} ${t}`,
+    preheaderBooked: n => `${n} ha reservado una visita.`,
+    preheaderCancelled: n => `${n} ha cancelado su reserva.`,
+    eyebrowBooked: 'Reserva',
+    eyebrowCancelled: 'Cancelación',
+    titleBooked: 'Nuevo visitante',
+    titleCancelled: 'Reserva cancelada',
+    leadBooked: 'Se ha registrado una reserva para una visita guiada que pasará por su galería.',
+    leadCancelled: 'Una reserva de visita guiada ha sido cancelada.',
+    sectionVisit: 'La visita',
+    sectionVisitor: 'El visitante',
+    rowRoute: 'Recorrido',
+    rowGalleries: 'Galerías',
+    rowDate: 'Fecha',
+    rowTime: 'Hora',
+    rowVisitor: 'Nombre',
+    rowGuests: 'Personas',
+    rowLanguage: 'Idioma',
+    rowEmail: 'Email',
+    rowPhone: 'Teléfono',
+    rowNotes: 'Notas',
+    rowReference: 'Ref.',
+    greetingLead: g => `Estimada galería ${g},`,
   },
   fr: {
-    subjectBooked: (r, d) => `[Irekiak] Nouvelle réservation : ${r} — ${d}`,
-    subjectCancelled: (r, d) => `[Irekiak] Réservation annulée : ${r} — ${d}`,
-    greeting: g => `Bonjour ${g},`,
-    introBooked: 'Une nouvelle réservation vient d\'être enregistrée pour une visite guidée qui passera dans votre galerie.',
-    introCancelled: 'Une réservation de visite guidée a été annulée.',
-    details: 'Détails',
-    route: 'Parcours',
-    galleriesInRoute: 'Galeries du parcours',
-    dateLabel: 'Date',
-    time: 'Horaire',
-    visitor: 'Visiteur',
-    guests: 'Participants',
-    language: 'Langue',
-    contactEmail: 'Email',
-    contactPhone: 'Téléphone',
-    specialNeeds: 'Besoins spécifiques',
-    bookingRef: 'Référence',
-    footer: 'Irekiak Gallery Weekend — DAGGE',
+    subjectBooked: (g, d, t) => `Irekiak · Nouvelle réservation · ${g} · ${d} ${t}`,
+    subjectCancelled: (g, d, t) => `Irekiak · Réservation annulée · ${g} · ${d} ${t}`,
+    preheaderBooked: n => `${n} a réservé une visite.`,
+    preheaderCancelled: n => `${n} a annulé sa réservation.`,
+    eyebrowBooked: 'Réservation',
+    eyebrowCancelled: 'Annulation',
+    titleBooked: 'Nouveau visiteur',
+    titleCancelled: 'Réservation annulée',
+    leadBooked: 'Une réservation a été enregistrée pour une visite guidée qui passera dans votre galerie.',
+    leadCancelled: 'Une réservation de visite guidée a été annulée.',
+    sectionVisit: 'La visite',
+    sectionVisitor: 'Le visiteur',
+    rowRoute: 'Parcours',
+    rowGalleries: 'Galeries',
+    rowDate: 'Date',
+    rowTime: 'Horaire',
+    rowVisitor: 'Nom',
+    rowGuests: 'Personnes',
+    rowLanguage: 'Langue',
+    rowEmail: 'Email',
+    rowPhone: 'Téléphone',
+    rowNotes: 'Notes',
+    rowReference: 'Réf.',
+    greetingLead: g => `Bonjour ${g},`,
   },
   en: {
-    subjectBooked: (r, d) => `[Irekiak] New booking: ${r} — ${d}`,
-    subjectCancelled: (r, d) => `[Irekiak] Booking cancelled: ${r} — ${d}`,
-    greeting: g => `Hello ${g},`,
-    introBooked: 'A new booking has been made for a guided tour that will visit your gallery.',
-    introCancelled: 'A guided tour booking has been cancelled.',
-    details: 'Details',
-    route: 'Route',
-    galleriesInRoute: 'Galleries on this route',
-    dateLabel: 'Date',
-    time: 'Time',
-    visitor: 'Visitor',
-    guests: 'Guests',
-    language: 'Language',
-    contactEmail: 'Email',
-    contactPhone: 'Phone',
-    specialNeeds: 'Special needs',
-    bookingRef: 'Reference',
-    footer: 'Irekiak Gallery Weekend — DAGGE',
+    subjectBooked: (g, d, t) => `Irekiak · New booking · ${g} · ${d} ${t}`,
+    subjectCancelled: (g, d, t) => `Irekiak · Booking cancelled · ${g} · ${d} ${t}`,
+    preheaderBooked: n => `${n} has booked a visit.`,
+    preheaderCancelled: n => `${n} has cancelled their booking.`,
+    eyebrowBooked: 'Booking',
+    eyebrowCancelled: 'Cancellation',
+    titleBooked: 'New visitor',
+    titleCancelled: 'Booking cancelled',
+    leadBooked: 'A new booking has been registered for a guided tour visiting your gallery.',
+    leadCancelled: 'A guided tour booking has been cancelled.',
+    sectionVisit: 'The visit',
+    sectionVisitor: 'The visitor',
+    rowRoute: 'Route',
+    rowGalleries: 'Galleries',
+    rowDate: 'Date',
+    rowTime: 'Time',
+    rowVisitor: 'Name',
+    rowGuests: 'Guests',
+    rowLanguage: 'Language',
+    rowEmail: 'Email',
+    rowPhone: 'Phone',
+    rowNotes: 'Notes',
+    rowReference: 'Ref.',
+    greetingLead: g => `Dear ${g} team,`,
   },
 }
 
-function esc(v: string): string {
-  return v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
-}
+export function buildGalleryNotificationEmail(p: GalleryNotificationParams): {
+  subject: string
+  html: string
+  text: string
+} {
+  const s = locales[p.contactLanguage] ?? locales.en
+  const fullName = `${p.booking.firstName} ${p.booking.lastName}`.trim()
+  const isBooked = p.action === 'booked'
 
-function buildHtml(p: GalleryNotificationParams, s: Strings): string {
-  const intro = p.action === 'booked' ? s.introBooked : s.introCancelled
-  const fullName = `${p.booking.firstName} ${p.booking.lastName}`
-  const specialRow = p.booking.specialNeeds
-    ? `<tr><td style="padding:6px 0;color:rgba(255,255,255,0.7);">${esc(s.specialNeeds)}</td><td style="padding:6px 0;text-align:right;">${esc(p.booking.specialNeeds)}</td></tr>`
-    : ''
-  const phoneRow = p.booking.phone
-    ? `<tr><td style="padding:6px 0;color:rgba(255,255,255,0.7);">${esc(s.contactPhone)}</td><td style="padding:6px 0;text-align:right;"><a href="tel:${esc(p.booking.phone)}" style="color:#ffffff;">${esc(p.booking.phone)}</a></td></tr>`
-    : ''
-  const statusBadge = p.action === 'cancelled'
-    ? `<span style="display:inline-block;background:rgba(255,80,80,0.25);color:#ffd0d0;padding:2px 10px;border-radius:999px;font-size:11px;margin-left:8px;">${p.action.toUpperCase()}</span>`
-    : `<span style="display:inline-block;background:rgba(80,255,180,0.18);color:#b8ffd6;padding:2px 10px;border-radius:999px;font-size:11px;margin-left:8px;">${p.action.toUpperCase()}</span>`
+  const visitRows: DataRow[] = [
+    { label: s.rowRoute, value: `<strong style="font-weight:600;">${escapeHtml(p.route.name)}</strong>` },
+    { label: s.rowGalleries, value: p.route.galleries.map(g => escapeHtml(g)).join('<br/>') },
+    { label: s.rowDate, value: escapeHtml(p.slot.date) },
+    { label: s.rowTime, value: `${escapeHtml(p.slot.startTime)}&nbsp;—&nbsp;${escapeHtml(p.slot.endTime)}` },
+  ]
 
-  return `<!doctype html>
-<html lang="${esc(p.contactLanguage)}">
-  <body style="margin:0;padding:0;background-color:#001E33;font-family:Inter,Arial,sans-serif;color:#ffffff;">
-    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#001E33;padding:32px 0;">
-      <tr><td align="center">
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;background-color:#003153;border-radius:12px;padding:32px;">
-          <tr><td>
-            <h1 style="margin:0 0 8px 0;font-size:22px;color:#ffffff;">Irekiak Gallery Weekend ${statusBadge}</h1>
-            <p style="margin:0 0 24px 0;font-size:14px;color:rgba(255,255,255,0.7);">Donostia / San Sebastián — 29-31.05.2026</p>
-            <p style="margin:0 0 16px 0;font-size:16px;color:#ffffff;">${esc(s.greeting(p.galleryName))}</p>
-            <p style="margin:0 0 24px 0;font-size:15px;line-height:1.6;">${esc(intro)}</p>
+  const visitorRows: DataRow[] = [
+    { label: s.rowVisitor, value: `<strong style="font-weight:600;">${escapeHtml(fullName)}</strong>` },
+    { label: s.rowGuests, value: String(p.booking.numberOfPeople) },
+    { label: s.rowLanguage, value: escapeHtml(p.booking.language.toUpperCase()) },
+    {
+      label: s.rowEmail,
+      value: `<a href="mailto:${escapeHtml(p.booking.email)}" style="color:#F5F1E8;text-decoration:underline;">${escapeHtml(p.booking.email)}</a>`,
+    },
+  ]
+  if (p.booking.phone) {
+    visitorRows.push({
+      label: s.rowPhone,
+      value: `<a href="tel:${escapeHtml(p.booking.phone)}" style="color:#F5F1E8;text-decoration:underline;">${escapeHtml(p.booking.phone)}</a>`,
+    })
+  }
+  if (p.booking.specialNeeds) {
+    visitorRows.push({ label: s.rowNotes, value: escapeHtml(p.booking.specialNeeds) })
+  }
+  visitorRows.push({ label: s.rowReference, value: escapeHtml(p.booking.id), mono: true })
 
-            <h2 style="margin:24px 0 12px 0;font-size:16px;border-top:1px solid rgba(255,255,255,0.15);padding-top:16px;">${esc(s.details)}</h2>
-            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="font-size:14px;">
-              <tr><td style="padding:6px 0;color:rgba(255,255,255,0.7);">${esc(s.route)}</td><td style="padding:6px 0;text-align:right;"><strong>${esc(p.route.name)}</strong></td></tr>
-              <tr><td style="padding:6px 0;color:rgba(255,255,255,0.7);">${esc(s.galleriesInRoute)}</td><td style="padding:6px 0;text-align:right;">${esc(p.route.galleries.join(' · '))}</td></tr>
-              <tr><td style="padding:6px 0;color:rgba(255,255,255,0.7);">${esc(s.dateLabel)}</td><td style="padding:6px 0;text-align:right;">${esc(p.slot.date)}</td></tr>
-              <tr><td style="padding:6px 0;color:rgba(255,255,255,0.7);">${esc(s.time)}</td><td style="padding:6px 0;text-align:right;">${esc(p.slot.startTime)} — ${esc(p.slot.endTime)}</td></tr>
-              <tr><td style="padding:6px 0;color:rgba(255,255,255,0.7);">${esc(s.language)}</td><td style="padding:6px 0;text-align:right;">${esc(p.booking.language.toUpperCase())}</td></tr>
-            </table>
+  const eyebrow = isBooked ? s.eyebrowBooked : s.eyebrowCancelled
+  const title = isBooked ? s.titleBooked : s.titleCancelled
+  const lead = isBooked ? s.leadBooked : s.leadCancelled
 
-            <h2 style="margin:24px 0 12px 0;font-size:16px;border-top:1px solid rgba(255,255,255,0.15);padding-top:16px;">${esc(s.visitor)}</h2>
-            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="font-size:14px;">
-              <tr><td style="padding:6px 0;color:rgba(255,255,255,0.7);">${esc(s.visitor)}</td><td style="padding:6px 0;text-align:right;"><strong>${esc(fullName)}</strong></td></tr>
-              <tr><td style="padding:6px 0;color:rgba(255,255,255,0.7);">${esc(s.guests)}</td><td style="padding:6px 0;text-align:right;">${p.booking.numberOfPeople}</td></tr>
-              <tr><td style="padding:6px 0;color:rgba(255,255,255,0.7);">${esc(s.contactEmail)}</td><td style="padding:6px 0;text-align:right;"><a href="mailto:${esc(p.booking.email)}" style="color:#ffffff;">${esc(p.booking.email)}</a></td></tr>
-              ${phoneRow}
-              ${specialRow}
-              <tr><td style="padding:6px 0;color:rgba(255,255,255,0.7);">${esc(s.bookingRef)}</td><td style="padding:6px 0;text-align:right;font-family:'JetBrains Mono',monospace;font-size:11px;">${esc(p.booking.id)}</td></tr>
-            </table>
+  const subject = isBooked
+    ? s.subjectBooked(p.galleryName, p.slot.date, p.slot.startTime)
+    : s.subjectCancelled(p.galleryName, p.slot.date, p.slot.startTime)
 
-            <p style="margin:24px 0 0 0;font-size:12px;color:rgba(255,255,255,0.5);border-top:1px solid rgba(255,255,255,0.15);padding-top:16px;">${esc(s.footer)}</p>
-          </td></tr>
-        </table>
-      </td></tr>
-    </table>
-  </body>
-</html>`
+  const preheader = isBooked ? s.preheaderBooked(fullName) : s.preheaderCancelled(fullName)
+
+  const html = shell({
+    title,
+    preheader,
+    lang: p.contactLanguage,
+    body: [
+      header({}),
+      hero({ eyebrow, title, lead }),
+      paragraph({ text: s.greetingLead(p.galleryName), muted: true }),
+      dataTable({ title: s.sectionVisit, rows: visitRows }),
+      dataTable({ title: s.sectionVisitor, rows: visitorRows }),
+      footer({ locale: p.contactLanguage }),
+    ].join('\n'),
+  })
+
+  const textLines = [
+    title.toUpperCase(),
+    '',
+    lead,
+    '',
+    `${s.sectionVisit.toUpperCase()}`,
+    `${s.rowRoute}: ${p.route.name}`,
+    `${s.rowGalleries}: ${p.route.galleries.join(', ')}`,
+    `${s.rowDate}: ${p.slot.date}`,
+    `${s.rowTime}: ${p.slot.startTime} — ${p.slot.endTime}`,
+    '',
+    `${s.sectionVisitor.toUpperCase()}`,
+    `${s.rowVisitor}: ${fullName}`,
+    `${s.rowGuests}: ${p.booking.numberOfPeople}`,
+    `${s.rowLanguage}: ${p.booking.language.toUpperCase()}`,
+    `${s.rowEmail}: ${p.booking.email}`,
+    p.booking.phone ? `${s.rowPhone}: ${p.booking.phone}` : '',
+    p.booking.specialNeeds ? `${s.rowNotes}: ${p.booking.specialNeeds}` : '',
+    `${s.rowReference}: ${p.booking.id}`,
+    '',
+    '— Irekiak Gallery Weekend · Donostia / San Sebastián',
+  ].filter(Boolean).join('\n')
+
+  return { subject, html, text: textLines }
 }
 
 /**
@@ -203,17 +272,14 @@ export async function sendGalleryBookingNotification(params: GalleryNotification
   }
   try {
     const resend = new Resend(config.resendApiKey)
-    const strings = locales[params.contactLanguage] ?? locales.es
-    const subject = params.action === 'booked'
-      ? strings.subjectBooked(params.route.name, params.slot.date)
-      : strings.subjectCancelled(params.route.name, params.slot.date)
-    const html = buildHtml(params, strings)
+    const { subject, html, text } = buildGalleryNotificationEmail(params)
     await withEmailRetry(async () => {
       const { error } = await resend.emails.send({
         from: config.fromEmail,
         to: params.to,
         subject,
         html,
+        text,
       })
       if (error) throw new Error(`Resend: ${error.message ?? 'unknown'}`)
     }, {

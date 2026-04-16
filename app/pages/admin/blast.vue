@@ -23,6 +23,7 @@ const messageTab = ref<Lang>('fr')
 const sending = ref(false)
 const result = ref<{ ok: boolean, recipients: number, sent: number, failed: number } | null>(null)
 const errorMessage = ref<string | null>(null)
+const confirmOpen = ref(false)
 
 const frRequired = computed(() => subjectByLang.fr.trim().length > 0 && messageByLang.fr.trim().length > 0)
 
@@ -40,12 +41,17 @@ function buildPayloadDict(source: Record<Lang, string>): Record<Lang, string | u
   return payload
 }
 
-async function send() {
+function requestSend(): void {
   if (!frRequired.value) {
     errorMessage.value = subjectByLang.fr.trim().length === 0 ? t('blast.subjectMissingFr') : t('blast.messageMissingFr')
     return
   }
-  if (!confirm(t('blast.submitConfirmTitle'))) return
+  errorMessage.value = null
+  confirmOpen.value = true
+}
+
+async function send() {
+  confirmOpen.value = false
   sending.value = true
   errorMessage.value = null
   result.value = null
@@ -70,49 +76,105 @@ async function send() {
   }
   finally { sending.value = false }
 }
+
+interface ScopeOption {
+  value: 'all' | 'date' | 'slot'
+  eyebrow: string
+  label: string
+  hint: string
+}
+
+const scopeOptions = computed<ScopeOption[]>(() => [
+  { value: 'all', eyebrow: 'A · TOUS', label: t('blast.scopeAll'), hint: t('blast.scopeAllHint') },
+  { value: 'date', eyebrow: 'B · DATE', label: t('blast.scopeDate'), hint: t('blast.scopeDateHint') },
+  { value: 'slot', eyebrow: 'C · CRÉNEAU', label: t('blast.scopeSlot'), hint: t('blast.scopeSlotHint') },
+])
 </script>
 
 <template>
-  <div>
-    <AdminPageHeader :title="t('blast.title')" :subtitle="t('blast.subtitle')" />
+  <div class="relative">
+    <div class="absolute inset-x-0 -top-10 -bottom-10 editorial-grain pointer-events-none opacity-60" aria-hidden="true"></div>
 
-    <form class="max-w-2xl bg-edition-dark border border-white/10 rounded-sm p-6 space-y-5" @submit.prevent="send">
-      <div>
-        <label class="text-xs uppercase tracking-wider text-white/40 block mb-2">{{ t('blast.scopeLabel') }}</label>
-        <div class="flex gap-3 mb-3">
-          <label class="flex items-center gap-2 text-sm">
-            <input v-model="scopeType" type="radio" value="all" class="accent-white">
-            {{ t('blast.scopeAll') }}
-          </label>
-          <label class="flex items-center gap-2 text-sm">
-            <input v-model="scopeType" type="radio" value="date" class="accent-white">
-            {{ t('blast.scopeDate') }}
-          </label>
-          <label class="flex items-center gap-2 text-sm">
-            <input v-model="scopeType" type="radio" value="slot" class="accent-white">
-            {{ t('blast.scopeSlot') }}
+    <section class="relative mb-10 md:mb-12 editorial-in">
+      <div class="eyebrow mb-4">{{ t('blast.eyebrow') }}</div>
+      <h1 class="font-serif text-3xl md:text-4xl text-white" style="font-weight: 400; letter-spacing: -0.01em; line-height: 1.1;">
+        {{ t('blast.title') }}
+      </h1>
+      <p class="mt-2 text-sm text-white/55 italic font-serif">
+        {{ t('blast.heroSubtitle') }}
+      </p>
+      <div class="mt-6 h-px w-16 bg-[var(--color-accent-gold)] opacity-80"></div>
+    </section>
+
+    <form class="relative max-w-3xl space-y-10" @submit.prevent="requestSend">
+      <section class="editorial-in" style="animation-delay: 60ms;">
+        <div class="eyebrow mb-4">{{ t('blast.scopeTitle') }}</div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <label
+            v-for="opt in scopeOptions"
+            :key="opt.value"
+            class="group relative block cursor-pointer border rounded-sm px-4 py-4 transition-colors focus-within:border-gold"
+            :class="scopeType === opt.value
+              ? 'border-gold bg-gold-soft'
+              : 'border-white/10 hover:border-white/25 hover:bg-white/[0.02]'"
+          >
+            <input
+              v-model="scopeType"
+              type="radio"
+              :value="opt.value"
+              class="sr-only"
+            >
+            <div class="eyebrow mb-2" :class="scopeType === opt.value ? 'text-gold' : 'text-white/40'">
+              {{ opt.eyebrow }}
+            </div>
+            <div
+              class="font-serif text-lg mb-1"
+              :class="scopeType === opt.value ? 'text-white' : 'text-white/80'"
+              style="font-weight: 400; letter-spacing: -0.01em;"
+            >
+              {{ opt.label }}
+            </div>
+            <div class="text-xs italic font-serif text-white/45 leading-snug">
+              {{ opt.hint }}
+            </div>
           </label>
         </div>
-        <select v-if="scopeType === 'date'" v-model="scopeDate" class="bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-white text-sm">
-          <option value="2026-05-30">{{ t('blast.scopeDateOptionSat') }}</option>
-          <option value="2026-05-31">{{ t('blast.scopeDateOptionSun') }}</option>
-        </select>
-        <input v-if="scopeType === 'slot'" v-model="scopeSlotId" :placeholder="t('blast.scopeSlotPlaceholder')" class="bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-white text-sm w-full">
-      </div>
 
-      <div>
-        <span class="text-xs uppercase tracking-wider text-white/40 block mb-2">{{ t('blast.subjectLabel') }} *</span>
-        <div class="flex border-b border-white/10 mb-3">
+        <div v-if="scopeType === 'date'" class="mt-5">
+          <select
+            v-model="scopeDate"
+            class="w-full md:w-auto bg-transparent border border-white/15 rounded-sm px-3 py-2 text-white text-sm focus:outline-none focus:border-gold transition-colors"
+          >
+            <option value="2026-05-30">{{ t('blast.scopeDateOptionSat') }}</option>
+            <option value="2026-05-31">{{ t('blast.scopeDateOptionSun') }}</option>
+          </select>
+        </div>
+        <div v-if="scopeType === 'slot'" class="mt-5">
+          <input
+            v-model="scopeSlotId"
+            :placeholder="t('blast.scopeSlotPlaceholder')"
+            class="w-full bg-transparent border border-white/15 rounded-sm px-3 py-2 text-white text-sm placeholder:italic placeholder:font-serif placeholder:text-white/30 focus:outline-none focus:border-gold transition-colors"
+          >
+        </div>
+      </section>
+
+      <section class="editorial-in" style="animation-delay: 120ms;">
+        <div class="eyebrow mb-4">{{ t('blast.subjectTitle') }} <span class="text-gold ml-1">*</span></div>
+        <div class="flex border-b border-white/10 mb-4">
           <button
             v-for="l in langs"
             :key="`subject-tab-${l}`"
             type="button"
-            class="px-4 py-2 text-xs font-mono uppercase tracking-wider border-b-2 -mb-px transition-colors hover:text-white hover:bg-white/5"
-            :class="subjectTab === l ? 'border-white text-white' : 'border-transparent text-white/50'"
+            class="px-4 py-2 text-xs font-mono uppercase tracking-[0.18em] border-b-2 -mb-px transition-colors focus-gold"
+            :class="subjectTab === l
+              ? 'border-[var(--color-accent-gold)] text-gold'
+              : 'border-transparent text-white/40 hover:text-white'"
             @click="subjectTab = l"
           >
             {{ langLabels[l] }}
-            <span class="ml-1 text-[10px] text-white/40 normal-case">({{ tabState(subjectByLang[l], l) }})</span>
+            <span class="ml-1 text-[10px] italic font-serif normal-case tracking-normal text-white/40">
+              ({{ tabState(subjectByLang[l], l) }})
+            </span>
           </button>
         </div>
         <input
@@ -123,23 +185,27 @@ async function send() {
           type="text"
           maxlength="200"
           :required="l === 'fr'"
-          class="w-full bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-white"
+          class="w-full bg-transparent border border-white/15 rounded-sm px-3 py-3 text-white placeholder:italic placeholder:font-serif placeholder:text-white/30 focus:outline-none focus:border-gold transition-colors"
         >
-      </div>
+      </section>
 
-      <div>
-        <span class="text-xs uppercase tracking-wider text-white/40 block mb-2">{{ t('blast.messageLabel') }} *</span>
-        <div class="flex border-b border-white/10 mb-3">
+      <section class="editorial-in" style="animation-delay: 180ms;">
+        <div class="eyebrow mb-4">{{ t('blast.messageTitle') }} <span class="text-gold ml-1">*</span></div>
+        <div class="flex border-b border-white/10 mb-4">
           <button
             v-for="l in langs"
             :key="`message-tab-${l}`"
             type="button"
-            class="px-4 py-2 text-xs font-mono uppercase tracking-wider border-b-2 -mb-px transition-colors hover:text-white hover:bg-white/5"
-            :class="messageTab === l ? 'border-white text-white' : 'border-transparent text-white/50'"
+            class="px-4 py-2 text-xs font-mono uppercase tracking-[0.18em] border-b-2 -mb-px transition-colors focus-gold"
+            :class="messageTab === l
+              ? 'border-[var(--color-accent-gold)] text-gold'
+              : 'border-transparent text-white/40 hover:text-white'"
             @click="messageTab = l"
           >
             {{ langLabels[l] }}
-            <span class="ml-1 text-[10px] text-white/40 normal-case">({{ tabState(messageByLang[l], l) }})</span>
+            <span class="ml-1 text-[10px] italic font-serif normal-case tracking-normal text-white/40">
+              ({{ tabState(messageByLang[l], l) }})
+            </span>
           </button>
         </div>
         <textarea
@@ -147,26 +213,82 @@ async function send() {
           v-show="messageTab === l"
           :key="`message-textarea-${l}`"
           v-model="messageByLang[l]"
-          rows="10"
+          rows="6"
           maxlength="5000"
           :required="l === 'fr'"
           :placeholder="l === 'fr' ? t('blast.messagePlaceholder') : ''"
-          class="w-full bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-white font-mono text-sm"
+          class="w-full bg-transparent border border-white/15 rounded-sm px-3 py-3 text-white font-serif text-[15px] leading-relaxed placeholder:italic placeholder:font-serif placeholder:text-white/30 focus:outline-none focus:border-gold transition-colors resize-y"
         />
-        <p class="text-xs text-white/40 mt-2">{{ t('blast.languageTabHint') }}</p>
-        <p class="text-xs text-white/40 mt-1">{{ t('blast.formatHint') }}</p>
+        <p class="mt-3 text-sm italic font-serif text-white/40 flex items-start gap-2">
+          <span class="text-gold shrink-0 mt-0.5" aria-hidden="true">◆</span>
+          <span>{{ t('blast.languageTabHint') }}</span>
+        </p>
+        <p class="mt-2 text-sm italic font-serif text-white/40 flex items-start gap-2">
+          <span class="text-gold shrink-0 mt-0.5" aria-hidden="true">◆</span>
+          <span>{{ t('blast.formatHint') }}</span>
+        </p>
+      </section>
+
+      <div v-if="errorMessage || result" class="editorial-in">
+        <p v-if="errorMessage" class="text-sm italic font-serif text-red-300">{{ errorMessage }}</p>
+        <p v-if="result" class="text-sm italic font-serif text-emerald-300">
+          {{ t('blast.successMessage', { sent: result.sent, failed: result.failed }) }}
+        </p>
       </div>
 
-      <p v-if="errorMessage" class="text-sm text-red-300">{{ errorMessage }}</p>
-      <div v-if="result" class="bg-emerald-500/10 border border-emerald-500/30 rounded-sm p-4 text-sm">
-        {{ t('blast.successMessage', { sent: result.sent, failed: result.failed }) }}
-      </div>
-
-      <div class="flex gap-3 justify-end">
-        <AdminBaseButton type="submit" :loading="sending" :disabled="!frRequired">
+      <div class="flex justify-end editorial-in" style="animation-delay: 240ms;">
+        <button
+          type="submit"
+          :disabled="!frRequired || sending"
+          class="inline-flex items-center gap-2 px-8 py-3 bg-[var(--color-accent-gold)] text-[var(--color-edition)] font-medium text-sm uppercase tracking-[0.18em] rounded-sm hover:bg-[var(--color-accent-gold)]/90 disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus-gold"
+        >
+          <span
+            v-if="sending"
+            class="inline-block w-4 h-4 border border-current border-t-transparent rounded-full animate-spin"
+            aria-hidden="true"
+          />
           {{ t('blast.submitSend') }}
-        </AdminBaseButton>
+        </button>
       </div>
     </form>
+
+    <Transition name="fade">
+      <div
+        v-if="confirmOpen"
+        class="fixed inset-0 z-[1000] flex items-center justify-center bg-black/70 backdrop-blur-sm px-6"
+        @click.self="confirmOpen = false"
+      >
+        <div class="max-w-md w-full bg-[var(--color-edition)] border border-white/15 rounded-sm p-8 editorial-in">
+          <div class="eyebrow mb-3">{{ t('blast.eyebrow') }}</div>
+          <h2 class="font-serif text-2xl text-white mb-2" style="font-weight: 400; letter-spacing: -0.01em;">
+            {{ t('blast.submitConfirmTitle') }}
+          </h2>
+          <p class="text-sm italic font-serif text-white/60 mb-8">
+            {{ t('blast.submitConfirmDesc', { count: '…' }) }}
+          </p>
+          <div class="flex justify-end gap-3">
+            <button
+              type="button"
+              class="px-5 py-2.5 text-sm text-white/60 hover:text-white uppercase tracking-[0.18em] font-mono transition-colors focus-gold"
+              @click="confirmOpen = false"
+            >
+              {{ t('blast.submitConfirmNo') }}
+            </button>
+            <button
+              type="button"
+              class="px-6 py-2.5 bg-[var(--color-accent-gold)] text-[var(--color-edition)] font-medium text-sm uppercase tracking-[0.18em] rounded-sm hover:bg-[var(--color-accent-gold)]/90 transition-colors focus-gold"
+              @click="send"
+            >
+              {{ t('blast.submitConfirmYes') }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
+
+<style scoped>
+.fade-enter-active, .fade-leave-active { transition: opacity 200ms ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+</style>

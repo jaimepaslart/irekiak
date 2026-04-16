@@ -19,7 +19,7 @@ interface AuditPayload {
 definePageMeta({ layout: 'admin', i18n: false })
 useSeoMeta({ title: 'Admin · Audit log', robots: 'noindex, nofollow' })
 
-const { t } = useAdminT()
+const { t, locale } = useAdminT()
 const token = inject<Ref<string>>('adminToken')!
 const entries = ref<AuditEntry[]>([])
 const total = ref(0)
@@ -39,6 +39,26 @@ const filtered = computed(() => entries.value.filter((e) => {
 
 const actors = computed(() => Array.from(new Set(entries.value.map(e => e.actor))).sort())
 const actions = computed(() => Array.from(new Set(entries.value.map(e => e.action))).sort())
+
+const actorChipOptions = computed(() => {
+  const all = { value: 'all', label: t('audit.filterActor'), count: entries.value.length }
+  const rest = actors.value.map(a => ({
+    value: a,
+    label: a,
+    count: entries.value.filter(e => e.actor === a).length,
+  }))
+  return [all, ...rest]
+})
+
+const actionChipOptions = computed(() => {
+  const all = { value: 'all', label: t('audit.filterAction'), count: entries.value.length }
+  const rest = actions.value.map(a => ({
+    value: a,
+    label: humanizeAction(a),
+    count: entries.value.filter(e => e.action === a).length,
+  }))
+  return [all, ...rest]
+})
 
 async function load() {
   loading.value = true
@@ -61,14 +81,6 @@ onMounted(() => { void load() })
 watch(page, () => { void load() })
 
 const totalPages = computed(() => Math.max(1, Math.ceil(total.value / pageSize)))
-
-function actionColor(a: string): string {
-  if (a.includes('cancel')) return 'text-red-300 bg-red-500/10 border-red-500/30'
-  if (a.includes('create')) return 'text-emerald-300 bg-emerald-500/10 border-emerald-500/30'
-  if (a.includes('email.failed') || a.includes('bounced') || a.includes('complained')) return 'text-orange-300 bg-orange-500/10 border-orange-500/30'
-  if (a.includes('purge')) return 'text-purple-300 bg-purple-500/10 border-purple-500/30'
-  return 'text-white/70 bg-white/5 border-white/15'
-}
 
 /**
  * parseMetadata — safe JSON parse: accepts null, object, or string.
@@ -159,74 +171,181 @@ function humanizeAction(action: string): string {
   const translated = t(key)
   return translated === key ? action : translated
 }
+
+function actionTone(a: string): 'emerald' | 'red' | 'orange' | 'gold' | 'muted' | 'blue' {
+  if (a.includes('cancel')) return 'red'
+  if (a.includes('create')) return 'emerald'
+  if (a.includes('email.failed') || a.includes('bounced') || a.includes('complained')) return 'orange'
+  if (a.includes('opened') || a.includes('clicked')) return 'blue'
+  if (a.includes('purge') || a.includes('blast')) return 'gold'
+  return 'muted'
+}
+
+function toneClass(tone: ReturnType<typeof actionTone>): string {
+  switch (tone) {
+    case 'emerald': return 'text-emerald-300'
+    case 'red': return 'text-red-300'
+    case 'orange': return 'text-orange-300'
+    case 'blue': return 'text-sky-300'
+    case 'gold': return 'text-gold'
+    default: return 'text-white/70'
+  }
+}
+
+function toneDot(tone: ReturnType<typeof actionTone>): string {
+  switch (tone) {
+    case 'emerald': return 'bg-emerald-400/70'
+    case 'red': return 'bg-red-400/70'
+    case 'orange': return 'bg-orange-400/70'
+    case 'blue': return 'bg-sky-400/70'
+    case 'gold': return 'bg-[var(--color-accent-gold)]'
+    default: return 'bg-white/30'
+  }
+}
+
+const dtFormatter = computed(() => {
+  const loc = locale.value === 'es' ? 'es-ES' : 'fr-FR'
+  return new Intl.DateTimeFormat(loc, { day: 'numeric', month: 'long' })
+})
+const timeFormatter = computed(() => {
+  const loc = locale.value === 'es' ? 'es-ES' : 'fr-FR'
+  return new Intl.DateTimeFormat(loc, { hour: '2-digit', minute: '2-digit' })
+})
+
+function formatTimestamp(iso: string): { date: string, time: string } {
+  const ts = Date.parse(iso)
+  if (!Number.isFinite(ts)) return { date: iso, time: '' }
+  const d = new Date(ts)
+  return { date: dtFormatter.value.format(d), time: timeFormatter.value.format(d) }
+}
 </script>
 
 <template>
-  <div>
-    <AdminPageHeader :title="t('audit.title')" :subtitle="t('audit.subtitle')" />
-    <p v-if="errorMessage" class="text-sm text-red-300 mb-6">{{ errorMessage }}</p>
+  <div class="relative">
+    <div class="absolute inset-x-0 -top-10 -bottom-10 editorial-grain pointer-events-none opacity-60" aria-hidden="true"></div>
 
-    <div class="flex flex-wrap gap-3 mb-6">
-      <select v-model="actorFilter" class="bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-sm text-white">
-        <option value="all">{{ t('audit.filterActor') }}</option>
-        <option v-for="a in actors" :key="a" :value="a">{{ a }}</option>
-      </select>
-      <select v-model="actionFilter" class="bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-sm text-white">
-        <option value="all">{{ t('audit.filterAction') }}</option>
-        <option v-for="a in actions" :key="a" :value="a">{{ humanizeAction(a) }}</option>
-      </select>
-      <p class="text-xs text-white/40 font-mono self-center">{{ filtered.length }} / {{ entries.length }}</p>
-    </div>
+    <section class="relative mb-10 md:mb-12 editorial-in">
+      <div class="eyebrow mb-4">{{ t('audit.eyebrow') }}</div>
+      <h1 class="font-serif text-3xl md:text-4xl text-white" style="font-weight: 400; letter-spacing: -0.01em; line-height: 1.1;">
+        {{ t('audit.title') }}
+      </h1>
+      <p class="mt-2 text-sm text-white/55 italic font-serif">
+        {{ t('audit.heroSubtitle') }}
+      </p>
+      <div class="mt-6 h-px w-16 bg-[var(--color-accent-gold)] opacity-80"></div>
+    </section>
 
-    <div class="bg-edition-dark border border-white/10 rounded-sm overflow-hidden">
-      <div class="flex items-center justify-between px-4 py-3 border-b border-white/10 text-xs text-white/50 font-mono">
-        <span>{{ t('audit.pagination', { count: entries.length, page, totalPages, total }) }}</span>
-        <div class="flex items-center gap-2">
-          <AdminBaseButton variant="secondary" :disabled="page <= 1" @click="page--">←</AdminBaseButton>
-          <AdminBaseButton variant="secondary" :disabled="page >= totalPages" @click="page++">→</AdminBaseButton>
+    <p v-if="errorMessage" class="text-sm text-red-300 italic font-serif mb-6">{{ errorMessage }}</p>
+
+    <section class="relative mb-10 editorial-in" style="animation-delay: 60ms;">
+      <div class="eyebrow mb-3">{{ t('audit.filtersTitle') }}</div>
+      <div class="flex flex-wrap gap-4">
+        <AdminFilterChips v-model="actorFilter" :options="actorChipOptions" />
+        <AdminFilterChips v-model="actionFilter" :options="actionChipOptions" />
+      </div>
+    </section>
+
+    <section class="relative editorial-in" style="animation-delay: 120ms;">
+      <div v-if="loading && !loaded" class="py-4">
+        <AdminSkeleton variant="row" :count="8" />
+      </div>
+
+      <template v-else-if="filtered.length > 0">
+        <div class="hidden md:grid grid-cols-[180px_120px_1fr_200px] gap-4 px-2 pb-3 border-b border-white/10">
+          <div class="eyebrow text-white/40">{{ t('audit.columnWhen') }}</div>
+          <div class="eyebrow text-white/40">{{ t('audit.columnActor') }}</div>
+          <div class="eyebrow text-white/40">{{ t('audit.columnAction') }}</div>
+          <div class="eyebrow text-white/40">{{ t('audit.columnTarget') }}</div>
+        </div>
+
+        <ul class="divide-y divide-white/[0.05]">
+          <li
+            v-for="(e, i) in filtered"
+            :key="e.id"
+            class="grid grid-cols-1 md:grid-cols-[180px_120px_1fr_200px] gap-2 md:gap-4 px-2 py-4 hover:bg-white/[0.02] transition-colors editorial-in"
+            :style="{ animationDelay: `${Math.min(i * 24, 400)}ms` }"
+          >
+            <div class="flex items-baseline gap-2 md:block">
+              <span class="font-serif italic text-sm text-white/75">
+                {{ formatTimestamp(e.timestamp).date }}
+              </span>
+              <span class="hidden md:inline text-white/20 mx-1">·</span>
+              <span class="font-serif italic text-sm text-white/50 tabular-nums">
+                {{ formatTimestamp(e.timestamp).time }}
+              </span>
+            </div>
+
+            <div>
+              <span class="inline-block px-2 py-0.5 border border-white/15 text-[10px] text-white/70 font-mono uppercase tracking-[0.18em] rounded-sm">
+                {{ e.actor }}
+              </span>
+            </div>
+
+            <div class="min-w-0">
+              <div class="flex items-center gap-2 mb-1">
+                <span
+                  class="inline-block w-1.5 h-1.5 rounded-full shrink-0"
+                  :class="toneDot(actionTone(e.action))"
+                  aria-hidden="true"
+                />
+                <span
+                  class="font-serif text-base"
+                  :class="toneClass(actionTone(e.action))"
+                  :title="e.action"
+                >
+                  {{ humanizeAction(e.action) }}
+                </span>
+              </div>
+              <p
+                v-if="humanize(e.action, parseMetadata(e.metadata))"
+                class="font-serif italic text-sm text-white/45 pl-4"
+              >
+                {{ humanize(e.action, parseMetadata(e.metadata)) }}
+              </p>
+            </div>
+
+            <div class="font-mono text-xs text-white/40 tabular-nums self-start">
+              <span v-if="e.targetType">{{ e.targetType }}/</span>
+              <span v-if="e.targetId">{{ e.targetId.slice(0, 8) }}</span>
+            </div>
+          </li>
+        </ul>
+      </template>
+
+      <AdminEmptyState v-else :title="t('audit.emptyState')" :description="t('audit.emptyStateDesc')">
+        <template #action>
+          <AdminBaseButton variant="primary" as="nuxt-link" to="/admin">
+            {{ t('audit.emptyStateCta') }}
+          </AdminBaseButton>
+        </template>
+      </AdminEmptyState>
+
+      <div v-if="filtered.length > 0" class="mt-10 flex items-center justify-between gap-4">
+        <span class="text-xs text-white/40 font-mono uppercase tracking-[0.18em] tabular-nums">
+          {{ filtered.length }} / {{ entries.length }}
+        </span>
+        <div class="flex items-center gap-4">
+          <button
+            type="button"
+            class="arrow-nudge-parent text-gold text-sm uppercase tracking-[0.18em] font-mono disabled:opacity-30 disabled:cursor-not-allowed transition-colors focus-gold"
+            :disabled="page <= 1"
+            @click="page--"
+          >
+            <span class="arrow-nudge inline-block mr-1">←</span>
+          </button>
+          <span class="font-serif italic text-sm text-white/60 tabular-nums">
+            {{ t('audit.pageLabel', { page, totalPages }) }}
+          </span>
+          <button
+            type="button"
+            class="arrow-nudge-parent text-gold text-sm uppercase tracking-[0.18em] font-mono disabled:opacity-30 disabled:cursor-not-allowed transition-colors focus-gold"
+            :disabled="page >= totalPages"
+            @click="page++"
+          >
+            <span class="arrow-nudge inline-block ml-1">→</span>
+          </button>
         </div>
       </div>
-      <div class="overflow-x-auto">
-        <div v-if="loading && !loaded">
-          <AdminSkeleton variant="row" :count="8" />
-        </div>
-        <table v-else-if="filtered.length > 0" class="w-full text-sm">
-          <thead class="bg-white/5">
-            <tr class="text-left text-xs uppercase tracking-wider text-white/50 font-mono">
-              <th class="px-4 py-3">{{ t('audit.columnWhen') }}</th>
-              <th class="px-4 py-3">{{ t('audit.columnActor') }}</th>
-              <th class="px-4 py-3">{{ t('audit.columnAction') }}</th>
-              <th class="px-4 py-3">{{ t('audit.columnTarget') }}</th>
-              <th class="px-4 py-3">{{ t('audit.columnMetadata') }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="e in filtered" :key="e.id" class="border-t border-white/5 align-top">
-              <td class="px-4 py-3 font-mono text-xs text-white/60 whitespace-nowrap">{{ e.timestamp }}</td>
-              <td class="px-4 py-3 text-xs">
-                <span class="inline-block px-2 py-0.5 rounded-full border border-white/20 text-white/80 font-mono uppercase text-[10px]">{{ e.actor }}</span>
-              </td>
-              <td class="px-4 py-3">
-                <span class="inline-block text-xs px-2 py-0.5 rounded-full border" :class="actionColor(e.action)" :title="e.action">{{ humanizeAction(e.action) }}</span>
-              </td>
-              <td class="px-4 py-3 text-xs text-white/70 font-mono">
-                <span v-if="e.targetType">{{ e.targetType }}/</span>
-                <span v-if="e.targetId">{{ e.targetId.slice(0, 8) }}</span>
-              </td>
-              <td class="px-4 py-3 text-xs max-w-[400px]">
-                <span class="text-white/70">{{ humanize(e.action, parseMetadata(e.metadata)) }}</span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <AdminEmptyState v-else icon="📋" :title="t('audit.emptyState')" :description="t('audit.emptyStateDesc')">
-          <template #action>
-            <AdminBaseButton variant="primary" as="nuxt-link" to="/admin">
-              {{ t('audit.emptyStateCta') }}
-            </AdminBaseButton>
-          </template>
-        </AdminEmptyState>
-      </div>
-    </div>
+    </section>
   </div>
 </template>

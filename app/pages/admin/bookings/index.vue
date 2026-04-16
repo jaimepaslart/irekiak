@@ -39,14 +39,8 @@ interface AvailabilitySlot {
 definePageMeta({ layout: 'admin', i18n: false })
 
 const { t } = useAdminT()
-const { dates, year, startDate, endDate } = useEdition()
-
-const dateRangeLabel = computed(() => {
-  const startDay = startDate.value.slice(8, 10)
-  const endDay = endDate.value.slice(8, 10)
-  const month = startDate.value.slice(5, 7)
-  return `${startDay}-${endDay}.${month}`
-})
+const { dates, year } = useEdition()
+const router = useRouter()
 
 useSeoMeta({ title: () => t('bookings.seoTitleList'), robots: 'noindex, nofollow' })
 
@@ -88,6 +82,17 @@ const pagedBookings = computed(() => {
 })
 
 const editionDates = computed(() => dates.value)
+
+const confirmedCount = computed(() =>
+  rawBookings.value.filter(b => b.status === 'confirmed').length,
+)
+
+const heroSubtitle = computed(() => {
+  const count = confirmedCount.value
+  if (count === 0) return t('bookings.heroSubtitleEmpty', { year: year.value })
+  if (count === 1) return t('bookings.heroSubtitleOne', { count, year: year.value })
+  return t('bookings.heroSubtitleMany', { count, year: year.value })
+})
 
 function formatDateChip(iso: string): string {
   const day = iso.slice(8, 10)
@@ -175,6 +180,10 @@ function statusBadgeLabel(s: 'confirmed' | 'cancelled' | 'waitlist'): string {
   return t('bookings.statusWaitlist')
 }
 
+function goToDetail(id: string): void {
+  void router.push(`/admin/bookings/${id}`)
+}
+
 const newOpen = ref(false)
 const newSubmitting = ref(false)
 const newError = ref<string | null>(null)
@@ -259,88 +268,130 @@ async function submitNew() {
 </script>
 
 <template>
-  <div>
-    <AdminPageHeader
-      :title="t('bookings.title')"
-      :subtitle="t('bookings.editionSubtitle', { year, range: dateRangeLabel })"
-    >
-      <template #actions>
-        <AdminBaseButton variant="secondary" type="button" @click="loadAll">
-          {{ t('bookings.refresh') }}
-        </AdminBaseButton>
-        <AdminBaseButton variant="secondary" type="button" @click="exportCsv">
-          {{ t('bookings.csvExport') }}
-        </AdminBaseButton>
-        <AdminBaseButton variant="primary" type="button" @click="openNewDrawer">
-          {{ t('bookings.new') }}
-        </AdminBaseButton>
-      </template>
-    </AdminPageHeader>
+  <div class="relative max-w-5xl mx-auto">
+    <div class="absolute inset-x-0 -top-10 -bottom-10 editorial-grain pointer-events-none opacity-60" aria-hidden="true"></div>
+
+    <section class="relative mb-10 md:mb-14 editorial-in">
+      <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+        <div class="min-w-0">
+          <div class="eyebrow mb-4">
+            {{ t('bookings.heroEyebrow', { year }) }}
+          </div>
+          <h1 class="font-serif text-4xl md:text-5xl text-white" style="font-weight: 400; letter-spacing: -0.01em; line-height: 1.05;">
+            {{ t('bookings.title') }}
+          </h1>
+          <p class="mt-3 text-sm text-white/55">
+            <span class="italic font-serif">{{ heroSubtitle }}</span>
+          </p>
+          <div class="mt-6 h-px w-24 bg-[var(--color-accent-gold)] opacity-50"></div>
+        </div>
+        <div class="flex flex-wrap items-center gap-2 shrink-0">
+          <AdminBaseButton variant="secondary" type="button" @click="loadAll">
+            {{ t('bookings.refresh') }}
+          </AdminBaseButton>
+          <AdminBaseButton variant="secondary" type="button" @click="exportCsv">
+            {{ t('bookings.csvExport') }}
+          </AdminBaseButton>
+          <AdminBaseButton variant="primary" type="button" @click="openNewDrawer">
+            {{ t('bookings.new') }}
+          </AdminBaseButton>
+        </div>
+      </div>
+    </section>
 
     <p v-if="errorMessage" class="text-sm text-red-300 mb-6">{{ errorMessage }}</p>
     <p v-if="newSuccess" class="text-sm text-emerald-300 mb-6">{{ t('bookings.createSuccess') }} ({{ newSuccess }})</p>
 
-    <div v-if="loading && !stats" class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+    <div v-if="loading && !stats" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
       <AdminSkeleton variant="stat" :count="3" />
     </div>
 
-    <div v-if="stats" class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
-      <AdminStatCard
-        :label="t('bookings.statsBookings')"
+    <div v-if="stats" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+      <AdminMiniStatCard
+        :eyebrow="t('bookings.statsBookings')"
         :value="stats.totals.bookingsCount"
         :subtitle="t('bookings.statsCancelled', { count: stats.totals.cancelledCount })"
+        :delay="80"
       />
-      <AdminStatCard
-        :label="t('bookings.statsParticipants')"
+      <AdminMiniStatCard
+        :eyebrow="t('bookings.statsParticipants')"
         :value="stats.totals.guests"
         :subtitle="t('bookings.statsCapacityOf', { capacity: stats.totals.capacity })"
+        :delay="140"
       />
-      <AdminStatCard
-        :label="t('bookings.statsFillRate')"
+      <AdminMiniStatCard
+        :eyebrow="t('bookings.statsFillRate')"
         :value="`${stats.totals.avgFillRate}%`"
+        :delay="200"
       />
     </div>
 
-    <div class="mb-6">
+    <div class="relative mb-8 max-w-2xl mx-auto">
       <input
         v-model="searchQuery"
         type="search"
         :placeholder="t('bookings.searchPlaceholder')"
-        class="w-full max-w-md mx-auto block bg-white/5 border border-white/15 rounded-sm text-base px-5 py-3 text-white placeholder-white/40 focus:outline-none focus:border-white/40 transition-colors"
+        class="w-full block bg-transparent border-b border-white/15 rounded-none text-base px-0 py-3 text-white placeholder:italic placeholder:font-serif placeholder:text-white/35 focus:outline-none focus:border-[var(--color-accent-gold)] transition-colors"
       >
     </div>
 
-    <div class="space-y-4 mb-6">
-      <AdminFilterChips
-        v-model="statusFilter"
-        :options="statusChipOptions"
-        :label="t('bookings.filterByStatus')"
-      />
-      <AdminFilterChips
-        v-model="dateFilter"
-        :options="dateChipOptions"
-        :label="t('bookings.filterByDate')"
-      />
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+      <div>
+        <p class="eyebrow mb-3">{{ t('bookings.filterByStatus') }}</p>
+        <div class="flex flex-wrap gap-2">
+          <button
+            v-for="option in statusChipOptions"
+            :key="option.value"
+            type="button"
+            :aria-pressed="statusFilter === option.value"
+            class="px-3 py-1.5 text-xs font-mono uppercase tracking-[0.14em] rounded-full border transition-colors"
+            :class="statusFilter === option.value
+              ? 'bg-gold-soft text-gold border-gold-soft'
+              : 'border-white/10 text-white/50 hover:text-white hover:border-white/25'"
+            @click="statusFilter = option.value as StatusFilter"
+          >
+            {{ option.label }}<span v-if="option.count !== undefined" class="opacity-50 ml-1.5 tabular-nums">{{ option.count }}</span>
+          </button>
+        </div>
+      </div>
+      <div>
+        <p class="eyebrow mb-3">{{ t('bookings.filterByDate') }}</p>
+        <div class="flex flex-wrap gap-2">
+          <button
+            v-for="option in dateChipOptions"
+            :key="option.value"
+            type="button"
+            :aria-pressed="dateFilter === option.value"
+            class="px-3 py-1.5 text-xs font-mono uppercase tracking-[0.14em] rounded-full border transition-colors"
+            :class="dateFilter === option.value
+              ? 'bg-gold-soft text-gold border-gold-soft'
+              : 'border-white/10 text-white/50 hover:text-white hover:border-white/25'"
+            @click="dateFilter = option.value"
+          >
+            {{ option.label }}<span v-if="option.count !== undefined" class="opacity-50 ml-1.5 tabular-nums">{{ option.count }}</span>
+          </button>
+        </div>
+      </div>
     </div>
 
-    <div class="bg-edition-dark border border-white/10 rounded-sm overflow-hidden">
+    <div class="relative border border-white/10 bg-[var(--color-edition-dark)] rounded-sm overflow-hidden editorial-in" :style="{ animationDelay: '260ms' }">
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
-          <thead class="bg-white/5">
-            <tr class="text-left text-xs uppercase tracking-wider text-white/50 font-mono">
-              <th class="px-4 py-3">{{ t('bookings.columnVisitor') }}</th>
-              <th class="px-4 py-3">{{ t('bookings.columnSlot') }}</th>
-              <th class="px-4 py-3">{{ t('bookings.columnStatus') }}</th>
-              <th class="px-4 py-3 text-right">{{ t('bookings.columnParticipants') }}</th>
+          <thead>
+            <tr class="text-left border-b border-white/10">
+              <th class="px-5 py-4 eyebrow font-normal">{{ t('bookings.columnVisitor') }}</th>
+              <th class="px-5 py-4 eyebrow font-normal">{{ t('bookings.columnSlot') }}</th>
+              <th class="px-5 py-4 eyebrow font-normal">{{ t('bookings.columnStatus') }}</th>
+              <th class="px-5 py-4 eyebrow font-normal text-right">{{ t('bookings.columnParticipants') }}</th>
             </tr>
           </thead>
           <tbody>
             <template v-if="loading && rawBookings.length === 0">
-              <tr v-for="n in 8" :key="`skeleton-${n}`" class="border-t border-white/5 animate-pulse">
-                <td class="px-4 py-3"><div class="h-3 w-32 bg-white/10 rounded" /></td>
-                <td class="px-4 py-3"><div class="h-3 w-40 bg-white/10 rounded" /></td>
-                <td class="px-4 py-3"><div class="h-5 w-20 bg-white/10 rounded-full" /></td>
-                <td class="px-4 py-3"><div class="h-3 w-6 bg-white/10 rounded ml-auto" /></td>
+              <tr v-for="n in 8" :key="`skeleton-${n}`" class="border-t border-white/[0.05] animate-pulse">
+                <td class="px-5 py-4"><div class="h-3 w-40 bg-white/10 rounded" /></td>
+                <td class="px-5 py-4"><div class="h-3 w-44 bg-white/10 rounded" /></td>
+                <td class="px-5 py-4"><div class="h-5 w-24 bg-white/10 rounded-full" /></td>
+                <td class="px-5 py-4"><div class="h-3 w-6 bg-white/10 rounded ml-auto" /></td>
               </tr>
             </template>
             <tr v-else-if="filteredBookings.length === 0">
@@ -354,32 +405,44 @@ async function submitNew() {
                 </AdminEmptyState>
               </td>
             </tr>
-            <tr v-for="b in pagedBookings" :key="b.id" class="border-t border-white/5 hover:bg-white/5">
-              <td class="px-4 py-3">
-                <NuxtLink :to="`/admin/bookings/${b.id}`" class="font-medium text-white hover:underline">
+            <tr
+              v-for="b in pagedBookings"
+              :key="b.id"
+              class="border-t border-white/[0.05] hover:bg-white/[0.02] transition-colors cursor-pointer focus-gold"
+              tabindex="0"
+              @click="goToDetail(b.id)"
+              @keydown.enter="goToDetail(b.id)"
+              @keydown.space.prevent="goToDetail(b.id)"
+            >
+              <td class="px-5 py-4">
+                <div class="font-serif text-base text-white leading-snug" style="font-weight: 400;">
                   {{ b.firstName }} {{ b.lastName }}
-                </NuxtLink>
-                <div class="text-xs text-white/40 truncate max-w-[220px]">
-                  <a :href="`mailto:${b.email}`" class="hover:underline">{{ b.email }}</a>
+                </div>
+                <div class="text-xs text-white/45 italic font-serif truncate max-w-[240px] mt-0.5">
+                  {{ b.email }}
                 </div>
               </td>
-              <td class="px-4 py-3 font-mono text-xs text-white/70">
-                {{ formatSlotDate(b.slotDate) }} · {{ b.slotStartTime }} · {{ abbrevRoute(b.routeId) }}
+              <td class="px-5 py-4 text-xs text-white/70 tabular-nums">
+                <span class="text-white/85">{{ formatSlotDate(b.slotDate) }}</span>
+                <span class="text-white/30 mx-1.5">·</span>
+                <span>{{ b.slotStartTime }}</span>
+                <span class="text-white/30 mx-1.5">·</span>
+                <span class="font-mono uppercase tracking-wider text-white/50 text-[11px]">{{ abbrevRoute(b.routeId) }}</span>
               </td>
-              <td class="px-4 py-3">
+              <td class="px-5 py-4">
                 <AdminBadgeStatus :status="statusBadgeStatus(b.status)" :label="statusBadgeLabel(b.status)" />
               </td>
-              <td class="px-4 py-3 text-right tabular-nums">{{ b.guests }}</td>
+              <td class="px-5 py-4 text-right tabular-nums font-serif text-white/85">{{ b.guests }}</td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <div v-if="filteredBookings.length > pageSize" class="flex items-center justify-between px-4 py-3 border-t border-white/10 text-xs text-white/50 font-mono">
-        <span>{{ t('bookings.paginationRange', { start: (currentPage - 1) * pageSize + 1, end: Math.min(currentPage * pageSize, filteredBookings.length), total: filteredBookings.length }) }}</span>
+      <div v-if="filteredBookings.length > pageSize" class="flex items-center justify-between px-5 py-4 border-t border-white/10 text-xs text-white/55 font-mono">
+        <span class="tabular-nums">{{ t('bookings.paginationRange', { start: (currentPage - 1) * pageSize + 1, end: Math.min(currentPage * pageSize, filteredBookings.length), total: filteredBookings.length }) }}</span>
         <div class="flex items-center gap-2">
           <AdminBaseButton variant="secondary" :disabled="currentPage <= 1" @click="currentPage--">←</AdminBaseButton>
-          <span>{{ t('bookings.paginationOf', { current: currentPage, total: totalPages }) }}</span>
+          <span class="tabular-nums">{{ t('bookings.paginationOf', { current: currentPage, total: totalPages }) }}</span>
           <AdminBaseButton variant="secondary" :disabled="currentPage >= totalPages" @click="currentPage++">→</AdminBaseButton>
         </div>
       </div>

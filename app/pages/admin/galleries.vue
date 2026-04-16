@@ -98,7 +98,7 @@ const galleriesCount = computed(() => galleries.value.length)
 </script>
 
 <template>
-  <div class="relative max-w-5xl mx-auto">
+  <div class="relative max-w-5xl">
     <AdminGrain />
 
     <AdminHeroSection

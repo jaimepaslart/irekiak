@@ -175,7 +175,7 @@ function backToRoute(): void {
 </script>
 
 <template>
-  <div class="relative max-w-4xl mx-auto">
+  <div class="relative max-w-4xl">
     <AdminGrain />
 
     <button

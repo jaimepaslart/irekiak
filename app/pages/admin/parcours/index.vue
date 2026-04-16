@@ -80,7 +80,7 @@ function arrivedLabel(count: number): string {
 </script>
 
 <template>
-  <div class="relative max-w-4xl mx-auto">
+  <div class="relative max-w-4xl">
     <AdminGrain />
 
     <AdminHeroSection

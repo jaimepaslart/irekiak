@@ -34,9 +34,7 @@ const form = reactive<FormState>({
   email: '',
   phone: '',
   numberOfPeople: 1,
-  language: (['eu', 'es', 'fr', 'en'] as const).includes(locale.value as BookingLanguage)
-    ? (locale.value as BookingLanguage)
-    : 'eu',
+  language: locale.value === 'es' ? 'es' : 'eu',
   specialNeeds: '',
   acceptsPrivacyPolicy: false,
   acceptsMarketing: false,

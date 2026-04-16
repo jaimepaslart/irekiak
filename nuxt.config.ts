@@ -110,6 +110,7 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     resendApiKey: '',
+    fromEmail: 'Irekiak <irekiak@irekiak.art>', // NUXT_FROM_EMAIL
     resendWebhookSecret: '', // NUXT_RESEND_WEBHOOK_SECRET
     contactEmail: 'irekiak@irekiak.eus',
     adminTokenSecret: '',    // NUXT_ADMIN_TOKEN_SECRET

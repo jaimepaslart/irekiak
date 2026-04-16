@@ -10,7 +10,7 @@ const currentYear = new Date().getFullYear()
   <footer class="border-t border-white/10 bg-edition-dark py-16 px-6 md:px-12" role="contentinfo">
     <div class="max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-12">
       <div>
-        <img src="/images/irekiak-logo-white.png" alt="Irekiak" class="h-5 w-auto mb-4">
+        <img src="/logo.webp" alt="Irekiak" class="h-5 w-auto mb-4">
         <p class="text-sm text-white/60 leading-relaxed">
           Gallery Weekend<br>
           Donostia / San Sebastián

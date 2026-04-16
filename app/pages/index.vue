@@ -21,17 +21,11 @@ usePageSeo('home')
     <!-- Hero -->
     <section class="min-h-screen flex items-center justify-center px-6 pt-24">
       <div class="max-w-4xl mx-auto text-center">
-        <p class="text-xs uppercase tracking-[0.4em] text-white/40 mb-10 font-mono animate-fade-in">
-          Gallery Weekend
-        </p>
-
-        <h1 class="md:hidden animate-fade-in-up" style="animation-delay: 100ms">
-          Irekiak
-        </h1>
+        <h1 class="sr-only">Irekiak</h1>
         <img
-          src="/images/irekiak-logo-white.png"
+          src="/logo-big.webp"
           alt="Irekiak"
-          class="hidden md:block h-auto w-full max-w-[500px] mx-auto mb-8 animate-fade-in-up"
+          class="h-auto w-full max-w-[280px] md:max-w-[500px] mx-auto mb-8 animate-fade-in-up"
           style="animation-delay: 100ms"
         >
 

@@ -210,7 +210,7 @@ export async function sendGalleryBookingNotification(params: GalleryNotification
     const html = buildHtml(params, strings)
     await withEmailRetry(async () => {
       const { error } = await resend.emails.send({
-        from: 'Irekiak <irekiak@irekiak.eus>',
+        from: config.fromEmail,
         to: params.to,
         subject,
         html,

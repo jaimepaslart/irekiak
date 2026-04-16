@@ -325,3 +325,25 @@
 .leaflet-popup-tip {
   background-color: var(--color-edition) !important;
 }
+
+/* ── Admin design tokens ──────────────────────────────────────────── */
+
+@utility text-muted {
+  color: rgb(255 255 255 / 0.6);
+}
+
+@utility text-subtle {
+  color: rgb(255 255 255 / 0.4);
+}
+
+@utility text-faint {
+  color: rgb(255 255 255 / 0.3);
+}
+
+@utility bg-surface {
+  background-color: var(--color-edition-dark);
+}
+
+@utility border-subtle {
+  border-color: rgb(255 255 255 / 0.1);
+}

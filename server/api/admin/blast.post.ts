@@ -89,7 +89,7 @@ export default defineEventHandler(async (event) => {
     try {
       await withEmailRetry(async () => {
         const { error } = await resend.emails.send({
-          from: 'Irekiak <irekiak@irekiak.eus>',
+          from: config.fromEmail,
           to: email,
           subject: parsed.subject,
           html,

@@ -38,11 +38,10 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
   >
     <nav class="flex items-center justify-between h-16 px-6 md:px-12 max-w-[1200px] mx-auto" aria-label="Main navigation">
       <NuxtLink :to="localePath('/')" class="block shrink-0">
-        <span class="text-lg font-bold tracking-tight text-white md:hidden">Irekiak</span>
         <img
-          src="/images/irekiak-logo-white.png"
+          src="/logo.webp"
           alt="Irekiak Gallery Weekend"
-          class="hidden md:block h-8 w-auto"
+          class="h-6 md:h-8 w-auto"
         >
       </NuxtLink>
 

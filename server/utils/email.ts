@@ -189,7 +189,7 @@ export async function sendBookingConfirmation(params: SendBookingConfirmationPar
 
   await withEmailRetry(async () => {
     const { error } = await resend.emails.send({
-      from: 'Irekiak <irekiak@irekiak.eus>',
+      from: config.fromEmail,
       to: params.to,
       subject: strings.subject,
       html,
@@ -322,7 +322,7 @@ export async function sendBookingCancellation(params: SendBookingCancellationPar
     const resend = new Resend(config.resendApiKey)
     await withEmailRetry(async () => {
       const { error } = await resend.emails.send({
-        from: 'Irekiak <irekiak@irekiak.eus>',
+        from: config.fromEmail,
         to: params.to,
         subject: s.subject,
         html,

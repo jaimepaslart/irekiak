@@ -199,7 +199,7 @@ const decoratedOthers = computed<DecoratedSlot[]>(() => otherSlots.value.map(dec
 </script>
 
 <template>
-  <div class="relative max-w-4xl mx-auto">
+  <div class="relative max-w-4xl">
     <AdminGrain />
 
     <button
@@ -316,7 +316,7 @@ const decoratedOthers = computed<DecoratedSlot[]>(() => otherSlots.value.map(dec
               :style="{ animationDelay: `${i * 70}ms` }"
             >
               <span
-                class="absolute left-[-1px] md:left-[3px] top-2 w-[14px] h-[14px] rounded-full border-2 bg-[var(--color-edition)]"
+                class="absolute left-[-24px] md:left-[-28px] top-2 w-[14px] h-[14px] rounded-full border-2 bg-[var(--color-edition)]"
                 :class="{
                   'border-gold': s.variant === 'normal',
                   'border-orange-400': s.variant === 'low',

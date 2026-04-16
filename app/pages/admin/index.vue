@@ -157,7 +157,7 @@ const languageBreakdown = computed(() => {
   if (!stats.value) return '—'
   const entries = Object.entries(stats.value.byLanguage)
   if (entries.length === 0) return '—'
-  return entries.map(([l, n]) => `${l.toUpperCase()} ${n}`).join(' · ')
+  return entries.map(([l, n]) => `${l.toUpperCase()}\u00a0${n}`).join(' · ')
 })
 
 const placesLabel = (booked: number, total: number) =>
@@ -372,7 +372,7 @@ const humanizedAudit = computed<TimelineEntry[]>(() => {
     </template>
 
     <template v-if="stats">
-      <section class="mb-14 grid grid-cols-1 md:grid-cols-5 gap-4">
+      <section class="mb-14 grid grid-cols-1 md:grid-cols-5 gap-4 md:items-start">
         <div class="md:col-span-2">
           <AdminHeroStatCard
             :eyebrow="t('dashboard.editionTag', { year })"

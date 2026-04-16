@@ -94,4 +94,4 @@ Raccourcis clavier admin : `d` dashboard · `b` bookings · `c` create · `k` ch
 
 ## Langue de communication
 Répondre en français.
-Toujours utiliser Opus 4.6.
+Toujours utiliser Opus 4.7.

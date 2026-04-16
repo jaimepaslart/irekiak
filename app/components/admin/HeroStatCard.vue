@@ -35,7 +35,7 @@ const barTone = computed(() => {
     <div class="eyebrow mb-4">
       {{ eyebrow }}
     </div>
-    <div class="flex items-baseline gap-2 mb-1">
+    <div class="flex items-baseline gap-1 mb-1">
       <span class="font-serif text-5xl md:text-6xl text-white tabular-nums leading-none" style="font-weight: 400; letter-spacing: -0.02em;">
         {{ value }}
       </span>

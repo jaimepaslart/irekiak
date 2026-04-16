@@ -57,7 +57,7 @@ export const tokens: BrandTokens = {
 }
 
 const EVENT_DATES = '29 — 31 MAI 2026'
-const LOGO_URL = 'https://irekiak.art/logo.webp'
+const LOGO_URL = 'https://irekiak.art/logo-email-bg.png'
 const SITE_URL = 'https://irekiak.art'
 
 export function escapeHtml(value: string | number | null | undefined): string {
@@ -132,9 +132,9 @@ export function header(opts: HeaderOpts = {}): string {
   const { dates = EVENT_DATES } = opts
   const t = tokens
   return `<tr>
-  <td class="px py" align="center" style="padding:8px ${t.layout.padding}px 32px ${t.layout.padding}px;">
+  <td class="px py" align="center" bgcolor="${t.colors.bg}" style="padding:8px ${t.layout.padding}px 32px ${t.layout.padding}px;background-color:${t.colors.bg};">
     <a href="${SITE_URL}" style="text-decoration:none;color:${t.colors.text};">
-      <img src="${LOGO_URL}" width="200" height="" alt="IREKIAK" style="display:block;width:200px;max-width:60%;height:auto;margin:0 auto;" />
+      <img src="${LOGO_URL}" width="240" alt="IREKIAK · Gallery Weekend Donostia · San Sebastián" border="0" style="display:block;width:240px;max-width:70%;height:auto;margin:0 auto;border:0;outline:none;text-decoration:none;background:${t.colors.bg};" />
     </a>
     <p style="margin:18px 0 0 0;font-family:${t.fonts.sans};font-size:11px;letter-spacing:0.24em;text-transform:uppercase;color:${t.colors.accent};font-feature-settings:'tnum';">
       ${escapeHtml(dates)}

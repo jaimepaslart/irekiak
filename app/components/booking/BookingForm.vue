@@ -247,8 +247,6 @@ async function onSubmit() {
       >
         <option value="eu" class="bg-[var(--color-edition)] text-white">Euskara</option>
         <option value="es" class="bg-[var(--color-edition)] text-white">Español</option>
-        <option value="fr" class="bg-[var(--color-edition)] text-white">Français</option>
-        <option value="en" class="bg-[var(--color-edition)] text-white">English</option>
       </select>
       <span class="form-chevron" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">

@@ -487,8 +487,6 @@ async function submitNew() {
             <select v-model="newForm.language" class="w-full bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-white">
               <option value="eu">Euskara</option>
               <option value="es">Español</option>
-              <option value="fr">Français</option>
-              <option value="en">English</option>
             </select>
           </label>
         </div>

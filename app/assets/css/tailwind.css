@@ -40,7 +40,7 @@
   /* Typography */
   --font-body: 'Inter', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
-  --font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-serif: 'Inter', sans-serif;
 
   /* Accent or (invitations de musée, editions premium) */
   --color-accent-gold: #D4B062;

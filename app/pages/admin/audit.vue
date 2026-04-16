@@ -354,27 +354,11 @@ const decoratedFiltered = computed<DecoratedEntry[]>(() => filtered.value.map((e
         <span class="text-xs text-white/40 font-mono uppercase tracking-[0.18em] tabular-nums">
           {{ filtered.length }} / {{ entries.length }}
         </span>
-        <div class="flex items-center gap-4">
-          <button
-            type="button"
-            class="arrow-nudge-parent text-gold text-sm uppercase tracking-[0.18em] font-mono disabled:opacity-30 disabled:cursor-not-allowed transition-colors focus-gold"
-            :disabled="page <= 1"
-            @click="page--"
-          >
-            <span class="arrow-nudge inline-block mr-1">←</span>
-          </button>
-          <span class="font-serif italic text-sm text-white/60 tabular-nums">
-            {{ t('audit.pageLabel', { page, totalPages }) }}
-          </span>
-          <button
-            type="button"
-            class="arrow-nudge-parent text-gold text-sm uppercase tracking-[0.18em] font-mono disabled:opacity-30 disabled:cursor-not-allowed transition-colors focus-gold"
-            :disabled="page >= totalPages"
-            @click="page++"
-          >
-            <span class="arrow-nudge inline-block ml-1">→</span>
-          </button>
-        </div>
+        <AdminPagination
+          v-model="page"
+          :total-pages="totalPages"
+          :label="t('audit.pageLabel', { page, totalPages })"
+        />
       </div>
     </section>
   </div>

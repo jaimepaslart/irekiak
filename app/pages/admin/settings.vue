@@ -41,6 +41,15 @@ async function save(key: keyof typeof settings, value: string) {
   finally { saving.value[key] = false }
 }
 
+const acceptBookingsValue = computed<boolean>({
+  get: () => settings['bookings.accept'] === '1',
+  set: (v: boolean) => { void save('bookings.accept', v ? '1' : '0') },
+})
+const notificationsValue = computed<boolean>({
+  get: () => settings['notifications.enabled'] === '1',
+  set: (v: boolean) => { void save('notifications.enabled', v ? '1' : '0') },
+})
+
 async function exportMarketing() {
   const res = await fetch('/api/admin/bookings', { headers: { 'x-admin-token': token.value } })
   const list = await res.json() as Array<{ email: string, firstName: string, lastName: string, language: string, status: string }>
@@ -95,48 +104,22 @@ const quickLinks = computed<QuickLink[]>(() => [
         :eyebrow="t('settings.sectionBookings')"
         :delay="120"
       >
-        <div class="mt-2 flex items-start justify-between gap-6">
-          <div class="flex-1 min-w-0">
-            <h2 class="font-serif text-2xl text-white" style="font-weight: 400; letter-spacing: -0.01em;">
-              {{ t('settings.settingAcceptBookings') }}
-            </h2>
-            <p class="font-serif italic text-sm text-white/55 mt-2">
-              {{ t('settings.settingAcceptBookingsDesc') }}
-            </p>
-          </div>
-          <label class="relative inline-flex items-center cursor-pointer shrink-0 mt-2">
-            <input
-              :checked="settings['bookings.accept'] === '1'"
-              type="checkbox"
-              class="sr-only peer"
-              :disabled="saving['bookings.accept']"
-              @change="save('bookings.accept', ($event.target as HTMLInputElement).checked ? '1' : '0')"
-            >
-            <div class="w-12 h-6 bg-white/10 peer-checked:bg-[var(--color-accent-gold)] rounded-full transition-colors peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--color-accent-gold)]"></div>
-            <div class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-6 shadow-sm"></div>
-          </label>
+        <div class="mt-2">
+          <AdminToggleSetting
+            v-model="acceptBookingsValue"
+            :heading="t('settings.settingAcceptBookings')"
+            :description="t('settings.settingAcceptBookingsDesc')"
+            :saving="saving['bookings.accept']"
+          />
         </div>
 
-        <div class="mt-7 flex items-start justify-between gap-6 pt-7 border-t border-white/5">
-          <div class="flex-1 min-w-0">
-            <h2 class="font-serif text-2xl text-white" style="font-weight: 400; letter-spacing: -0.01em;">
-              {{ t('settings.settingNotifications') }}
-            </h2>
-            <p class="font-serif italic text-sm text-white/55 mt-2">
-              {{ t('settings.settingNotificationsDesc') }}
-            </p>
-          </div>
-          <label class="relative inline-flex items-center cursor-pointer shrink-0 mt-2">
-            <input
-              :checked="settings['notifications.enabled'] === '1'"
-              type="checkbox"
-              class="sr-only peer"
-              :disabled="saving['notifications.enabled']"
-              @change="save('notifications.enabled', ($event.target as HTMLInputElement).checked ? '1' : '0')"
-            >
-            <div class="w-12 h-6 bg-white/10 peer-checked:bg-[var(--color-accent-gold)] rounded-full transition-colors peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--color-accent-gold)]"></div>
-            <div class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-6 shadow-sm"></div>
-          </label>
+        <div class="mt-7 pt-7 border-t border-white/5">
+          <AdminToggleSetting
+            v-model="notificationsValue"
+            :heading="t('settings.settingNotifications')"
+            :description="t('settings.settingNotificationsDesc')"
+            :saving="saving['notifications.enabled']"
+          />
         </div>
       </AdminSettingsSection>
 

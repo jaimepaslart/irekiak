@@ -53,6 +53,10 @@ const errorMessage = ref<string | null>(null)
 
 type StatusFilter = 'all' | 'confirmed' | 'cancelled' | 'waitlist'
 const statusFilter = ref<StatusFilter>('all')
+const statusFilterModel = computed<string>({
+  get: () => statusFilter.value,
+  set: (v: string) => { statusFilter.value = v as StatusFilter },
+})
 const dateFilter = ref<string>('all')
 const routeFilter = ref<string>('all')
 const searchQuery = ref<string>('')
@@ -343,57 +347,15 @@ async function submitNew() {
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
       <div>
         <p class="eyebrow mb-3">{{ t('bookings.filterByStatus') }}</p>
-        <div class="flex flex-wrap gap-2">
-          <button
-            v-for="option in statusChipOptions"
-            :key="option.value"
-            type="button"
-            :aria-pressed="statusFilter === option.value"
-            class="px-3 py-1.5 text-xs font-mono uppercase tracking-[0.14em] rounded-full border transition-colors"
-            :class="statusFilter === option.value
-              ? 'bg-gold-soft text-gold border-gold-soft'
-              : 'border-white/10 text-white/50 hover:text-white hover:border-white/25'"
-            @click="statusFilter = option.value as StatusFilter"
-          >
-            {{ option.label }}<span v-if="option.count !== undefined" class="opacity-50 ml-1.5 tabular-nums">{{ option.count }}</span>
-          </button>
-        </div>
+        <AdminFilterChips v-model="statusFilterModel" :options="statusChipOptions" variant="gold" />
       </div>
       <div>
         <p class="eyebrow mb-3">{{ t('bookings.filterByDate') }}</p>
-        <div class="flex flex-wrap gap-2">
-          <button
-            v-for="option in dateChipOptions"
-            :key="option.value"
-            type="button"
-            :aria-pressed="dateFilter === option.value"
-            class="px-3 py-1.5 text-xs font-mono uppercase tracking-[0.14em] rounded-full border transition-colors"
-            :class="dateFilter === option.value
-              ? 'bg-gold-soft text-gold border-gold-soft'
-              : 'border-white/10 text-white/50 hover:text-white hover:border-white/25'"
-            @click="dateFilter = option.value"
-          >
-            {{ option.label }}<span v-if="option.count !== undefined" class="opacity-50 ml-1.5 tabular-nums">{{ option.count }}</span>
-          </button>
-        </div>
+        <AdminFilterChips v-model="dateFilter" :options="dateChipOptions" variant="gold" />
       </div>
       <div v-if="routeChipOptions.length > 1">
         <p class="eyebrow mb-3">{{ t('bookings.filterByRoute') }}</p>
-        <div class="flex flex-wrap gap-2">
-          <button
-            v-for="option in routeChipOptions"
-            :key="option.value"
-            type="button"
-            :aria-pressed="routeFilter === option.value"
-            class="px-3 py-1.5 text-xs font-mono uppercase tracking-[0.14em] rounded-full border transition-colors"
-            :class="routeFilter === option.value
-              ? 'bg-gold-soft text-gold border-gold-soft'
-              : 'border-white/10 text-white/50 hover:text-white hover:border-white/25'"
-            @click="routeFilter = option.value"
-          >
-            {{ option.label }}<span v-if="option.count !== undefined" class="opacity-50 ml-1.5 tabular-nums">{{ option.count }}</span>
-          </button>
-        </div>
+        <AdminFilterChips v-model="routeFilter" :options="routeChipOptions" variant="gold" />
       </div>
     </div>
 

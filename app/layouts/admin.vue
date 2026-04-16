@@ -61,7 +61,15 @@ function logout() {
 provide('adminToken', token)
 provide('adminLogout', logout)
 
-const navItems = computed(() => [
+const desktopNavItems = computed(() => [
+  { to: '/admin', label: t('nav.dashboard') },
+  { to: '/admin/bookings', label: t('nav.bookings') },
+  { to: '/admin/checkin', label: t('nav.checkin') },
+  { to: '/admin/galleries', label: t('nav.galleries') },
+  { to: '/admin/blast', label: t('nav.blast') },
+])
+
+const mobileNavItems = computed(() => [
   { to: '/admin', label: t('nav.dashboard') },
   { to: '/admin/bookings', label: t('nav.bookings') },
   { to: '/admin/bookings/new', label: t('nav.newBooking') },
@@ -74,8 +82,16 @@ const navItems = computed(() => [
 ])
 
 const helpOpen = ref(false)
+const paletteOpen = ref(false)
+const isMac = ref(true)
+
 function handleKeyDown(e: KeyboardEvent) {
   if (!token.value) return
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+    e.preventDefault()
+    paletteOpen.value = true
+    return
+  }
   const target = e.target as HTMLElement | null
   const tag = target?.tagName
   if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || target?.isContentEditable) {
@@ -100,11 +116,22 @@ function handleKeyDown(e: KeyboardEvent) {
   }
 }
 
+function openHelpListener() {
+  helpOpen.value = true
+}
+
 onMounted(() => {
-  if (typeof window !== 'undefined') window.addEventListener('keydown', handleKeyDown)
+  if (typeof window !== 'undefined') {
+    isMac.value = /Mac|iPhone|iPad|iPod/i.test(navigator.platform)
+    window.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('admin:open-help', openHelpListener)
+  }
 })
 onBeforeUnmount(() => {
-  if (typeof window !== 'undefined') window.removeEventListener('keydown', handleKeyDown)
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('keydown', handleKeyDown)
+    window.removeEventListener('admin:open-help', openHelpListener)
+  }
 })
 </script>
 
@@ -149,7 +176,7 @@ onBeforeUnmount(() => {
             <NuxtLink to="/admin" class="font-mono text-sm uppercase tracking-wider whitespace-nowrap">Irekiak · {{ t('nav.admin') }}</NuxtLink>
             <nav class="hidden md:flex items-center gap-1 overflow-x-auto">
               <NuxtLink
-                v-for="item in navItems"
+                v-for="item in desktopNavItems"
                 :key="item.to"
                 :to="item.to"
                 class="px-3 py-1.5 text-sm rounded-sm text-white/60 hover:text-white hover:bg-white/5 transition-colors whitespace-nowrap"
@@ -160,6 +187,14 @@ onBeforeUnmount(() => {
             </nav>
           </div>
           <div class="flex items-center gap-2">
+            <button
+              type="button"
+              class="hidden md:inline-flex text-xs px-3 py-1.5 border border-white/15 text-white/60 hover:text-white hover:bg-white/5 rounded-sm font-mono items-center gap-2 transition-colors"
+              :aria-label="t('commandPalette.openLabel')"
+              @click="paletteOpen = true"
+            >
+              <span>{{ isMac ? '⌘K' : 'Ctrl+K' }}</span>
+            </button>
             <div class="flex items-center gap-1 text-xs font-mono">
               <button type="button" :class="['px-2 py-1 rounded-sm transition-colors', locale === 'fr' ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white']" @click="setLocale('fr')">FR</button>
               <button type="button" :class="['px-2 py-1 rounded-sm transition-colors', locale === 'es' ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white']" @click="setLocale('es')">ES</button>
@@ -173,7 +208,7 @@ onBeforeUnmount(() => {
           <nav v-if="navOpen" class="md:hidden border-t border-white/10 bg-[var(--color-edition-dark)]">
             <div class="max-w-[1400px] mx-auto px-4 py-2 flex flex-col">
               <NuxtLink
-                v-for="item in navItems"
+                v-for="item in mobileNavItems"
                 :key="item.to"
                 :to="item.to"
                 class="px-3 py-3 text-sm text-white/70 hover:text-white border-b border-white/5"
@@ -203,6 +238,7 @@ onBeforeUnmount(() => {
               <div class="flex justify-between"><dt><kbd class="kbd">s</kbd></dt><dd>{{ t('shortcuts.settings') }}</dd></div>
               <div class="flex justify-between"><dt><kbd class="kbd">a</kbd></dt><dd>{{ t('shortcuts.audit') }}</dd></div>
               <div class="flex justify-between"><dt><kbd class="kbd">/</kbd></dt><dd>{{ t('shortcuts.search') }}</dd></div>
+              <div class="flex justify-between"><dt><kbd class="kbd">{{ isMac ? '⌘K' : 'Ctrl+K' }}</kbd></dt><dd>{{ t('shortcuts.commandPalette') }}</dd></div>
               <div class="flex justify-between"><dt><kbd class="kbd">?</kbd></dt><dd>{{ t('shortcuts.help') }}</dd></div>
               <div class="flex justify-between"><dt><kbd class="kbd">Esc</kbd></dt><dd>{{ t('shortcuts.blur') }}</dd></div>
             </dl>
@@ -212,6 +248,8 @@ onBeforeUnmount(() => {
           </div>
         </div>
       </Transition>
+
+      <AdminCommandPalette v-model="paletteOpen" />
     </div>
   </div>
 </template>

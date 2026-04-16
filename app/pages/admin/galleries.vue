@@ -88,6 +88,19 @@ async function save() {
       <AdminSkeleton variant="card" :count="8" />
     </div>
 
+    <AdminEmptyState
+      v-else-if="!loading && galleries.length === 0"
+      icon="🖼"
+      :title="t('galleries.emptyState')"
+      :description="t('galleries.emptyStateDesc')"
+    >
+      <template #action>
+        <AdminBaseButton variant="primary" type="button" :loading="loading" @click="load">
+          {{ t('galleries.emptyStateCta') }}
+        </AdminBaseButton>
+      </template>
+    </AdminEmptyState>
+
     <div v-else class="space-y-3">
       <div v-for="g in galleries" :key="g.id" class="bg-edition-dark border border-white/10 rounded-sm p-4">
         <div v-if="editing !== g.id" class="flex flex-wrap items-center justify-between gap-3">

@@ -72,7 +72,13 @@ function attendedPct(s: SlotOverview) {
       v-else-if="!errorMessage && byDate.length === 0"
       :title="t('checkin.emptyStateOverview')"
       :description="t('checkin.emptyStateOverviewDesc')"
-    />
+    >
+      <template #action>
+        <AdminBaseButton variant="primary" as="nuxt-link" to="/admin/bookings">
+          {{ t('checkin.emptyStateOverviewCta') }}
+        </AdminBaseButton>
+      </template>
+    </AdminEmptyState>
 
     <div v-for="[date, dateSlots] in byDate" :key="date" class="mb-10">
       <h2 class="text-lg font-semibold mb-4">{{ date }}</h2>

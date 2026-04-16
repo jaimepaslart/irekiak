@@ -98,7 +98,13 @@ function eventColor(type: string) {
           icon="✉"
           :title="t('emails.emptyState')"
           :description="`${t('emails.emptyStateDesc')} ${t('emails.webhookInfo')}`"
-        />
+        >
+          <template #action>
+            <AdminBaseButton variant="primary" as="a" href="https://resend.com/webhooks">
+              {{ t('emails.emptyStateCta') }}
+            </AdminBaseButton>
+          </template>
+        </AdminEmptyState>
       </div>
     </div>
   </div>

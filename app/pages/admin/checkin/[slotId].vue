@@ -118,7 +118,13 @@ function printList() {
         v-if="data.participants.length === 0"
         :title="t('checkin.emptyState')"
         :description="t('checkin.emptyStateDesc')"
-      />
+      >
+        <template #action>
+          <AdminBaseButton variant="primary" as="nuxt-link" to="/admin/checkin">
+            {{ t('checkin.emptyStateCta') }}
+          </AdminBaseButton>
+        </template>
+      </AdminEmptyState>
 
       <template v-else>
         <div class="md:hidden space-y-3 print:hidden">

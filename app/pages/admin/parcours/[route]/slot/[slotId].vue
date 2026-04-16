@@ -176,7 +176,7 @@ function backToRoute(): void {
 
 <template>
   <div class="relative max-w-4xl mx-auto">
-    <div class="absolute inset-x-0 -top-10 -bottom-10 editorial-grain pointer-events-none opacity-60" aria-hidden="true"></div>
+    <AdminGrain />
 
     <button
       type="button"
@@ -195,21 +195,21 @@ function backToRoute(): void {
     </template>
 
     <template v-else-if="slot">
-      <section class="relative mb-10 md:mb-12 editorial-in">
-        <div class="eyebrow mb-4">
-          {{ t('parcours.checkinEyebrow') }} · {{ routeName }}
-        </div>
-        <h1 class="font-serif text-3xl md:text-4xl text-white" style="font-weight: 400; letter-spacing: -0.01em; line-height: 1.1;">
-          {{ longDate }}
-        </h1>
-        <p class="mt-2 flex items-baseline gap-3 text-white/70">
-          <span class="font-serif text-2xl md:text-3xl tabular-nums" style="font-weight: 400;">{{ slot.startTime }}</span>
-          <span class="text-white/35 text-sm tabular-nums">→ {{ slot.endTime }}</span>
-          <span class="text-white/30 text-sm">·</span>
-          <span class="text-xs text-white/50 uppercase tracking-wider font-mono">{{ slot.language.toUpperCase() }}</span>
-        </p>
-        <div class="mt-6 h-px w-24 bg-[var(--color-accent-gold)] opacity-50"></div>
-      </section>
+      <AdminHeroSection
+        :eyebrow="`${t('parcours.checkinEyebrow')} · ${routeName}`"
+        :title="longDate"
+        spacing="tight"
+        :italic-subtitle="false"
+      >
+        <template #subtitle>
+          <span class="flex items-baseline gap-3 text-white/70">
+            <span class="font-serif text-2xl md:text-3xl tabular-nums" style="font-weight: 400;">{{ slot.startTime }}</span>
+            <span class="text-white/35 text-sm tabular-nums">→ {{ slot.endTime }}</span>
+            <span class="text-white/30 text-sm">·</span>
+            <span class="text-xs text-white/50 uppercase tracking-wider font-mono">{{ slot.language.toUpperCase() }}</span>
+          </span>
+        </template>
+      </AdminHeroSection>
 
       <section
         class="relative mb-12 md:mb-14 editorial-in"

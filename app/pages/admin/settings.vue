@@ -65,48 +65,36 @@ const quickLinks = computed<QuickLink[]>(() => [
 
 <template>
   <div class="relative max-w-3xl mx-auto">
-    <div class="absolute inset-x-0 -top-10 -bottom-10 editorial-grain pointer-events-none opacity-60" aria-hidden="true"></div>
+    <AdminGrain />
 
-    <section class="relative mb-10 md:mb-14 editorial-in">
-      <div class="eyebrow mb-4">
-        {{ t('settings.eyebrow') }}
-      </div>
-      <h1 class="font-serif text-3xl md:text-4xl text-white" style="font-weight: 400; letter-spacing: -0.01em; line-height: 1.1;">
-        {{ t('settings.title') }}
-      </h1>
-      <p class="mt-2 text-sm text-white/55">
-        <span class="italic font-serif">{{ t('settings.heroSubtitle') }}</span>
-      </p>
-      <div class="mt-6 h-px w-24 bg-[var(--color-accent-gold)] opacity-50"></div>
-    </section>
+    <AdminHeroSection
+      :eyebrow="t('settings.eyebrow')"
+      :title="t('settings.title')"
+      :subtitle="t('settings.heroSubtitle')"
+    />
 
     <p v-if="errorMessage" class="text-sm text-red-300 italic font-serif mb-6">
       {{ errorMessage }}
     </p>
 
     <div class="relative space-y-0">
-      <section class="py-8 md:py-10 editorial-in" style="animation-delay: 60ms;">
-        <div class="flex items-baseline gap-3 mb-1">
-          <span class="text-gold text-lg leading-none" aria-hidden="true">✉</span>
-          <div class="eyebrow">{{ t('settings.sectionTestEmail') }}</div>
-        </div>
-        <h2 class="font-serif text-2xl text-white mt-2" style="font-weight: 400; letter-spacing: -0.01em;">
-          {{ t('settings.sectionTestEmail') }}
-        </h2>
-        <p class="font-serif italic text-sm text-white/55 mt-2 mb-6">
-          {{ t('settings.testEmailDesc') }}
-        </p>
+      <AdminSettingsSection
+        icon="✉"
+        :eyebrow="t('settings.sectionTestEmail')"
+        :heading="t('settings.sectionTestEmail')"
+        :description="t('settings.testEmailDesc')"
+        :delay="60"
+      >
         <AdminTestEmailForm />
-      </section>
+      </AdminSettingsSection>
 
       <div class="h-px w-full bg-[var(--color-accent-gold)] opacity-5"></div>
 
-      <section class="py-8 md:py-10 editorial-in" style="animation-delay: 120ms;">
-        <div class="flex items-baseline gap-3 mb-1">
-          <span class="text-gold text-lg leading-none" aria-hidden="true">◉</span>
-          <div class="eyebrow">{{ t('settings.sectionBookings') }}</div>
-        </div>
-
+      <AdminSettingsSection
+        icon="◉"
+        :eyebrow="t('settings.sectionBookings')"
+        :delay="120"
+      >
         <div class="mt-2 flex items-start justify-between gap-6">
           <div class="flex-1 min-w-0">
             <h2 class="font-serif text-2xl text-white" style="font-weight: 400; letter-spacing: -0.01em;">
@@ -150,21 +138,17 @@ const quickLinks = computed<QuickLink[]>(() => [
             <div class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-6 shadow-sm"></div>
           </label>
         </div>
-      </section>
+      </AdminSettingsSection>
 
       <div class="h-px w-full bg-[var(--color-accent-gold)] opacity-5"></div>
 
-      <section class="py-8 md:py-10 editorial-in" style="animation-delay: 180ms;">
-        <div class="flex items-baseline gap-3 mb-1">
-          <span class="text-gold text-lg leading-none" aria-hidden="true">⚠</span>
-          <div class="eyebrow">{{ t('settings.sectionEmergency') }}</div>
-        </div>
-        <h2 class="font-serif text-2xl text-white mt-2" style="font-weight: 400; letter-spacing: -0.01em;">
-          {{ t('settings.sectionEmergency') }}
-        </h2>
-        <p class="font-serif italic text-sm text-white/55 mt-2 mb-5">
-          {{ t('settings.settingEmergencyMessage') }}
-        </p>
+      <AdminSettingsSection
+        icon="⚠"
+        :eyebrow="t('settings.sectionEmergency')"
+        :heading="t('settings.sectionEmergency')"
+        :description="t('settings.settingEmergencyMessage')"
+        :delay="180"
+      >
         <textarea
           v-model="settings['emergency.message']"
           rows="3"
@@ -187,21 +171,17 @@ const quickLinks = computed<QuickLink[]>(() => [
             {{ t('common.save') }}
           </button>
         </div>
-      </section>
+      </AdminSettingsSection>
 
       <div class="h-px w-full bg-[var(--color-accent-gold)] opacity-5"></div>
 
-      <section class="py-8 md:py-10 editorial-in" style="animation-delay: 240ms;">
-        <div class="flex items-baseline gap-3 mb-1">
-          <span class="text-gold text-lg leading-none" aria-hidden="true">↓</span>
-          <div class="eyebrow">{{ t('settings.sectionExport') }}</div>
-        </div>
-        <h2 class="font-serif text-2xl text-white mt-2" style="font-weight: 400; letter-spacing: -0.01em;">
-          {{ t('settings.sectionExport') }}
-        </h2>
-        <p class="font-serif italic text-sm text-white/55 mt-2 mb-5">
-          {{ t('settings.exportContactsCsv') }}
-        </p>
+      <AdminSettingsSection
+        icon="↓"
+        :eyebrow="t('settings.sectionExport')"
+        :heading="t('settings.sectionExport')"
+        :description="t('settings.exportContactsCsv')"
+        :delay="240"
+      >
         <button
           type="button"
           class="inline-flex items-center gap-2 px-5 py-3 border border-white/15 text-white text-xs uppercase tracking-[0.18em] font-medium rounded-sm hover:border-[var(--color-accent-gold)] hover:text-gold transition-colors focus-gold"
@@ -209,16 +189,16 @@ const quickLinks = computed<QuickLink[]>(() => [
         >
           {{ t('common.export') }}
         </button>
-      </section>
+      </AdminSettingsSection>
 
       <div class="h-px w-full bg-[var(--color-accent-gold)] opacity-5"></div>
 
-      <section class="py-8 md:py-10 editorial-in" style="animation-delay: 300ms;">
-        <div class="flex items-baseline gap-3 mb-6">
-          <span class="text-gold text-lg leading-none" aria-hidden="true">→</span>
-          <div class="eyebrow">{{ t('settings.sectionLinks') }}</div>
-        </div>
-
+      <AdminSettingsSection
+        icon="→"
+        :eyebrow="t('settings.sectionLinks')"
+        :delay="300"
+        heading-gap="tight"
+      >
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <NuxtLink
             v-for="link in quickLinks"
@@ -239,7 +219,7 @@ const quickLinks = computed<QuickLink[]>(() => [
             </div>
           </NuxtLink>
         </div>
-      </section>
+      </AdminSettingsSection>
     </div>
 
     <p class="mt-10 text-[10px] uppercase tracking-[0.22em] text-white/20 font-mono text-center">

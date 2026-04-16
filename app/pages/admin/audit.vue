@@ -19,7 +19,7 @@ interface AuditPayload {
 definePageMeta({ layout: 'admin', i18n: false })
 useSeoMeta({ title: 'Admin · Audit log', robots: 'noindex, nofollow' })
 
-const { t, locale } = useAdminT()
+const { t, formatShortDateTime } = useAdminT()
 const token = inject<Ref<string>>('adminToken')!
 const entries = ref<AuditEntry[]>([])
 const total = ref(0)
@@ -37,15 +37,27 @@ const filtered = computed(() => entries.value.filter((e) => {
   return true
 }))
 
-const actors = computed(() => Array.from(new Set(entries.value.map(e => e.actor))).sort())
-const actions = computed(() => Array.from(new Set(entries.value.map(e => e.action))).sort())
+// Pré-calcul des compteurs par actor/action en une seule passe (O(N))
+// plutôt que de refaire un filter pour chaque chip (O(N²)).
+const counts = computed(() => {
+  const byActor = new Map<string, number>()
+  const byAction = new Map<string, number>()
+  for (const e of entries.value) {
+    byActor.set(e.actor, (byActor.get(e.actor) ?? 0) + 1)
+    byAction.set(e.action, (byAction.get(e.action) ?? 0) + 1)
+  }
+  return { byActor, byAction }
+})
+
+const actors = computed(() => Array.from(counts.value.byActor.keys()).sort())
+const actions = computed(() => Array.from(counts.value.byAction.keys()).sort())
 
 const actorChipOptions = computed(() => {
   const all = { value: 'all', label: t('audit.filterActor'), count: entries.value.length }
   const rest = actors.value.map(a => ({
     value: a,
     label: a,
-    count: entries.value.filter(e => e.actor === a).length,
+    count: counts.value.byActor.get(a) ?? 0,
   }))
   return [all, ...rest]
 })
@@ -55,7 +67,7 @@ const actionChipOptions = computed(() => {
   const rest = actions.value.map(a => ({
     value: a,
     label: humanizeAction(a),
-    count: entries.value.filter(e => e.action === a).length,
+    count: counts.value.byAction.get(a) ?? 0,
   }))
   return [all, ...rest]
 })
@@ -203,37 +215,55 @@ function toneDot(tone: ReturnType<typeof actionTone>): string {
   }
 }
 
-const dtFormatter = computed(() => {
-  const loc = locale.value === 'es' ? 'es-ES' : 'fr-FR'
-  return new Intl.DateTimeFormat(loc, { day: 'numeric', month: 'long' })
-})
-const timeFormatter = computed(() => {
-  const loc = locale.value === 'es' ? 'es-ES' : 'fr-FR'
-  return new Intl.DateTimeFormat(loc, { hour: '2-digit', minute: '2-digit' })
-})
+const formatTimestamp = formatShortDateTime
 
-function formatTimestamp(iso: string): { date: string, time: string } {
-  const ts = Date.parse(iso)
-  if (!Number.isFinite(ts)) return { date: iso, time: '' }
-  const d = new Date(ts)
-  return { date: dtFormatter.value.format(d), time: timeFormatter.value.format(d) }
+// Décoration en une passe : on évite d'appeler formatTimestamp, parseMetadata,
+// humanize et actionTone plusieurs fois dans le template (2-4× par ligne).
+interface DecoratedEntry {
+  id: string
+  actor: string
+  action: string
+  actionLabel: string
+  summary: string
+  targetType: string | null
+  targetIdShort: string
+  dateLabel: string
+  timeLabel: string
+  toneDotClass: string
+  toneTextClass: string
 }
+
+const decoratedFiltered = computed<DecoratedEntry[]>(() => filtered.value.map((e) => {
+  const ts = formatTimestamp(e.timestamp)
+  const tone = actionTone(e.action)
+  const meta = parseMetadata(e.metadata)
+  return {
+    id: e.id,
+    actor: e.actor,
+    action: e.action,
+    actionLabel: humanizeAction(e.action),
+    summary: humanize(e.action, meta),
+    targetType: e.targetType,
+    targetIdShort: e.targetId ? e.targetId.slice(0, 8) : '',
+    dateLabel: ts.date,
+    timeLabel: ts.time,
+    toneDotClass: toneDot(tone),
+    toneTextClass: toneClass(tone),
+  }
+}))
 </script>
 
 <template>
   <div class="relative">
-    <div class="absolute inset-x-0 -top-10 -bottom-10 editorial-grain pointer-events-none opacity-60" aria-hidden="true"></div>
+    <AdminGrain />
 
-    <section class="relative mb-10 md:mb-12 editorial-in">
-      <div class="eyebrow mb-4">{{ t('audit.eyebrow') }}</div>
-      <h1 class="font-serif text-3xl md:text-4xl text-white" style="font-weight: 400; letter-spacing: -0.01em; line-height: 1.1;">
-        {{ t('audit.title') }}
-      </h1>
-      <p class="mt-2 text-sm text-white/55 italic font-serif">
-        {{ t('audit.heroSubtitle') }}
-      </p>
-      <div class="mt-6 h-px w-16 bg-[var(--color-accent-gold)] opacity-80"></div>
-    </section>
+    <AdminHeroSection
+      :eyebrow="t('audit.eyebrow')"
+      :title="t('audit.title')"
+      :subtitle="t('audit.heroSubtitle')"
+      divider="short"
+      spacing="tight"
+    />
 
     <p v-if="errorMessage" class="text-sm text-red-300 italic font-serif mb-6">{{ errorMessage }}</p>
 
@@ -250,7 +280,7 @@ function formatTimestamp(iso: string): { date: string, time: string } {
         <AdminSkeleton variant="row" :count="8" />
       </div>
 
-      <template v-else-if="filtered.length > 0">
+      <template v-else-if="decoratedFiltered.length > 0">
         <div class="hidden md:grid grid-cols-[180px_120px_1fr_200px] gap-4 px-2 pb-3 border-b border-white/10">
           <div class="eyebrow text-white/40">{{ t('audit.columnWhen') }}</div>
           <div class="eyebrow text-white/40">{{ t('audit.columnActor') }}</div>
@@ -260,18 +290,18 @@ function formatTimestamp(iso: string): { date: string, time: string } {
 
         <ul class="divide-y divide-white/[0.05]">
           <li
-            v-for="(e, i) in filtered"
+            v-for="(e, i) in decoratedFiltered"
             :key="e.id"
             class="grid grid-cols-1 md:grid-cols-[180px_120px_1fr_200px] gap-2 md:gap-4 px-2 py-4 hover:bg-white/[0.02] transition-colors editorial-in"
             :style="{ animationDelay: `${Math.min(i * 24, 400)}ms` }"
           >
             <div class="flex items-baseline gap-2 md:block">
               <span class="font-serif italic text-sm text-white/75">
-                {{ formatTimestamp(e.timestamp).date }}
+                {{ e.dateLabel }}
               </span>
               <span class="hidden md:inline text-white/20 mx-1">·</span>
               <span class="font-serif italic text-sm text-white/50 tabular-nums">
-                {{ formatTimestamp(e.timestamp).time }}
+                {{ e.timeLabel }}
               </span>
             </div>
 
@@ -285,28 +315,28 @@ function formatTimestamp(iso: string): { date: string, time: string } {
               <div class="flex items-center gap-2 mb-1">
                 <span
                   class="inline-block w-1.5 h-1.5 rounded-full shrink-0"
-                  :class="toneDot(actionTone(e.action))"
+                  :class="e.toneDotClass"
                   aria-hidden="true"
                 />
                 <span
                   class="font-serif text-base"
-                  :class="toneClass(actionTone(e.action))"
+                  :class="e.toneTextClass"
                   :title="e.action"
                 >
-                  {{ humanizeAction(e.action) }}
+                  {{ e.actionLabel }}
                 </span>
               </div>
               <p
-                v-if="humanize(e.action, parseMetadata(e.metadata))"
+                v-if="e.summary"
                 class="font-serif italic text-sm text-white/45 pl-4"
               >
-                {{ humanize(e.action, parseMetadata(e.metadata)) }}
+                {{ e.summary }}
               </p>
             </div>
 
             <div class="font-mono text-xs text-white/40 tabular-nums self-start">
               <span v-if="e.targetType">{{ e.targetType }}/</span>
-              <span v-if="e.targetId">{{ e.targetId.slice(0, 8) }}</span>
+              <span v-if="e.targetIdShort">{{ e.targetIdShort }}</span>
             </div>
           </li>
         </ul>

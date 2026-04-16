@@ -93,18 +93,15 @@ const scopeOptions = computed<ScopeOption[]>(() => [
 
 <template>
   <div class="relative">
-    <div class="absolute inset-x-0 -top-10 -bottom-10 editorial-grain pointer-events-none opacity-60" aria-hidden="true"></div>
+    <AdminGrain />
 
-    <section class="relative mb-10 md:mb-12 editorial-in">
-      <div class="eyebrow mb-4">{{ t('blast.eyebrow') }}</div>
-      <h1 class="font-serif text-3xl md:text-4xl text-white" style="font-weight: 400; letter-spacing: -0.01em; line-height: 1.1;">
-        {{ t('blast.title') }}
-      </h1>
-      <p class="mt-2 text-sm text-white/55 italic font-serif">
-        {{ t('blast.heroSubtitle') }}
-      </p>
-      <div class="mt-6 h-px w-16 bg-[var(--color-accent-gold)] opacity-80"></div>
-    </section>
+    <AdminHeroSection
+      :eyebrow="t('blast.eyebrow')"
+      :title="t('blast.title')"
+      :subtitle="t('blast.heroSubtitle')"
+      divider="short"
+      spacing="tight"
+    />
 
     <form class="relative max-w-3xl space-y-10" @submit.prevent="requestSend">
       <section class="editorial-in" style="animation-delay: 60ms;">

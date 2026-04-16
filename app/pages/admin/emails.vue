@@ -11,7 +11,7 @@ interface Entry {
 definePageMeta({ layout: 'admin', i18n: false })
 useSeoMeta({ title: 'Admin · Emails', robots: 'noindex, nofollow' })
 
-const { t, locale } = useAdminT()
+const { t, formatShortDateTime } = useAdminT()
 const token = inject<Ref<string>>('adminToken')!
 const entries = ref<Entry[]>([])
 const total = ref(0)
@@ -66,37 +66,48 @@ function toneClass(tone: Tone): string {
   }
 }
 
-const dtFormatter = computed(() => {
-  const loc = locale.value === 'es' ? 'es-ES' : 'fr-FR'
-  return new Intl.DateTimeFormat(loc, { day: 'numeric', month: 'long' })
-})
-const timeFormatter = computed(() => {
-  const loc = locale.value === 'es' ? 'es-ES' : 'fr-FR'
-  return new Intl.DateTimeFormat(loc, { hour: '2-digit', minute: '2-digit' })
-})
-
-function formatTimestamp(iso: string): { date: string, time: string } {
-  const ts = Date.parse(iso)
-  if (!Number.isFinite(ts)) return { date: iso, time: '' }
-  const d = new Date(ts)
-  return { date: dtFormatter.value.format(d), time: timeFormatter.value.format(d) }
+// Décoration en une passe : dans le template chaque ligne appelait auparavant
+// formatShortDateTime 2× (.date + .time) et toneClass(eventTone(...)) dans le
+// :class. Pour N=50 lignes ça faisait 150 recomputes inutiles par render.
+interface DecoratedEmail {
+  id: string
+  dateLabel: string
+  timeLabel: string
+  eventType: string
+  toneClassStr: string
+  recipient: string
+  channel: string
+  bookingId: string | null
+  bookingShort: string
 }
+
+const decoratedEntries = computed<DecoratedEmail[]>(() => entries.value.map((e) => {
+  const ts = formatShortDateTime(e.timestamp)
+  return {
+    id: e.id,
+    dateLabel: ts.date,
+    timeLabel: ts.time,
+    eventType: e.eventType,
+    toneClassStr: toneClass(eventTone(e.eventType)),
+    recipient: e.recipient,
+    channel: e.channel,
+    bookingId: e.bookingId,
+    bookingShort: e.bookingId ? e.bookingId.slice(0, 8) : '',
+  }
+}))
 </script>
 
 <template>
   <div class="relative">
-    <div class="absolute inset-x-0 -top-10 -bottom-10 editorial-grain pointer-events-none opacity-60" aria-hidden="true"></div>
+    <AdminGrain />
 
-    <section class="relative mb-10 md:mb-12 editorial-in">
-      <div class="eyebrow mb-4">{{ t('emails.eyebrow') }}</div>
-      <h1 class="font-serif text-3xl md:text-4xl text-white" style="font-weight: 400; letter-spacing: -0.01em; line-height: 1.1;">
-        {{ t('emails.title') }}
-      </h1>
-      <p class="mt-2 text-sm text-white/55 italic font-serif">
-        {{ t('emails.heroSubtitle') }}
-      </p>
-      <div class="mt-6 h-px w-16 bg-[var(--color-accent-gold)] opacity-80"></div>
-    </section>
+    <AdminHeroSection
+      :eyebrow="t('emails.eyebrow')"
+      :title="t('emails.title')"
+      :subtitle="t('emails.heroSubtitle')"
+      divider="short"
+      spacing="tight"
+    />
 
     <p v-if="errorMessage" class="text-sm text-red-300 italic font-serif mb-6">{{ errorMessage }}</p>
 
@@ -116,25 +127,25 @@ function formatTimestamp(iso: string): { date: string, time: string } {
 
         <ul class="divide-y divide-white/[0.05]">
           <li
-            v-for="(e, i) in entries"
+            v-for="(e, i) in decoratedEntries"
             :key="e.id"
             class="grid grid-cols-1 md:grid-cols-[180px_160px_1fr_140px_140px] gap-2 md:gap-4 px-2 py-4 hover:bg-white/[0.02] transition-colors editorial-in"
             :style="{ animationDelay: `${Math.min(i * 24, 400)}ms` }"
           >
             <div class="flex items-baseline gap-2 md:block">
               <span class="font-serif italic text-sm text-white/75">
-                {{ formatTimestamp(e.timestamp).date }}
+                {{ e.dateLabel }}
               </span>
               <span class="hidden md:inline text-white/20 mx-1">·</span>
               <span class="font-serif italic text-sm text-white/50 tabular-nums">
-                {{ formatTimestamp(e.timestamp).time }}
+                {{ e.timeLabel }}
               </span>
             </div>
 
             <div>
               <span
                 class="inline-block text-[10px] font-mono uppercase tracking-[0.18em] px-2 py-0.5 border rounded-sm"
-                :class="toneClass(eventTone(e.eventType))"
+                :class="e.toneClassStr"
               >
                 {{ e.eventType }}
               </span>
@@ -154,7 +165,7 @@ function formatTimestamp(iso: string): { date: string, time: string } {
                 :to="`/admin/bookings/${e.bookingId}`"
                 class="text-gold hover:text-[var(--color-accent-gold)] hover:underline arrow-nudge-parent"
               >
-                {{ e.bookingId.slice(0, 8) }}<span class="arrow-nudge inline-block ml-1">→</span>
+                {{ e.bookingShort }}<span class="arrow-nudge inline-block ml-1">→</span>
               </NuxtLink>
               <span v-else class="text-white/20">—</span>
             </div>

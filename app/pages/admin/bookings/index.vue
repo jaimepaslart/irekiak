@@ -269,35 +269,26 @@ async function submitNew() {
 
 <template>
   <div class="relative max-w-5xl mx-auto">
-    <div class="absolute inset-x-0 -top-10 -bottom-10 editorial-grain pointer-events-none opacity-60" aria-hidden="true"></div>
+    <AdminGrain />
 
-    <section class="relative mb-10 md:mb-14 editorial-in">
-      <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
-        <div class="min-w-0">
-          <div class="eyebrow mb-4">
-            {{ t('bookings.heroEyebrow', { year }) }}
-          </div>
-          <h1 class="font-serif text-4xl md:text-5xl text-white" style="font-weight: 400; letter-spacing: -0.01em; line-height: 1.05;">
-            {{ t('bookings.title') }}
-          </h1>
-          <p class="mt-3 text-sm text-white/55">
-            <span class="italic font-serif">{{ heroSubtitle }}</span>
-          </p>
-          <div class="mt-6 h-px w-24 bg-[var(--color-accent-gold)] opacity-50"></div>
-        </div>
-        <div class="flex flex-wrap items-center gap-2 shrink-0">
-          <AdminBaseButton variant="secondary" type="button" @click="loadAll">
-            {{ t('bookings.refresh') }}
-          </AdminBaseButton>
-          <AdminBaseButton variant="secondary" type="button" @click="exportCsv">
-            {{ t('bookings.csvExport') }}
-          </AdminBaseButton>
-          <AdminBaseButton variant="primary" type="button" @click="openNewDrawer">
-            {{ t('bookings.new') }}
-          </AdminBaseButton>
-        </div>
-      </div>
-    </section>
+    <AdminHeroSection
+      :eyebrow="t('bookings.heroEyebrow', { year })"
+      :title="t('bookings.title')"
+      :subtitle="heroSubtitle"
+      title-size="lg"
+    >
+      <template #actions>
+        <AdminBaseButton variant="secondary" type="button" @click="loadAll">
+          {{ t('bookings.refresh') }}
+        </AdminBaseButton>
+        <AdminBaseButton variant="secondary" type="button" @click="exportCsv">
+          {{ t('bookings.csvExport') }}
+        </AdminBaseButton>
+        <AdminBaseButton variant="primary" type="button" @click="openNewDrawer">
+          {{ t('bookings.new') }}
+        </AdminBaseButton>
+      </template>
+    </AdminHeroSection>
 
     <p v-if="errorMessage" class="text-sm text-red-300 mb-6">{{ errorMessage }}</p>
     <p v-if="newSuccess" class="text-sm text-emerald-300 mb-6">{{ t('bookings.createSuccess') }} ({{ newSuccess }})</p>

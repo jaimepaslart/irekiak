@@ -99,20 +99,13 @@ const galleriesCount = computed(() => galleries.value.length)
 
 <template>
   <div class="relative max-w-5xl mx-auto">
-    <div class="absolute inset-x-0 -top-10 -bottom-10 editorial-grain pointer-events-none opacity-60" aria-hidden="true"></div>
+    <AdminGrain />
 
-    <section class="relative mb-10 md:mb-14 editorial-in">
-      <div class="eyebrow mb-4">
-        {{ t('galleries.eyebrow') }}
-      </div>
-      <h1 class="font-serif text-3xl md:text-4xl text-white" style="font-weight: 400; letter-spacing: -0.01em; line-height: 1.1;">
-        {{ t('galleries.title') }}
-      </h1>
-      <p class="mt-2 text-sm text-white/55">
-        <span class="italic font-serif">{{ t('galleries.heroSubtitle') }}</span>
-      </p>
-      <div class="mt-6 h-px w-24 bg-[var(--color-accent-gold)] opacity-50"></div>
-    </section>
+    <AdminHeroSection
+      :eyebrow="t('galleries.eyebrow')"
+      :title="t('galleries.title')"
+      :subtitle="t('galleries.heroSubtitle')"
+    />
 
     <p v-if="errorMessage" class="text-sm text-red-300 italic font-serif mb-6">
       {{ errorMessage }}

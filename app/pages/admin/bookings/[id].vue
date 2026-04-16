@@ -146,7 +146,7 @@ const timelineEntries = computed<TimelineEntry[]>(() => {
 
 <template>
   <div class="relative max-w-5xl mx-auto">
-    <div class="absolute inset-x-0 -top-10 -bottom-10 editorial-grain pointer-events-none opacity-60" aria-hidden="true"></div>
+    <AdminGrain />
 
     <NuxtLink
       to="/admin/bookings"
@@ -174,27 +174,24 @@ const timelineEntries = computed<TimelineEntry[]>(() => {
     </template>
 
     <template v-if="data">
-      <section class="relative mb-10 md:mb-12 editorial-in">
-        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
-          <div class="min-w-0">
-            <div class="eyebrow mb-4">
-              {{ t('bookings.detailEyebrow', { id: shortId }) }}
-            </div>
-            <div class="flex flex-wrap items-center gap-4">
-              <h1 class="font-serif text-4xl md:text-5xl text-white" style="font-weight: 400; letter-spacing: -0.01em; line-height: 1.05;">
-                {{ data.booking.firstName }} {{ data.booking.lastName }}
-              </h1>
-              <AdminBadgeStatus :status="data.booking.status" :label="statusBadgeLabel(data.booking.status)" />
-            </div>
-            <div class="mt-6 h-px w-24 bg-[var(--color-accent-gold)] opacity-50"></div>
-          </div>
-          <div class="flex flex-wrap items-center gap-2 shrink-0">
-            <AdminBaseButton v-if="data.booking.status === 'confirmed'" variant="secondary" type="button" @click="resend">
-              {{ t('bookings.detailResend') }}
-            </AdminBaseButton>
-          </div>
-        </div>
-      </section>
+      <AdminHeroSection
+        :eyebrow="t('bookings.detailEyebrow', { id: shortId })"
+        :title="`${data.booking.firstName} ${data.booking.lastName}`"
+        title-size="lg"
+        spacing="tight"
+      >
+        <template #title>
+          <span class="inline-flex flex-wrap items-center gap-4">
+            <span>{{ data.booking.firstName }} {{ data.booking.lastName }}</span>
+            <AdminBadgeStatus :status="data.booking.status" :label="statusBadgeLabel(data.booking.status)" />
+          </span>
+        </template>
+        <template #actions>
+          <AdminBaseButton v-if="data.booking.status === 'confirmed'" variant="secondary" type="button" @click="resend">
+            {{ t('bookings.detailResend') }}
+          </AdminBaseButton>
+        </template>
+      </AdminHeroSection>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
         <section

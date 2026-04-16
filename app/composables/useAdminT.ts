@@ -40,6 +40,8 @@ export function useAdminT(): {
   setLocale: (loc: AdminLocale) => void
   /** Formate une date ISO (YYYY-MM-DD) via Intl selon la locale admin. Première lettre capitalisée. */
   formatLongDate: (iso: string, options?: Intl.DateTimeFormatOptions) => string
+  /** Formate un timestamp ISO complet en { date: "15 avril", time: "14:32" } selon la locale admin. */
+  formatShortDateTime: (iso: string) => { date: string, time: string }
   /** Retourne la variante FR ou ES d'un TranslatedText selon la locale admin. */
   localized: (text: TranslatedText) => string
 } {
@@ -69,13 +71,44 @@ export function useAdminT(): {
     month: 'long',
   }
 
+  // Cache des Intl.DateTimeFormat : (locale + signature d'options) → formatter.
+  // Créer un Intl.DateTimeFormat coûte ~50-200 µs ; l'appeler dans un v-for de
+  // 50 lignes = 2-10 ms perdus par render. On les ré-utilise donc.
+  const formatterCache = new Map<string, Intl.DateTimeFormat>()
+
+  const getFormatter = (loc: string, options: Intl.DateTimeFormatOptions): Intl.DateTimeFormat => {
+    const key = `${loc}|${JSON.stringify(options)}`
+    let fmt = formatterCache.get(key)
+    if (!fmt) {
+      fmt = new Intl.DateTimeFormat(loc, options)
+      formatterCache.set(key, fmt)
+    }
+    return fmt
+  }
+
   const formatLongDate = (iso: string, options?: Intl.DateTimeFormatOptions): string => {
     const d = new Date(`${iso}T00:00:00`)
-    const intl = new Intl.DateTimeFormat(INTL_LOCALE[locale.value], options ?? defaultLongDate)
+    const intl = getFormatter(INTL_LOCALE[locale.value], options ?? defaultLongDate)
     return intl.format(d).replace(/^./, c => c.toUpperCase())
+  }
+
+  // Options constantes hoistées pour ne pas recréer de nouvelle signature à chaque appel
+  // (le cache de getFormatter se base sur JSON.stringify des options).
+  const shortDateOpts: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long' }
+  const shortTimeOpts: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit' }
+
+  const formatShortDateTime = (iso: string): { date: string, time: string } => {
+    const ts = Date.parse(iso)
+    if (!Number.isFinite(ts)) return { date: iso, time: '' }
+    const d = new Date(ts)
+    const loc = INTL_LOCALE[locale.value]
+    return {
+      date: getFormatter(loc, shortDateOpts).format(d),
+      time: getFormatter(loc, shortTimeOpts).format(d),
+    }
   }
 
   const localized = (text: TranslatedText): string => text[locale.value]
 
-  return { t, locale, setLocale, formatLongDate, localized }
+  return { t, locale, setLocale, formatLongDate, formatShortDateTime, localized }
 }

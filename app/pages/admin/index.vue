@@ -153,11 +153,39 @@ const concerns = computed<Concern[]>(() => {
   return list
 })
 
-const languageBreakdown = computed(() => {
-  if (!stats.value) return '—'
-  const entries = Object.entries(stats.value.byLanguage)
-  if (entries.length === 0) return '—'
-  return entries.map(([l, n]) => `${l.toUpperCase()}\u00a0${n}`).join(' · ')
+interface LanguageEntry { lang: string, count: number, pct: number }
+
+const languageEntries = computed<LanguageEntry[]>(() => {
+  if (!stats.value) return []
+  const raw = Object.entries(stats.value.byLanguage)
+  if (raw.length === 0) return []
+  const max = Math.max(1, ...raw.map(([, n]) => n))
+  return raw
+    .sort((a, b) => b[1] - a[1])
+    .map(([lang, count]) => ({
+      lang: lang.toUpperCase(),
+      count,
+      pct: (count / max) * 100,
+    }))
+})
+
+const bookingSplit = computed(() => {
+  const total = stats.value?.totals.bookingsCount ?? 0
+  const cancelled = stats.value?.totals.cancelledCount ?? 0
+  const active = Math.max(0, total - cancelled)
+  const denom = Math.max(1, total)
+  return {
+    active,
+    cancelled,
+    activePct: (active / denom) * 100,
+    cancelledPct: (cancelled / denom) * 100,
+  }
+})
+
+const capacityPct = computed(() => {
+  const capacity = stats.value?.totals.capacity ?? 0
+  const guests = stats.value?.totals.guests ?? 0
+  return capacity > 0 ? Math.min(100, (guests / capacity) * 100) : 0
 })
 
 const placesLabel = (booked: number, total: number) =>
@@ -372,7 +400,7 @@ const humanizedAudit = computed<TimelineEntry[]>(() => {
     </template>
 
     <template v-if="stats">
-      <section class="mb-14 grid grid-cols-1 md:grid-cols-5 gap-4 md:items-start">
+      <section class="mb-14 grid grid-cols-1 md:grid-cols-5 gap-4">
         <div class="md:col-span-2">
           <AdminHeroStatCard
             :eyebrow="t('dashboard.editionTag', { year })"
@@ -390,18 +418,37 @@ const humanizedAudit = computed<TimelineEntry[]>(() => {
             :value="stats.totals.bookingsCount"
             :subtitle="t('dashboard.statCancelled', { count: stats.totals.cancelledCount })"
             :delay="80"
-          />
+          >
+            <div class="flex h-[3px] bg-white/10 overflow-hidden rounded-sm">
+              <div class="h-full bg-gold-soft transition-[width] duration-700" :style="{ width: `${bookingSplit.activePct}%` }" />
+              <div v-if="bookingSplit.cancelledPct > 0" class="h-full bg-orange-400/60 transition-[width] duration-700" :style="{ width: `${bookingSplit.cancelledPct}%` }" />
+            </div>
+          </AdminMiniStatCard>
           <AdminMiniStatCard
             :eyebrow="t('dashboard.statParticipants')"
             :value="stats.totals.guests"
             :subtitle="t('dashboard.statCapacityOf', { capacity: stats.totals.capacity })"
             :delay="140"
-          />
+          >
+            <div class="h-[3px] bg-white/10 overflow-hidden rounded-sm">
+              <div class="h-full bg-gold-soft transition-[width] duration-700" :style="{ width: `${capacityPct}%` }" />
+            </div>
+          </AdminMiniStatCard>
           <AdminMiniStatCard
             :eyebrow="t('dashboard.statLanguages')"
-            :value="languageBreakdown"
             :delay="200"
-          />
+          >
+            <div class="space-y-2.5">
+              <div v-for="entry in languageEntries" :key="entry.lang" class="flex items-center gap-3">
+                <span class="text-[10px] font-mono uppercase tracking-[0.14em] text-white/55 w-5 tabular-nums">{{ entry.lang }}</span>
+                <div class="flex-1 h-[2px] bg-white/10 overflow-hidden">
+                  <div class="h-full bg-gold-soft transition-[width] duration-700" :style="{ width: `${entry.pct}%` }" />
+                </div>
+                <span class="font-serif text-base text-white tabular-nums w-4 text-right" style="font-weight: 400;">{{ entry.count }}</span>
+              </div>
+              <p v-if="languageEntries.length === 0" class="text-xs text-white/30 italic">—</p>
+            </div>
+          </AdminMiniStatCard>
         </div>
       </section>
 

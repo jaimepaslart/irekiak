@@ -234,7 +234,7 @@ onBeforeUnmount(() => {
               <div class="flex justify-between"><dt><kbd class="kbd">d</kbd></dt><dd>{{ t('shortcuts.dashboard') }}</dd></div>
               <div class="flex justify-between"><dt><kbd class="kbd">b</kbd></dt><dd>{{ t('shortcuts.bookings') }}</dd></div>
               <div class="flex justify-between"><dt><kbd class="kbd">c</kbd></dt><dd>{{ t('shortcuts.newBooking') }}</dd></div>
-              <div class="flex justify-between"><dt><kbd class="kbd">k</kbd></dt><dd>{{ t('shortcuts.checkin') }}</dd></div>
+              <div class="flex justify-between"><dt><kbd class="kbd">k</kbd></dt><dd>{{ t('shortcuts.parcours') }}</dd></div>
               <div class="flex justify-between"><dt><kbd class="kbd">s</kbd></dt><dd>{{ t('shortcuts.settings') }}</dd></div>
               <div class="flex justify-between"><dt><kbd class="kbd">a</kbd></dt><dd>{{ t('shortcuts.audit') }}</dd></div>
               <div class="flex justify-between"><dt><kbd class="kbd">/</kbd></dt><dd>{{ t('shortcuts.search') }}</dd></div>

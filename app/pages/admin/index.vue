@@ -79,6 +79,10 @@ onMounted(() => { void load() })
 
 const todayIso = new Date().toISOString().split('T')[0]!
 
+function routeSlugFromId(routeId: string): string {
+  return routeId.replace(/^route-/, '')
+}
+
 const upcomingSlots = computed(() => {
   if (!stats.value) return []
   return stats.value.fillRate
@@ -226,7 +230,7 @@ function slotFillVariant(rate: number): 'low' | 'full' | 'normal' {
           <NuxtLink
             v-for="s in upcomingSlots"
             :key="s.slotId"
-            :to="`/admin/checkin/${s.slotId}`"
+            :to="`/admin/parcours/${routeSlugFromId(s.routeId)}/slot/${s.slotId}`"
             class="block bg-edition-dark border rounded-sm p-4 transition-colors"
             :class="{
               'border-orange-500/40 hover:border-orange-400': slotFillVariant(s.rate) === 'low',

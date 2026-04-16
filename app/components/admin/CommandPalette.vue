@@ -25,6 +25,7 @@ interface PaletteItem {
   sublabel: string
   icon: string
   shortcut?: string
+  aliases?: string[]
   action: () => void
 }
 
@@ -41,13 +42,12 @@ const items = computed<PaletteItem[]>(() => {
   const nav = t('commandPalette.categoryNav')
   const action = t('commandPalette.categoryAction')
   return [
-    { id: 'nav-dashboard', label: t('nav.dashboard'), sublabel: nav, icon: '📊', shortcut: 'd', action: () => go('/admin') },
-    { id: 'nav-bookings', label: t('nav.bookings'), sublabel: nav, icon: '📋', shortcut: 'b', action: () => go('/admin/bookings') },
-    { id: 'nav-parcours', label: t('nav.parcours'), sublabel: nav, icon: '📍', shortcut: 'k', action: () => go('/admin/parcours') },
-    { id: 'nav-parcours-ac', label: 'Arteko · Cibrián', sublabel: t('nav.parcours'), icon: '📍', action: () => go('/admin/parcours/arteko-cibrian') },
-    { id: 'nav-parcours-cs', label: 'Central · Sakana', sublabel: t('nav.parcours'), icon: '📍', action: () => go('/admin/parcours/central-sakana') },
-    { id: 'nav-parcours-ae', label: 'Arteztu · Ekain', sublabel: t('nav.parcours'), icon: '📍', action: () => go('/admin/parcours/arteztu-ekain') },
-    { id: 'nav-checkin', label: t('nav.checkin'), sublabel: nav, icon: '✓', action: () => go('/admin/checkin') },
+    { id: 'nav-dashboard', label: t('nav.dashboard'), sublabel: nav, icon: '📊', shortcut: 'd', action: () => go('/admin'), aliases: ['panel', 'tableau', 'dashboard'] },
+    { id: 'nav-bookings', label: t('nav.bookings'), sublabel: nav, icon: '📋', shortcut: 'b', action: () => go('/admin/bookings'), aliases: ['reservas', 'reservations', 'bookings'] },
+    { id: 'nav-parcours', label: t('nav.parcours'), sublabel: nav, icon: '📍', shortcut: 'k', action: () => go('/admin/parcours'), aliases: ['parcours', 'recorridos', 'tours', 'routes', 'checkin', 'check-in'] },
+    { id: 'nav-parcours-ac', label: 'Arteko · Cibrián', sublabel: t('nav.parcours'), icon: '📍', action: () => go('/admin/parcours/arteko-cibrian'), aliases: ['parcours', 'recorridos', 'checkin'] },
+    { id: 'nav-parcours-cs', label: 'La Central · Sakana', sublabel: t('nav.parcours'), icon: '📍', action: () => go('/admin/parcours/la-central-sakana'), aliases: ['parcours', 'recorridos', 'checkin'] },
+    { id: 'nav-parcours-ae', label: 'Arteztu · Ekain', sublabel: t('nav.parcours'), icon: '📍', action: () => go('/admin/parcours/arteztu-ekain'), aliases: ['parcours', 'recorridos', 'checkin'] },
     { id: 'nav-galleries', label: t('nav.galleries'), sublabel: nav, icon: '🏛️', action: () => go('/admin/galleries') },
     { id: 'nav-blast', label: t('nav.blast'), sublabel: nav, icon: '✉', action: () => go('/admin/blast') },
     { id: 'nav-emails', label: t('nav.emails'), sublabel: nav, icon: '✉', action: () => go('/admin/emails') },
@@ -64,7 +64,12 @@ const items = computed<PaletteItem[]>(() => {
 const filtered = computed<PaletteItem[]>(() => {
   const q = query.value.trim().toLowerCase()
   if (!q) return items.value
-  return items.value.filter(it => it.label.toLowerCase().includes(q) || it.sublabel.toLowerCase().includes(q))
+  return items.value.filter((it) => {
+    if (it.label.toLowerCase().includes(q)) return true
+    if (it.sublabel.toLowerCase().includes(q)) return true
+    if (it.aliases?.some(a => a.toLowerCase().includes(q))) return true
+    return false
+  })
 })
 
 watch(() => props.modelValue, async (open) => {

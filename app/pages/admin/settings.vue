@@ -140,7 +140,7 @@ async function exportMarketing() {
         <div class="flex flex-wrap gap-2">
           <AdminBaseButton variant="secondary" as="nuxt-link" to="/admin/galleries">{{ t('settings.linkGalleries') }}</AdminBaseButton>
           <AdminBaseButton variant="secondary" as="nuxt-link" to="/admin/blast">{{ t('settings.linkBlast') }}</AdminBaseButton>
-          <AdminBaseButton variant="secondary" as="nuxt-link" to="/admin/checkin">{{ t('settings.linkCheckin') }}</AdminBaseButton>
+          <AdminBaseButton variant="secondary" as="nuxt-link" to="/admin/parcours">{{ t('settings.linkCheckin') }}</AdminBaseButton>
         </div>
       </div>
     </div>

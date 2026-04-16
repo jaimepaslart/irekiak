@@ -42,7 +42,7 @@ interface GalleryNotificationParams {
   action: 'booked' | 'cancelled'
 }
 
-const galeristeCtaLabels: Record<Language, string> = {
+const parcoursCtaLabels: Record<Language, string> = {
   eu: 'Ibilbidea ikusi',
   es: 'Ver el recorrido',
   fr: 'Voir le parcours',
@@ -237,11 +237,11 @@ export function buildGalleryNotificationEmail(p: GalleryNotificationParams): {
 
   const preheader = isBooked ? s.preheaderBooked(fullName) : s.preheaderCancelled(fullName)
 
-  const galeristeUrl = buildParcoursUrl(p.route.id)
-  const galeristeCta = galeristeUrl
+  const parcoursUrl = buildParcoursUrl(p.route.id)
+  const parcoursCta = parcoursUrl
     ? cta({
-        href: galeristeUrl,
-        label: galeristeCtaLabels[p.contactLanguage] ?? galeristeCtaLabels.en,
+        href: parcoursUrl,
+        label: parcoursCtaLabels[p.contactLanguage] ?? parcoursCtaLabels.en,
         variant: 'secondary',
       })
     : ''
@@ -256,7 +256,7 @@ export function buildGalleryNotificationEmail(p: GalleryNotificationParams): {
       paragraph({ text: s.greetingLead(p.galleryName), muted: true }),
       dataTable({ title: s.sectionVisit, rows: visitRows }),
       dataTable({ title: s.sectionVisitor, rows: visitorRows }),
-      galeristeCta,
+      parcoursCta,
       footer({ locale: p.contactLanguage }),
     ].join('\n'),
   })

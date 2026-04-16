@@ -173,7 +173,7 @@ function resetForm() {
       </label>
 
       <fieldset class="border border-white/10 rounded-sm p-4 space-y-3">
-        <legend class="text-xs uppercase tracking-wider text-white/40 px-2 font-mono">{{ t('bookings.optionsAdmin') }}</legend>
+        <legend class="text-xs uppercase tracking-wider text-white/40 px-2 font-mono bg-[var(--color-edition)]">{{ t('bookings.optionsAdmin') }}</legend>
         <label class="flex items-center gap-2 text-sm">
           <input v-model="form.notify" type="checkbox" class="accent-white">
           {{ t('bookings.fieldSendEmailVisitor') }}

@@ -177,7 +177,7 @@
     "paginationRange": "{start}-{end} / {total}",
     "paginationOf": "{current} / {total}",
     "detailTitle": "Réservation {id}",
-    "detailBack": "← Réservations",
+    "detailBack": "Réservations",
     "detailParticipant": "Participant",
     "detailSlotInfo": "Créneau",
     "detailActions": "Actions",
@@ -453,7 +453,13 @@
       "gallery_contact_update": "Contact galerie modifié",
       "blast_send": "Blast envoyé",
       "data_purge": "Purge RGPD",
-      "data_export": "Export RGPD"
+      "data_export": "Export RGPD",
+      "attendance_uncheck": "Présence retirée",
+      "email_retry_attempt": "Email · nouvelle tentative",
+      "email_sent": "Email envoyé",
+      "galeriste_linkSent": "Lien galeriste envoyé",
+      "galerie_linkSent": "Lien galeriste envoyé",
+      "email_delivery_delayed": "Livraison différée"
     }
   },
   "shortcuts": {

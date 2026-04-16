@@ -177,7 +177,7 @@
     "paginationRange": "{start}-{end} / {total}",
     "paginationOf": "{current} / {total}",
     "detailTitle": "Reserva {id}",
-    "detailBack": "← Reservas",
+    "detailBack": "Reservas",
     "detailParticipant": "Participante",
     "detailSlotInfo": "Turno",
     "detailActions": "Acciones",
@@ -453,7 +453,13 @@
       "gallery_contact_update": "Contacto galería modificado",
       "blast_send": "Blast enviado",
       "data_purge": "Purga RGPD",
-      "data_export": "Export RGPD"
+      "data_export": "Export RGPD",
+      "attendance_uncheck": "Asistencia retirada",
+      "email_retry_attempt": "Email · reintento",
+      "email_sent": "Email enviado",
+      "galeriste_linkSent": "Enlace galerista enviado",
+      "galerie_linkSent": "Enlace galerista enviado",
+      "email_delivery_delayed": "Entrega retrasada"
     }
   },
   "shortcuts": {

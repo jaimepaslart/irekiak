@@ -41,7 +41,7 @@ export function notifyGalleriesForBooking(params: NotifyParams): void {
       contactLanguage: contact.preferredLanguage,
       booking: params.bookingData,
       slot: params.slot,
-      route: { name: params.localizedRouteName, galleries: galleryNames },
+      route: { id: params.routeId, name: params.localizedRouteName, galleries: galleryNames },
       action: params.action,
     })
   }

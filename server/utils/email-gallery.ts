@@ -1,7 +1,9 @@
 import { Resend } from 'resend'
 import { useRuntimeConfig } from '#imports'
 import { withEmailRetry } from './email-retry'
+import { signRouteToken } from './galeriste-token'
 import {
+  cta,
   dataTable,
   escapeHtml,
   footer,
@@ -34,10 +36,35 @@ interface GalleryNotificationParams {
     endTime: string
   }
   route: {
+    id: string
     name: string
     galleries: string[]
   }
   action: 'booked' | 'cancelled'
+}
+
+const galeristeCtaLabels: Record<Language, string> = {
+  eu: 'Nire erreserbak ikusi',
+  es: 'Ver mis reservas',
+  fr: 'Voir mes réservations',
+  en: 'View my bookings',
+}
+
+const ALLOWED_GALERISTE_SLUGS = new Set(['arteko-cibrian', 'central-sakana', 'arteztu-ekain'])
+
+function buildGaleristeUrl(routeId: string): string | null {
+  const slug = routeId.startsWith('route-') ? routeId.slice('route-'.length) : routeId
+  if (!ALLOWED_GALERISTE_SLUGS.has(slug)) return null
+  let token: string
+  try {
+    token = signRouteToken(slug)
+  }
+  catch {
+    return null
+  }
+  const config = useRuntimeConfig()
+  const siteUrl = (config.public?.siteUrl as string | undefined) ?? 'https://irekiak.eus'
+  return `${siteUrl.replace(/\/$/, '')}/galeristes/${slug}?key=${token}`
 }
 
 interface Strings {
@@ -220,6 +247,15 @@ export function buildGalleryNotificationEmail(p: GalleryNotificationParams): {
 
   const preheader = isBooked ? s.preheaderBooked(fullName) : s.preheaderCancelled(fullName)
 
+  const galeristeUrl = buildGaleristeUrl(p.route.id)
+  const galeristeCta = galeristeUrl
+    ? cta({
+        href: galeristeUrl,
+        label: galeristeCtaLabels[p.contactLanguage] ?? galeristeCtaLabels.en,
+        variant: 'secondary',
+      })
+    : ''
+
   const html = shell({
     title,
     preheader,
@@ -230,6 +266,7 @@ export function buildGalleryNotificationEmail(p: GalleryNotificationParams): {
       paragraph({ text: s.greetingLead(p.galleryName), muted: true }),
       dataTable({ title: s.sectionVisit, rows: visitRows }),
       dataTable({ title: s.sectionVisitor, rows: visitorRows }),
+      galeristeCta,
       footer({ locale: p.contactLanguage }),
     ].join('\n'),
   })

@@ -126,6 +126,7 @@ function buildGalleryTest(language: Language): Preview {
       endTime: '13:00',
     },
     route: {
+      id: 'route-arteko-cibrian',
       name: 'Arteko + Cibrián',
       galleries: ['Arteko', 'Cibrián', 'Galería Test'],
     },

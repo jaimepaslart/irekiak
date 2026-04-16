@@ -115,6 +115,7 @@ export default defineNuxtConfig({
     contactEmail: 'irekiak@irekiak.eus',
     adminTokenSecret: '',    // NUXT_ADMIN_TOKEN_SECRET
     cronSecret: '',          // NUXT_CRON_SECRET
+    galeristeSecret: '',     // NUXT_GALERISTE_SECRET
     public: {
       siteUrl: 'https://irekiak.eus',
     },

@@ -6,7 +6,8 @@
     "map": "Mapa",
     "about": "Irekiaki buruz",
     "contact": "Kontaktua",
-    "accessibility": "Irisgarritasuna"
+    "accessibility": "Irisgarritasuna",
+    "home": "Hasiera"
   },
   "home": {
     "galleries": "Galeriak",
@@ -64,7 +65,8 @@
     "loading": "Kargatzen...",
     "free": "Doako",
     "spotsLeft": "{count} leku libre",
-    "full": "Beteta"
+    "full": "Beteta",
+    "privacyPolicy": "Pribatutasun politika"
   },
   "tours": {
     "galleries": "Ibilbide honetako galeriak",
@@ -117,7 +119,22 @@
     "addToCalendar": "Egutegira",
     "share": "Partekatu",
     "shareSubject": "Erreserba baieztatua - Irekiak Gallery Weekend",
-    "shareBody": "Zure bisita gidatua erreserbatu dut:"
+    "shareBody": "Zure bisita gidatua erreserbatu dut:",
+    "resendEmail": "Bidali esteka berriro emailez",
+    "resendSuccess": "✓ Esteka berriro bidali da.",
+    "resendFailed": "Bidaltzean errorea.",
+    "cancel": "Nire erreserba bertan behera utzi",
+    "cancelConfirmTitle": "Bertan behera uztea berretsi",
+    "cancelConfirmBody": "Zure lekua beste bisitarientzat askatuko da. Ekintza hau itzulezina da.",
+    "cancelConfirm": "Bai, bertan behera utzi",
+    "cancelCancel": "Ez, mantendu",
+    "cancelled": "Erreserba bertan behera utzi da",
+    "cancelledBody": "Zure erreserba bertan behera utzi da. Akatsa izan bada, berriro erreserbatu.",
+    "exportData": "Nire datuak esportatu (JSON)",
+    "purgeData": "Nire datu guztiak ezabatu",
+    "purgeConfirm": "Ziur zaude? Ekintza hau itzulezina da.",
+    "purgeDone": "Zure datuak ezabatu dira.",
+    "privacyTitle": "Zure datuak, zure kontrola"
   },
   "contact": {
     "title": "Kontaktua",

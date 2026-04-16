@@ -6,7 +6,8 @@
     "map": "Carte",
     "about": "À propos",
     "contact": "Contact",
-    "accessibility": "Accessibilité"
+    "accessibility": "Accessibilité",
+    "home": "Accueil"
   },
   "home": {
     "galleries": "Galeries",
@@ -64,7 +65,8 @@
     "loading": "Chargement...",
     "free": "Gratuit",
     "spotsLeft": "{count} places disponibles",
-    "full": "Complet"
+    "full": "Complet",
+    "privacyPolicy": "Politique de confidentialité"
   },
   "tours": {
     "galleries": "Galeries sur cet itinéraire",
@@ -117,7 +119,22 @@
     "addToCalendar": "Ajouter au calendrier",
     "share": "Partager",
     "shareSubject": "Réservation confirmée - Irekiak Gallery Weekend",
-    "shareBody": "J'ai réservé ma visite guidée :"
+    "shareBody": "J'ai réservé ma visite guidée :",
+    "resendEmail": "Renvoyer le lien par email",
+    "resendSuccess": "✓ Lien renvoyé par email.",
+    "resendFailed": "Erreur lors de l'envoi.",
+    "cancel": "Annuler ma réservation",
+    "cancelConfirmTitle": "Confirmer l'annulation",
+    "cancelConfirmBody": "Ta place sera libérée pour d'autres visiteurs. Cette action est irréversible.",
+    "cancelConfirm": "Oui, annuler",
+    "cancelCancel": "Non, garder",
+    "cancelled": "Réservation annulée",
+    "cancelledBody": "Ta réservation a été annulée. Si c'était une erreur, réserve à nouveau.",
+    "exportData": "Exporter mes données (JSON)",
+    "purgeData": "Effacer toutes mes données",
+    "purgeConfirm": "Êtes-vous sûr ? Cette action est irréversible.",
+    "purgeDone": "Vos données ont été supprimées.",
+    "privacyTitle": "Vos données, votre contrôle"
   },
   "contact": {
     "title": "Contact",

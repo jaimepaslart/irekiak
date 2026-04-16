@@ -1,13 +1,14 @@
 <script setup lang="ts">
 /**
- * Dashboard admin — surface les "concerns" (préoccupations actionables) en haut
- * pour que les organisateurs voient immédiatement ce qui demande attention.
+ * Dashboard admin — esthétique éditoriale "invitation de musée".
+ * Palette Prussian Blue + accent or, typographie Playfair Display pour les titres,
+ * timelines verticales pour créneaux et activité.
  *
- * TODO data manquante : `/api/admin/stats` ne retourne pas (encore) les compteurs
- * - bounces / complaints sur les dernières 24 h → on récupère via /api/admin/emails
- * - waitlist global → on approxime via les `recentBookings` (limité à 10).
- *   Pour un vrai compteur exhaustif, ajouter un champ `waitlistCount` dans stats.
+ * Data : /api/admin/stats + /api/admin/audit + /api/admin/emails.
  */
+
+import type { TimelineEntry } from '~/components/admin/ActivityFeed.vue'
+import type { UpcomingSlot } from '~/components/admin/UpcomingSlots.vue'
 
 interface StatsPayload {
   totals: { bookingsCount: number, cancelledCount: number, guests: number, capacity: number, booked: number, avgFillRate: number }
@@ -79,12 +80,12 @@ onMounted(() => { void load() })
 
 const todayIso = new Date().toISOString().split('T')[0]!
 
-const upcomingSlots = computed(() => {
+const upcomingSlots = computed<UpcomingSlot[]>(() => {
   if (!stats.value) return []
   return stats.value.fillRate
     .filter(f => f.date >= todayIso)
     .sort((a, b) => (a.date + a.startTime).localeCompare(b.date + b.startTime))
-    .slice(0, 3)
+    .slice(0, 4)
 })
 
 interface Concern {
@@ -133,159 +134,297 @@ const concerns = computed<Concern[]>(() => {
   return list
 })
 
-const languagesSubtitle = computed(() => {
-  if (!stats.value) return ''
-  return Object.entries(stats.value.byLanguage)
-    .map(([l, n]) => `${l.toUpperCase()}:${n}`)
-    .join(' · ')
+const languageBreakdown = computed(() => {
+  if (!stats.value) return '—'
+  const entries = Object.entries(stats.value.byLanguage)
+  if (entries.length === 0) return '—'
+  return entries.map(([l, n]) => `${l.toUpperCase()} ${n}`).join(' · ')
 })
 
-function slotFillVariant(rate: number): 'low' | 'full' | 'normal' {
-  if (rate >= 100) return 'full'
-  if (rate < 30) return 'low'
-  return 'normal'
+const placesLabel = (booked: number, total: number) =>
+  t('dashboard.placesOf', { booked, total })
+
+function escapeHtml(s: string): string {
+  return s.replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[c]!))
 }
+
+function lookupBooking(targetId: string | null) {
+  if (!targetId || !stats.value) return null
+  return stats.value.recentBookings.find(b => b.id === targetId) ?? null
+}
+
+function humanizeActor(actor: string): string {
+  const key = actor === 'admin' || actor === 'visitor' || actor === 'system' || actor === 'cron' ? actor : null
+  if (key) return t(`dashboard.actor.${key}`)
+  return actor
+}
+
+const humanizedAudit = computed<TimelineEntry[]>(() => {
+  return audit.value.slice(0, 8).map((a): TimelineEntry => {
+    const booking = lookupBooking(a.targetId)
+    const actorLabel = humanizeActor(a.actor)
+
+    if (a.action === 'booking.create') {
+      if (booking) {
+        const name = escapeHtml(`${booking.firstName} ${booking.lastName}`.trim())
+        const key = booking.guests === 1 ? 'dashboard.humanized.bookingCreateOne' : 'dashboard.humanized.bookingCreateMany'
+        return {
+          id: a.id,
+          glyph: '+',
+          tone: 'emerald',
+          text: t(key, { name, count: booking.guests }),
+          actor: actorLabel,
+          timestamp: a.timestamp,
+          link: `/admin/bookings/${booking.id}`,
+        }
+      }
+      return {
+        id: a.id,
+        glyph: '+',
+        tone: 'emerald',
+        text: t('dashboard.humanized.bookingCreateAnonOne', { count: 1 }),
+        actor: actorLabel,
+        timestamp: a.timestamp,
+        link: a.targetId ? `/admin/bookings/${a.targetId}` : undefined,
+      }
+    }
+
+    if (a.action === 'booking.cancel') {
+      return {
+        id: a.id,
+        glyph: '×',
+        tone: 'orange',
+        text: t('dashboard.humanized.bookingCancel'),
+        actor: actorLabel,
+        timestamp: a.timestamp,
+        link: a.targetId ? `/admin/bookings/${a.targetId}` : undefined,
+      }
+    }
+
+    if (a.action === 'booking.update') {
+      return {
+        id: a.id,
+        glyph: '~',
+        tone: 'gold',
+        text: t('dashboard.humanized.bookingUpdate'),
+        actor: actorLabel,
+        timestamp: a.timestamp,
+        link: a.targetId ? `/admin/bookings/${a.targetId}` : undefined,
+      }
+    }
+
+    if (a.action === 'checkin.in') {
+      return {
+        id: a.id,
+        glyph: '✓',
+        tone: 'emerald',
+        text: t('dashboard.humanized.checkinIn'),
+        actor: actorLabel,
+        timestamp: a.timestamp,
+      }
+    }
+
+    if (a.action === 'checkin.out') {
+      return {
+        id: a.id,
+        glyph: '↩',
+        tone: 'muted',
+        text: t('dashboard.humanized.checkinOut'),
+        actor: actorLabel,
+        timestamp: a.timestamp,
+      }
+    }
+
+    if (a.action.startsWith('email.test')) {
+      return {
+        id: a.id,
+        glyph: '✉',
+        tone: 'blue',
+        text: t('dashboard.humanized.emailTest'),
+        actor: actorLabel,
+        timestamp: a.timestamp,
+      }
+    }
+
+    if (a.action.startsWith('email.blast') || a.action.startsWith('blast')) {
+      return {
+        id: a.id,
+        glyph: '✉',
+        tone: 'blue',
+        text: t('dashboard.humanized.emailBlast'),
+        actor: actorLabel,
+        timestamp: a.timestamp,
+        link: '/admin/blast',
+      }
+    }
+
+    if (a.action.startsWith('settings')) {
+      return {
+        id: a.id,
+        glyph: '⚙',
+        tone: 'muted',
+        text: t('dashboard.humanized.settingsUpdate'),
+        actor: actorLabel,
+        timestamp: a.timestamp,
+        link: '/admin/settings',
+      }
+    }
+
+    if (a.action.startsWith('gallery')) {
+      return {
+        id: a.id,
+        glyph: '◉',
+        tone: 'gold',
+        text: t('dashboard.humanized.galleryUpdate'),
+        actor: actorLabel,
+        timestamp: a.timestamp,
+        link: '/admin/galleries',
+      }
+    }
+
+    return {
+      id: a.id,
+      glyph: '·',
+      tone: 'muted',
+      text: t('dashboard.humanized.generic', { action: a.action }),
+      actor: actorLabel,
+      timestamp: a.timestamp,
+    }
+  })
+})
 </script>
 
 <template>
-  <div>
-    <AdminPageHeader
-      :title="t('dashboard.title')"
-      :subtitle="t('dashboard.editionSubtitle', { year, range: dateRangeLabel })"
-    />
+  <div class="relative max-w-5xl mx-auto">
+    <div class="absolute inset-x-0 -top-10 -bottom-10 editorial-grain pointer-events-none opacity-60" aria-hidden="true"></div>
+
+    <section class="relative mb-10 md:mb-14 editorial-in">
+      <div class="eyebrow mb-4">
+        {{ t('dashboard.editionTag', { year }) }}
+      </div>
+      <h1 class="font-serif text-3xl md:text-4xl text-white" style="font-weight: 400; letter-spacing: -0.01em; line-height: 1.1;">
+        {{ t('dashboard.welcome') }}
+      </h1>
+      <p class="mt-2 text-sm text-white/55 tabular-nums">
+        {{ t('dashboard.editionDates') }} · <span class="italic font-serif">{{ t('dashboard.editionCity') }}</span>
+      </p>
+      <div class="mt-6 h-px w-24 bg-[var(--color-accent-gold)] opacity-50"></div>
+    </section>
 
     <p v-if="errorMessage" class="text-sm text-red-300 mb-6">{{ errorMessage }}</p>
 
-    <template v-if="loading && !stats">
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-        <AdminSkeleton variant="stat" :count="4" />
+    <section
+      v-if="concerns.length > 0"
+      class="relative mb-10 border border-orange-400/30 bg-orange-500/[0.06] rounded-sm px-5 py-4 editorial-in"
+      role="status"
+      aria-live="polite"
+    >
+      <div class="flex items-start gap-4">
+        <span class="mt-0.5 w-8 h-8 rounded-full border border-orange-400/40 bg-orange-500/10 flex items-center justify-center text-orange-300 text-sm shrink-0" aria-hidden="true">⚠</span>
+        <div class="flex-1 min-w-0">
+          <p class="eyebrow mb-2" style="color: rgb(253 186 116);">
+            {{ t('dashboard.concernsTitle') }}
+          </p>
+          <ul class="space-y-1">
+            <li v-for="c in concerns" :key="c.key" class="text-sm text-orange-100/90">
+              {{ c.label }}
+            </li>
+          </ul>
+        </div>
       </div>
-      <section class="mb-10">
-        <div class="h-5 w-40 bg-white/10 rounded mb-4 animate-pulse"></div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <AdminSkeleton variant="card" :count="3" />
+    </section>
+
+    <template v-if="loading && !stats">
+      <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-12">
+        <div class="md:col-span-2"><AdminSkeleton variant="stat" :count="1" /></div>
+        <div class="md:col-span-3 grid grid-cols-3 gap-3">
+          <AdminSkeleton variant="stat" :count="3" />
         </div>
+      </div>
+      <section class="mb-12">
+        <div class="h-5 w-40 bg-white/10 rounded mb-6 animate-pulse"></div>
+        <AdminSkeleton variant="row" :count="4" />
       </section>
-      <section class="mb-10">
-        <div class="h-5 w-40 bg-white/10 rounded mb-4 animate-pulse"></div>
-        <div class="bg-edition-dark border border-white/10 rounded-sm">
-          <AdminSkeleton variant="row" :count="6" />
-        </div>
+      <section class="mb-12">
+        <div class="h-5 w-40 bg-white/10 rounded mb-6 animate-pulse"></div>
+        <AdminSkeleton variant="row" :count="6" />
       </section>
     </template>
 
     <template v-if="stats">
-      <section
-        v-if="concerns.length > 0"
-        class="bg-orange-500/10 border border-orange-500/30 text-orange-200 rounded-sm px-5 py-4 mb-6"
-        role="status"
-        aria-live="polite"
-      >
-        <div class="flex items-start gap-3">
-          <span class="text-lg leading-none mt-0.5" aria-hidden="true">⚠</span>
-          <div class="flex-1 min-w-0">
-            <p class="text-xs uppercase tracking-wider font-mono mb-2 text-orange-200/80">
-              {{ t('dashboard.concernsTitle') }}
-            </p>
-            <ul class="space-y-1">
-              <li v-for="c in concerns" :key="c.key" class="text-sm">
-                {{ c.label }}
-              </li>
-            </ul>
-          </div>
+      <section class="mb-14 grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div class="md:col-span-2">
+          <AdminHeroStatCard
+            :eyebrow="t('dashboard.editionTag', { year })"
+            :label="t('dashboard.fillRateMain')"
+            :value="stats.totals.avgFillRate"
+            unit="%"
+            :progress="stats.totals.avgFillRate"
+            :progress-label="t('dashboard.placesOf', { booked: stats.totals.booked, total: stats.totals.capacity })"
+            :caption="t('dashboard.fillRateCaption')"
+          />
+        </div>
+        <div class="md:col-span-3 grid grid-cols-3 gap-3">
+          <AdminMiniStatCard
+            :eyebrow="t('dashboard.statBookings')"
+            :value="stats.totals.bookingsCount"
+            :subtitle="t('dashboard.statCancelled', { count: stats.totals.cancelledCount })"
+            :delay="80"
+          />
+          <AdminMiniStatCard
+            :eyebrow="t('dashboard.statParticipants')"
+            :value="stats.totals.guests"
+            :subtitle="t('dashboard.statCapacityOf', { capacity: stats.totals.capacity })"
+            :delay="140"
+          />
+          <AdminMiniStatCard
+            :eyebrow="t('dashboard.statLanguages')"
+            :value="languageBreakdown"
+            :delay="200"
+          />
         </div>
       </section>
 
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">
-        <div class="bg-edition-dark border border-white/10 rounded-sm p-4">
-          <div class="text-[10px] text-white/50 tracking-wider font-mono mb-1 uppercase">{{ t('dashboard.statBookings') }}</div>
-          <div class="text-xl font-light text-white">{{ stats.totals.bookingsCount }}</div>
-          <div class="text-[11px] text-white/40 mt-1">{{ t('dashboard.statCancelled', { count: stats.totals.cancelledCount }) }}</div>
-        </div>
-        <div class="bg-edition-dark border border-white/10 rounded-sm p-4">
-          <div class="text-[10px] text-white/50 tracking-wider font-mono mb-1 uppercase">{{ t('dashboard.statParticipants') }}</div>
-          <div class="text-xl font-light text-white">{{ stats.totals.guests }}</div>
-          <div class="text-[11px] text-white/40 mt-1">{{ t('dashboard.statCapacityOf', { capacity: stats.totals.capacity }) }}</div>
-        </div>
-        <div class="bg-edition-dark border border-white/10 rounded-sm p-4">
-          <div class="text-[10px] text-white/50 tracking-wider font-mono mb-1 uppercase">{{ t('dashboard.statFillRate') }}</div>
-          <div class="text-xl font-light text-white">{{ stats.totals.avgFillRate }}%</div>
-        </div>
-        <div class="bg-edition-dark border border-white/10 rounded-sm p-4">
-          <div class="text-[10px] text-white/50 tracking-wider font-mono mb-1 uppercase">{{ t('dashboard.statLanguages') }}</div>
-          <div class="text-xl font-light text-white">{{ languagesSubtitle || '—' }}</div>
-        </div>
-      </div>
-
-      <section class="mb-10">
-        <h2 class="text-lg font-semibold mb-4">{{ t('dashboard.upcomingSlots') }}</h2>
-        <div v-if="upcomingSlots.length === 0" class="text-sm text-white/40">
-          {{ t('dashboard.noUpcomingSlots') }}
-        </div>
-        <div v-else class="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <NuxtLink
-            v-for="s in upcomingSlots"
-            :key="s.slotId"
-            :to="`/admin/parcours/${routeSlugFromId(s.routeId)}/slot/${s.slotId}`"
-            class="block bg-edition-dark border rounded-sm p-4 transition-colors"
-            :class="{
-              'border-orange-500/40 hover:border-orange-400': slotFillVariant(s.rate) === 'low',
-              'border-emerald-500/40 hover:border-emerald-400': slotFillVariant(s.rate) === 'full',
-              'border-white/10 hover:border-white/25': slotFillVariant(s.rate) === 'normal',
-            }"
-          >
-            <div class="flex items-start justify-between gap-2">
-              <div class="min-w-0">
-                <p class="font-mono text-sm">{{ s.date }} · {{ s.startTime }}</p>
-                <p class="text-white/70 mt-1 capitalize">{{ routeSlugFromId(s.routeId).replace(/-/g, ' + ') }}</p>
-              </div>
-              <span
-                v-if="slotFillVariant(s.rate) === 'low'"
-                class="text-[10px] uppercase tracking-wider font-mono px-2 py-0.5 rounded-sm border border-orange-500/40 text-orange-300 bg-orange-500/10 whitespace-nowrap"
-              >
-                {{ t('dashboard.badgeLowFill') }}
-              </span>
-              <span
-                v-else-if="slotFillVariant(s.rate) === 'full'"
-                class="text-[10px] uppercase tracking-wider font-mono px-2 py-0.5 rounded-sm border border-emerald-500/40 text-emerald-300 bg-emerald-500/10 whitespace-nowrap"
-              >
-                {{ t('dashboard.badgeFull') }}
-              </span>
-            </div>
-            <p class="text-xs text-white/40 mt-2">{{ s.language.toUpperCase() }} · {{ t('dashboard.statSlotPlaces', { booked: s.booked, max: s.max }) }}</p>
-            <div class="mt-2 h-1 w-full bg-white/10 rounded-full overflow-hidden">
-              <div
-                class="h-full"
-                :class="{
-                  'bg-orange-400': slotFillVariant(s.rate) === 'low',
-                  'bg-emerald-400': slotFillVariant(s.rate) === 'full',
-                  'bg-white/60': slotFillVariant(s.rate) === 'normal',
-                }"
-                :style="{ width: `${s.rate}%` }"
-              />
-            </div>
+      <section class="mb-14">
+        <header class="flex items-baseline justify-between gap-4 mb-7">
+          <div>
+            <div class="eyebrow mb-2">{{ dateRangeLabel }}.{{ year }}</div>
+            <h2 class="font-serif text-2xl text-white" style="font-weight: 400; letter-spacing: -0.01em;">
+              {{ t('dashboard.upcomingSection') }}
+            </h2>
+          </div>
+          <NuxtLink to="/admin/parcours" class="text-xs text-white/50 hover:text-gold font-mono uppercase tracking-[0.18em] transition-colors arrow-nudge-parent">
+            {{ t('dashboard.viewAll') }}
           </NuxtLink>
-        </div>
+        </header>
+        <AdminUpcomingSlots
+          :slots="upcomingSlots"
+          :empty-label="t('dashboard.noUpcomingSlots')"
+          :full-label="t('dashboard.badgeFull')"
+          :low-fill-label="t('dashboard.badgeLowFill')"
+          :places-label="placesLabel"
+        />
       </section>
 
-      <section class="mb-10">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-semibold">{{ t('dashboard.recentActivity') }}</h2>
-          <NuxtLink to="/admin/audit" class="text-xs text-white/50 hover:text-white">{{ t('dashboard.viewAll') }}</NuxtLink>
-        </div>
-        <div v-if="audit.length === 0" class="bg-edition-dark border border-white/10 rounded-sm">
-          <AdminEmptyState :title="t('dashboard.noActivity')" />
-        </div>
-        <div v-else class="bg-edition-dark border border-white/10 rounded-sm divide-y divide-white/5">
-          <div v-for="a in audit.slice(0, 8)" :key="a.id" class="px-4 py-3 flex items-center justify-between gap-4 text-sm">
-            <div class="flex items-center gap-3 min-w-0">
-              <span class="text-[10px] uppercase tracking-wider font-mono text-white/40 shrink-0 w-14">{{ a.actor }}</span>
-              <span class="font-mono text-xs">{{ a.action }}</span>
-              <span v-if="a.targetId" class="text-xs text-white/40 font-mono truncate">{{ a.targetId.slice(0, 8) }}</span>
-            </div>
-            <span class="text-xs text-white/40 font-mono whitespace-nowrap">{{ a.timestamp }}</span>
+      <section class="mb-12">
+        <header class="flex items-baseline justify-between gap-4 mb-7">
+          <div>
+            <div class="eyebrow mb-2">Live</div>
+            <h2 class="font-serif text-2xl text-white" style="font-weight: 400; letter-spacing: -0.01em;">
+              {{ t('dashboard.activitySection') }}
+            </h2>
           </div>
-        </div>
+          <NuxtLink to="/admin/audit" class="text-xs text-white/50 hover:text-gold font-mono uppercase tracking-[0.18em] transition-colors arrow-nudge-parent">
+            {{ t('dashboard.viewAll') }}
+          </NuxtLink>
+        </header>
+        <AdminActivityFeed
+          :entries="humanizedAudit"
+          :empty-label="t('dashboard.noActivity')"
+          :just-now-label="t('dashboard.justNow')"
+        />
       </section>
     </template>
   </div>

@@ -262,7 +262,8 @@
     "detailHistoryActionEmailSent": "Email enviado",
     "detailHistoryActionEmailFailed": "Error al enviar email",
     "detailHistoryActionGeneric": "{action}",
-    "justNow": "ahora mismo"
+    "justNow": "ahora mismo",
+    "filterChipAllRoutes": "Todos los recorridos"
   },
   "checkin": {
     "overviewTitle": "Check-in",

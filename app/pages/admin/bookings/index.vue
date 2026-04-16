@@ -54,6 +54,7 @@ const errorMessage = ref<string | null>(null)
 type StatusFilter = 'all' | 'confirmed' | 'cancelled' | 'waitlist'
 const statusFilter = ref<StatusFilter>('all')
 const dateFilter = ref<string>('all')
+const routeFilter = ref<string>('all')
 const searchQuery = ref<string>('')
 const currentPage = ref(1)
 const pageSize = 20
@@ -67,6 +68,7 @@ const filteredBookings = computed(() => {
     if (statusFilter.value === 'cancelled' && b.status !== 'cancelled') return false
     if (statusFilter.value === 'waitlist' && b.status !== 'waitlist') return false
     if (dateFilter.value !== 'all' && b.slotDate !== dateFilter.value) return false
+    if (routeFilter.value !== 'all' && b.routeId !== routeFilter.value) return false
     if (q) {
       const hay = `${b.firstName} ${b.lastName} ${b.email} ${b.id} ${b.phone ?? ''} ${b.routeId} ${b.language}`.toLowerCase()
       if (!hay.includes(q)) return false
@@ -120,6 +122,18 @@ const dateChipOptions = computed(() => {
   return opts
 })
 
+const routeChipOptions = computed(() => {
+  const counts = new Map<string, number>()
+  for (const b of rawBookings.value) counts.set(b.routeId, (counts.get(b.routeId) ?? 0) + 1)
+  const opts: Array<{ value: string, label: string, count: number }> = [
+    { value: 'all', label: t('bookings.filterChipAllRoutes'), count: rawBookings.value.length },
+  ]
+  for (const [routeId, count] of counts) {
+    opts.push({ value: routeId, label: abbrevRoute(routeId), count })
+  }
+  return opts
+})
+
 function abbrevRoute(routeId: string): string {
   const parts = routeSlugFromId(routeId).split('-')
   return parts.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join('+')
@@ -132,7 +146,7 @@ function formatSlotDate(iso: string): string {
   return `${day} ${months[month] ?? ''}`
 }
 
-watch([statusFilter, dateFilter, searchQuery], () => {
+watch([statusFilter, dateFilter, routeFilter, searchQuery], () => {
   currentPage.value = 1
 })
 
@@ -358,6 +372,24 @@ async function submitNew() {
               ? 'bg-gold-soft text-gold border-gold-soft'
               : 'border-white/10 text-white/50 hover:text-white hover:border-white/25'"
             @click="dateFilter = option.value"
+          >
+            {{ option.label }}<span v-if="option.count !== undefined" class="opacity-50 ml-1.5 tabular-nums">{{ option.count }}</span>
+          </button>
+        </div>
+      </div>
+      <div v-if="routeChipOptions.length > 1">
+        <p class="eyebrow mb-3">{{ t('bookings.filterByRoute') }}</p>
+        <div class="flex flex-wrap gap-2">
+          <button
+            v-for="option in routeChipOptions"
+            :key="option.value"
+            type="button"
+            :aria-pressed="routeFilter === option.value"
+            class="px-3 py-1.5 text-xs font-mono uppercase tracking-[0.14em] rounded-full border transition-colors"
+            :class="routeFilter === option.value
+              ? 'bg-gold-soft text-gold border-gold-soft'
+              : 'border-white/10 text-white/50 hover:text-white hover:border-white/25'"
+            @click="routeFilter = option.value"
           >
             {{ option.label }}<span v-if="option.count !== undefined" class="opacity-50 ml-1.5 tabular-nums">{{ option.count }}</span>
           </button>

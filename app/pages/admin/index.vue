@@ -80,12 +80,31 @@ onMounted(() => { void load() })
 
 const todayIso = new Date().toISOString().split('T')[0]!
 
+const routeFilter = ref<string>('all')
+
+const upcomingRouteChips = computed(() => {
+  if (!stats.value) return []
+  const upcoming = stats.value.fillRate.filter(f => f.date >= todayIso)
+  const counts = new Map<string, number>()
+  for (const f of upcoming) counts.set(f.routeId, (counts.get(f.routeId) ?? 0) + 1)
+  const chips: Array<{ value: string, label: string, count: number }> = [
+    { value: 'all', label: t('dashboard.filterRouteAll'), count: upcoming.length },
+  ]
+  for (const [routeId, count] of counts) {
+    const slug = routeId.replace(/^route-/, '')
+    const label = slug.split('-').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' · ')
+    chips.push({ value: routeId, label, count })
+  }
+  return chips
+})
+
 const upcomingSlots = computed<UpcomingSlot[]>(() => {
   if (!stats.value) return []
   return stats.value.fillRate
     .filter(f => f.date >= todayIso)
+    .filter(f => routeFilter.value === 'all' || f.routeId === routeFilter.value)
     .sort((a, b) => (a.date + a.startTime).localeCompare(b.date + b.startTime))
-    .slice(0, 4)
+    .slice(0, 6)
 })
 
 interface Concern {
@@ -398,6 +417,23 @@ const humanizedAudit = computed<TimelineEntry[]>(() => {
             {{ t('dashboard.viewAll') }}
           </NuxtLink>
         </header>
+        <div v-if="upcomingRouteChips.length > 1" class="flex flex-wrap gap-2 mb-5">
+          <button
+            v-for="chip in upcomingRouteChips"
+            :key="chip.value"
+            type="button"
+            :class="[
+              'px-3 py-1.5 text-xs font-mono uppercase tracking-[0.12em] rounded-full border transition-colors',
+              routeFilter === chip.value
+                ? 'bg-gold-soft text-gold border-gold'
+                : 'text-white/50 border-white/10 hover:text-white hover:border-white/20',
+            ]"
+            @click="routeFilter = chip.value"
+          >
+            {{ chip.label }}
+            <span class="ml-1 opacity-60 tabular-nums">{{ chip.count }}</span>
+          </button>
+        </div>
         <AdminUpcomingSlots
           :slots="upcomingSlots"
           :empty-label="t('dashboard.noUpcomingSlots')"

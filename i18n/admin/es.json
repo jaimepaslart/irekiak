@@ -124,7 +124,8 @@
       "visitor": "Visitante",
       "system": "Sistema",
       "cron": "Cron"
-    }
+    },
+    "filterRouteAll": "Todos"
   },
   "bookings": {
     "title": "Reservas",

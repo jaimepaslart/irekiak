@@ -64,7 +64,7 @@ provide('adminLogout', logout)
 const desktopNavItems = computed(() => [
   { to: '/admin', label: t('nav.dashboard') },
   { to: '/admin/bookings', label: t('nav.bookings') },
-  { to: '/admin/checkin', label: t('nav.checkin') },
+  { to: '/admin/parcours', label: t('nav.parcours') },
   { to: '/admin/galleries', label: t('nav.galleries') },
   { to: '/admin/blast', label: t('nav.blast') },
 ])
@@ -73,7 +73,7 @@ const mobileNavItems = computed(() => [
   { to: '/admin', label: t('nav.dashboard') },
   { to: '/admin/bookings', label: t('nav.bookings') },
   { to: '/admin/bookings/new', label: t('nav.newBooking') },
-  { to: '/admin/checkin', label: t('nav.checkin') },
+  { to: '/admin/parcours', label: t('nav.parcours') },
   { to: '/admin/galleries', label: t('nav.galleries') },
   { to: '/admin/blast', label: t('nav.blast') },
   { to: '/admin/emails', label: t('nav.emails') },
@@ -103,7 +103,7 @@ function handleKeyDown(e: KeyboardEvent) {
     case 'd': navigateTo('/admin'); break
     case 'b': navigateTo('/admin/bookings'); break
     case 'c': navigateTo('/admin/bookings/new'); break
-    case 'k': navigateTo('/admin/checkin'); break
+    case 'k': navigateTo('/admin/parcours'); break
     case 's': navigateTo('/admin/settings'); break
     case 'a': navigateTo('/admin/audit'); break
     case '?': helpOpen.value = true; break

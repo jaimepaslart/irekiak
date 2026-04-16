@@ -43,7 +43,11 @@ const items = computed<PaletteItem[]>(() => {
   return [
     { id: 'nav-dashboard', label: t('nav.dashboard'), sublabel: nav, icon: '📊', shortcut: 'd', action: () => go('/admin') },
     { id: 'nav-bookings', label: t('nav.bookings'), sublabel: nav, icon: '📋', shortcut: 'b', action: () => go('/admin/bookings') },
-    { id: 'nav-checkin', label: t('nav.checkin'), sublabel: nav, icon: '✓', shortcut: 'k', action: () => go('/admin/checkin') },
+    { id: 'nav-parcours', label: t('nav.parcours'), sublabel: nav, icon: '📍', shortcut: 'k', action: () => go('/admin/parcours') },
+    { id: 'nav-parcours-ac', label: 'Arteko · Cibrián', sublabel: t('nav.parcours'), icon: '📍', action: () => go('/admin/parcours/arteko-cibrian') },
+    { id: 'nav-parcours-cs', label: 'Central · Sakana', sublabel: t('nav.parcours'), icon: '📍', action: () => go('/admin/parcours/central-sakana') },
+    { id: 'nav-parcours-ae', label: 'Arteztu · Ekain', sublabel: t('nav.parcours'), icon: '📍', action: () => go('/admin/parcours/arteztu-ekain') },
+    { id: 'nav-checkin', label: t('nav.checkin'), sublabel: nav, icon: '✓', action: () => go('/admin/checkin') },
     { id: 'nav-galleries', label: t('nav.galleries'), sublabel: nav, icon: '🏛️', action: () => go('/admin/galleries') },
     { id: 'nav-blast', label: t('nav.blast'), sublabel: nav, icon: '✉', action: () => go('/admin/blast') },
     { id: 'nav-emails', label: t('nav.emails'), sublabel: nav, icon: '✉', action: () => go('/admin/emails') },

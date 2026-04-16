@@ -1,7 +1,6 @@
 import { Resend } from 'resend'
 import { useRuntimeConfig } from '#imports'
 import { withEmailRetry } from './email-retry'
-import { ALLOWED_ROUTE_SLUGS, signRouteToken } from './galeriste-token'
 import {
   cta,
   dataTable,
@@ -44,27 +43,18 @@ interface GalleryNotificationParams {
 }
 
 const galeristeCtaLabels: Record<Language, string> = {
-  eu: 'Nire erreserbak ikusi',
-  es: 'Ver mis reservas',
-  fr: 'Voir mes réservations',
-  en: 'View my bookings',
+  eu: 'Ibilbidea ikusi',
+  es: 'Ver el recorrido',
+  fr: 'Voir le parcours',
+  en: 'View the route',
 }
 
-const ALLOWED_GALERISTE_SLUGS = new Set<string>(ALLOWED_ROUTE_SLUGS)
-
-function buildGaleristeUrl(routeId: string): string | null {
+function buildParcoursUrl(routeId: string): string | null {
   const slug = routeId.startsWith('route-') ? routeId.slice('route-'.length) : routeId
-  if (!ALLOWED_GALERISTE_SLUGS.has(slug)) return null
-  let token: string
-  try {
-    token = signRouteToken(slug)
-  }
-  catch {
-    return null
-  }
+  if (!slug) return null
   const config = useRuntimeConfig()
-  const siteUrl = (config.public?.siteUrl as string | undefined) ?? 'https://irekiak.eus'
-  return `${siteUrl.replace(/\/$/, '')}/galeristes/${slug}?key=${token}`
+  const siteUrl = (config.public?.siteUrl as string | undefined) ?? 'https://irekiak.art'
+  return `${siteUrl.replace(/\/$/, '')}/admin/parcours/${slug}`
 }
 
 interface Strings {
@@ -247,7 +237,7 @@ export function buildGalleryNotificationEmail(p: GalleryNotificationParams): {
 
   const preheader = isBooked ? s.preheaderBooked(fullName) : s.preheaderCancelled(fullName)
 
-  const galeristeUrl = buildGaleristeUrl(p.route.id)
+  const galeristeUrl = buildParcoursUrl(p.route.id)
   const galeristeCta = galeristeUrl
     ? cta({
         href: galeristeUrl,

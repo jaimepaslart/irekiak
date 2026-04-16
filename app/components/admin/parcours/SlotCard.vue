@@ -36,8 +36,8 @@ const dayBadge = computed(() => {
   today.setHours(0, 0, 0, 0)
   const slotDate = new Date(`${props.slotData.date}T00:00:00`)
   const diff = Math.round((slotDate.getTime() - today.getTime()) / (24 * 60 * 60 * 1000))
-  if (diff === 0) return t('galeriste.today')
-  if (diff === 1) return t('galeriste.tomorrow')
+  if (diff === 0) return t('parcours.today')
+  if (diff === 1) return t('parcours.tomorrow')
   return null
 })
 
@@ -50,7 +50,7 @@ const allAttended = computed(() =>
   props.slotData.booked > 0 && props.slotData.attendedCount >= props.slotData.booked,
 )
 
-const targetUrl = computed(() => `/galeristes/${props.routeSlug}/slot/${props.slotData.id}`)
+const targetUrl = computed(() => `/admin/parcours/${props.routeSlug}/slot/${props.slotData.id}`)
 </script>
 
 <template>
@@ -92,7 +92,7 @@ const targetUrl = computed(() => `/galeristes/${props.routeSlug}/slot/${props.sl
     <div class="mt-4 space-y-2">
       <div class="flex items-baseline justify-between text-sm">
         <span class="text-white/60">
-          {{ t('galeriste.fillRate', { booked: slot.booked, capacity: slot.capacity }) }}
+          {{ t('parcours.fillRate', { booked: slot.booked, capacity: slot.capacity }) }}
         </span>
         <span
           class="font-mono tabular-nums"
@@ -101,7 +101,7 @@ const targetUrl = computed(() => `/galeristes/${props.routeSlug}/slot/${props.sl
             allAttended ? 'text-emerald-300' : 'text-white/80',
           ]"
         >
-          {{ slot.attendedCount }}/{{ slot.booked }} <span class="text-white/40 text-xs">{{ t('galeriste.arrived', { count: slot.booked }).split(' ').slice(1).join(' ') }}</span>
+          {{ slot.attendedCount }}/{{ slot.booked }} <span class="text-white/40 text-xs">{{ t('parcours.arrived') }}</span>
         </span>
       </div>
       <div

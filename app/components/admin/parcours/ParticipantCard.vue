@@ -22,7 +22,7 @@ const emit = defineEmits<{ toggle: [bookingId: string, present: boolean] }>()
 const { t } = useAdminT()
 
 const peopleLabel = computed(() =>
-  props.participant.numberOfPeople > 1 ? t('galeriste.personPlural') : t('galeriste.personSingular'),
+  props.participant.numberOfPeople > 1 ? t('parcours.personPlural') : t('parcours.personSingular'),
 )
 
 function handleClick(e: MouseEvent): void {
@@ -90,7 +90,7 @@ function handleClick(e: MouseEvent): void {
         v-if="participant.specialNeeds"
         class="mt-2 inline-block text-xs px-2 py-1 rounded-sm bg-orange-500/15 border border-orange-400/30 text-orange-200"
       >
-        {{ t('galeriste.specialNeeds') }} · {{ participant.specialNeeds }}
+        {{ t('parcours.specialNeeds') }} · {{ participant.specialNeeds }}
       </div>
     </div>
   </button>

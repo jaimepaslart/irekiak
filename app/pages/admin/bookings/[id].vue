@@ -33,34 +33,12 @@ const bookingId = computed(() => String(route.params.id))
 const data = ref<DetailPayload | null>(null)
 const loading = ref(true)
 const errorMessage = ref<string | null>(null)
-const editing = ref(false)
-const saving = ref(false)
-
-interface EditForm {
-  firstName: string
-  lastName: string
-  email: string
-  phone: string
-  numberOfPeople: number
-  specialNeeds: string
-}
-const form = reactive<EditForm>({
-  firstName: '', lastName: '', email: '', phone: '', numberOfPeople: 1, specialNeeds: '',
-})
 
 async function load() {
   loading.value = true
   try {
     data.value = await $fetch<DetailPayload>(`/api/admin/bookings/${bookingId.value}`, {
       headers: { 'x-admin-token': token.value },
-    })
-    Object.assign(form, {
-      firstName: data.value.booking.firstName,
-      lastName: data.value.booking.lastName,
-      email: data.value.booking.email,
-      phone: data.value.booking.phone ?? '',
-      numberOfPeople: data.value.booking.numberOfPeople,
-      specialNeeds: data.value.booking.specialNeeds ?? '',
     })
   }
   catch (err: unknown) {
@@ -70,38 +48,6 @@ async function load() {
 }
 
 onMounted(() => { void load() })
-
-async function save() {
-  if (!data.value) return
-  saving.value = true
-  try {
-    const body: Record<string, unknown> = {}
-    const b = data.value.booking
-    if (form.firstName !== b.firstName) body.firstName = form.firstName
-    if (form.lastName !== b.lastName) body.lastName = form.lastName
-    if (form.email !== b.email) body.email = form.email
-    if ((form.phone || null) !== b.phone) body.phone = form.phone || null
-    if (form.numberOfPeople !== b.numberOfPeople) body.numberOfPeople = form.numberOfPeople
-    if ((form.specialNeeds || null) !== b.specialNeeds) body.specialNeeds = form.specialNeeds || null
-
-    if (Object.keys(body).length === 0) {
-      editing.value = false
-      return
-    }
-
-    await $fetch(`/api/admin/bookings/${bookingId.value}/edit`, {
-      method: 'PATCH',
-      headers: { 'x-admin-token': token.value, 'Content-Type': 'application/json' },
-      body,
-    })
-    editing.value = false
-    await load()
-  }
-  catch (err: unknown) {
-    alert((err as { statusMessage?: string })?.statusMessage ?? t('bookings.saveError'))
-  }
-  finally { saving.value = false }
-}
 
 async function resend() {
   try {
@@ -113,19 +59,6 @@ async function resend() {
   }
   catch (err: unknown) {
     alert((err as { statusMessage?: string })?.statusMessage ?? t('bookings.resendFailed'))
-  }
-}
-
-async function cancel() {
-  if (!confirm(t('bookings.confirmCancel'))) return
-  try {
-    await $fetch(`/api/admin/bookings/${bookingId.value}/cancel`, {
-      method: 'POST', headers: { 'x-admin-token': token.value },
-    })
-    await load()
-  }
-  catch (err: unknown) {
-    alert((err as { statusMessage?: string })?.statusMessage ?? t('bookings.cancelError'))
   }
 }
 
@@ -177,14 +110,8 @@ function actionColor(a: string): string {
       >
         <template #actions>
           <AdminBadgeStatus :status="data.booking.status" :label="statusBadgeLabel(data.booking.status)" />
-          <AdminBaseButton v-if="!editing && data.booking.status === 'confirmed'" variant="secondary" type="button" @click="editing = true">
-            {{ t('bookings.detailEdit') }}
-          </AdminBaseButton>
           <AdminBaseButton v-if="data.booking.status === 'confirmed'" variant="secondary" type="button" @click="resend">
             {{ t('bookings.detailResend') }}
-          </AdminBaseButton>
-          <AdminBaseButton v-if="data.booking.status === 'confirmed'" variant="danger" type="button" @click="cancel">
-            {{ t('bookings.detailCancel') }}
           </AdminBaseButton>
         </template>
       </AdminPageHeader>
@@ -196,7 +123,7 @@ function actionColor(a: string): string {
             {{ t('bookings.detailSection') }}
           </h2>
 
-          <dl v-if="!editing" class="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8 text-sm">
+          <dl class="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8 text-sm">
             <div>
               <dt class="text-white/40 uppercase tracking-wider text-xs font-mono mb-1">{{ t('bookings.detailFieldEmail') }}</dt>
               <dd class="text-white break-all"><a :href="`mailto:${data.booking.email}`" class="hover:underline">{{ data.booking.email }}</a></dd>
@@ -226,41 +153,6 @@ function actionColor(a: string): string {
               <dd class="text-white/70 font-mono text-xs">{{ data.booking.createdAt }}</dd>
             </div>
           </dl>
-
-          <form v-else class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm" @submit.prevent="save">
-            <label class="block">
-              <span class="text-xs uppercase tracking-wider text-white/40 block mb-1">{{ t('bookings.fieldFirstName') }}</span>
-              <input v-model="form.firstName" class="w-full bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-white">
-            </label>
-            <label class="block">
-              <span class="text-xs uppercase tracking-wider text-white/40 block mb-1">{{ t('bookings.fieldLastName') }}</span>
-              <input v-model="form.lastName" class="w-full bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-white">
-            </label>
-            <label class="block">
-              <span class="text-xs uppercase tracking-wider text-white/40 block mb-1">{{ t('bookings.fieldEmail') }}</span>
-              <input v-model="form.email" type="email" class="w-full bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-white">
-            </label>
-            <label class="block">
-              <span class="text-xs uppercase tracking-wider text-white/40 block mb-1">{{ t('bookings.fieldPhone') }}</span>
-              <input v-model="form.phone" class="w-full bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-white">
-            </label>
-            <label class="block">
-              <span class="text-xs uppercase tracking-wider text-white/40 block mb-1">{{ t('bookings.editParticipantsLabel') }}</span>
-              <input v-model.number="form.numberOfPeople" type="number" min="1" max="4" class="w-full bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-white">
-            </label>
-            <label class="block sm:col-span-2">
-              <span class="text-xs uppercase tracking-wider text-white/40 block mb-1">{{ t('bookings.fieldSpecialNeeds') }}</span>
-              <textarea v-model="form.specialNeeds" rows="3" maxlength="1000" class="w-full bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-white" />
-            </label>
-            <div class="sm:col-span-2 flex gap-3 justify-end mt-2">
-              <AdminBaseButton variant="ghost" type="button" :disabled="saving" @click="editing = false">
-                {{ t('common.cancel') }}
-              </AdminBaseButton>
-              <AdminBaseButton variant="primary" type="submit" :disabled="saving" :loading="saving">
-                {{ saving ? t('bookings.detailSaving') : t('common.save') }}
-              </AdminBaseButton>
-            </div>
-          </form>
         </section>
 
         <section class="bg-edition-dark border border-white/10 rounded-sm p-6">

@@ -40,26 +40,22 @@ const route = useRoute()
 const router = useRouter()
 const routeSlug = computed(() => String(route.params.route ?? ''))
 
-const { t, locale } = useAdminT()
+const { t, localized } = useAdminT()
 const token = inject<Ref<string>>('adminToken')!
 
-// Résolution du parcours via slug (côté client, depuis data/tours.ts)
-const routeMeta = computed(() => {
-  return tourRoutes.find(r => (r.slug || r.id.replace(/^route-/, '')) === routeSlug.value) ?? null
-})
+const galleriesById = new Map(galleries.map(g => [g.id, g]))
+
+const routeMeta = computed(() => findRouteBySlug(tourRoutes, routeSlug.value))
 
 const galleriesLabel = computed(() => {
   if (!routeMeta.value) return ''
   return routeMeta.value.galleryIds
-    .map(gid => galleries.find(g => g.id === gid)?.name)
+    .map(gid => galleriesById.get(gid)?.name)
     .filter((n): n is string => Boolean(n))
     .join(' · ')
 })
 
-const routeName = computed(() => {
-  if (!routeMeta.value) return ''
-  return routeMeta.value.name[locale.value === 'es' ? 'es' : 'fr']
-})
+const routeName = computed(() => routeMeta.value ? localized(routeMeta.value.name) : '')
 
 const slots = ref<SlotData[]>([])
 const loading = ref(true)

@@ -132,7 +132,7 @@ function resetForm() {
         <select v-model="form.tourSlotId" required class="w-full bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-white">
           <option value="">{{ t('bookings.fieldSlotPlaceholder') }}</option>
           <option v-for="s in slots" :key="s.id" :value="s.id">
-            {{ s.date }} · {{ s.startTime }} · {{ s.language.toUpperCase() }} · {{ s.routeId.replace('route-', '') }} ({{ s.remaining }}/{{ s.maxParticipants }})
+            {{ s.date }} · {{ s.startTime }} · {{ s.language.toUpperCase() }} · {{ routeSlugFromId(s.routeId) }} ({{ s.remaining }}/{{ s.maxParticipants }})
           </option>
         </select>
       </label>

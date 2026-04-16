@@ -17,25 +17,21 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), { isPrimary: false })
-const slot = computed(() => props.slotData)
 
-const { t, locale } = useAdminT()
+const { t, formatLongDate } = useAdminT()
 
-const dateLabel = computed(() => {
-  const d = new Date(`${props.slotData.date}T00:00:00`)
-  const intl = new Intl.DateTimeFormat(locale.value === 'es' ? 'es-ES' : 'fr-FR', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-  })
-  return intl.format(d).replace(/^./, c => c.toUpperCase())
-})
+// Timestamp "aujourd'hui 00:00" calculé une seule fois au setup de la card
+const todayStartTs = (() => {
+  const d = new Date()
+  d.setHours(0, 0, 0, 0)
+  return d.getTime()
+})()
+
+const dateLabel = computed(() => formatLongDate(props.slotData.date))
 
 const dayBadge = computed(() => {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const slotDate = new Date(`${props.slotData.date}T00:00:00`)
-  const diff = Math.round((slotDate.getTime() - today.getTime()) / (24 * 60 * 60 * 1000))
+  const slotTs = new Date(`${props.slotData.date}T00:00:00`).getTime()
+  const diff = Math.round((slotTs - todayStartTs) / 86_400_000)
   if (diff === 0) return t('parcours.today')
   if (diff === 1) return t('parcours.tomorrow')
   return null
@@ -75,7 +71,7 @@ const targetUrl = computed(() => `/admin/parcours/${props.routeSlug}/slot/${prop
           class="font-mono tabular-nums text-white/80"
           :class="isPrimary ? 'text-3xl mt-1' : 'text-base mt-0.5'"
         >
-          {{ slot.startTime }} <span class="text-white/40">→</span> {{ slot.endTime }}
+          {{ slotData.startTime }} <span class="text-white/40">→</span> {{ slotData.endTime }}
         </div>
       </div>
       <div class="flex flex-col items-end gap-1 flex-shrink-0">
@@ -84,7 +80,7 @@ const targetUrl = computed(() => `/admin/parcours/${props.routeSlug}/slot/${prop
           class="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-400/20 text-emerald-200 font-mono"
         >{{ dayBadge }}</span>
         <span class="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full border border-white/15 text-white/60 font-mono">
-          {{ slot.language.toUpperCase() }}
+          {{ slotData.language.toUpperCase() }}
         </span>
       </div>
     </div>
@@ -92,7 +88,7 @@ const targetUrl = computed(() => `/admin/parcours/${props.routeSlug}/slot/${prop
     <div class="mt-4 space-y-2">
       <div class="flex items-baseline justify-between text-sm">
         <span class="text-white/60">
-          {{ t('parcours.fillRate', { booked: slot.booked, capacity: slot.capacity }) }}
+          {{ t('parcours.fillRate', { booked: slotData.booked, capacity: slotData.capacity }) }}
         </span>
         <span
           class="font-mono tabular-nums"
@@ -101,7 +97,7 @@ const targetUrl = computed(() => `/admin/parcours/${props.routeSlug}/slot/${prop
             allAttended ? 'text-emerald-300' : 'text-white/80',
           ]"
         >
-          {{ slot.attendedCount }}/{{ slot.booked }} <span class="text-white/40 text-xs">{{ t('parcours.arrived') }}</span>
+          {{ slotData.attendedCount }}/{{ slotData.booked }} <span class="text-white/40 text-xs">{{ t('parcours.arrived') }}</span>
         </span>
       </div>
       <div

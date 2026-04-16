@@ -12,7 +12,7 @@ const galleries = galleriesData as Gallery[]
 definePageMeta({ layout: 'admin', i18n: false })
 useSeoMeta({ title: 'Admin · Parcours', robots: 'noindex, nofollow' })
 
-const { t, locale } = useAdminT()
+const { t, localized } = useAdminT()
 const token = inject<Ref<string>>('adminToken')!
 
 interface SlotOverview {
@@ -22,26 +22,29 @@ interface SlotOverview {
   attendedCount: number
 }
 
-const routeCards = computed(() => tourRoutes.map((r) => {
+// Pré-indexation (une passe) → évite O(routes × galleries) + O(routes × slots)
+// à chaque invalidation. Les datasets sont statiques donc calculés hors computed.
+const galleriesById = new Map(galleries.map(g => [g.id, g]))
+const slotCountByRouteId = tourSlots.reduce<Record<string, number>>((acc, s) => {
+  acc[s.routeId] = (acc[s.routeId] ?? 0) + 1
+  return acc
+}, {})
+
+const routeCards = tourRoutes.map((r) => {
   const galleryRefs = r.galleryIds
-    .map(gid => galleries.find(g => g.id === gid))
+    .map(gid => galleriesById.get(gid))
     .filter((g): g is NonNullable<typeof g> => Boolean(g))
-  const slug = r.slug || r.id.replace(/^route-/, '')
   return {
     id: r.id,
-    slug,
+    slug: slugOfRoute(r),
     name: r.name,
     color: r.color,
     galleries: galleryRefs,
-    slotCount: tourSlots.filter(s => s.routeId === r.id).length,
+    slotCount: slotCountByRouteId[r.id] ?? 0,
   }
-}))
+})
 
 const stats = ref<Record<string, { booked: number, attended: number }>>({})
-
-function localized(text: { eu: string, es: string, fr: string, en: string }): string {
-  return text[locale.value === 'es' ? 'es' : 'fr']
-}
 
 async function loadStats(): Promise<void> {
   try {

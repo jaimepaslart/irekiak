@@ -14,6 +14,8 @@ const { t, locale, setLocale } = useAdminT()
 const router = useRouter()
 const adminLogout = inject<() => void>('adminLogout')
 
+const PARCOURS_ALIASES = ['parcours', 'recorridos', 'checkin']
+
 const query = ref('')
 const selectedIndex = ref(0)
 const inputRef = useTemplateRef<HTMLInputElement>('inputRef')
@@ -38,16 +40,29 @@ function go(path: string) {
   close()
 }
 
+// Labels courts (pas dérivés des noms de galeries complets volontairement).
+const PARCOURS_ENTRIES: ReadonlyArray<{ slug: string, label: string }> = [
+  { slug: 'arteko-cibrian', label: 'Arteko · Cibrián' },
+  { slug: 'la-central-sakana', label: 'La Central · Sakana' },
+  { slug: 'arteztu-ekain', label: 'Arteztu · Ekain' },
+]
+
 const items = computed<PaletteItem[]>(() => {
   const nav = t('commandPalette.categoryNav')
   const action = t('commandPalette.categoryAction')
+  const parcoursSub = t('nav.parcours')
   return [
     { id: 'nav-dashboard', label: t('nav.dashboard'), sublabel: nav, icon: '📊', shortcut: 'd', action: () => go('/admin'), aliases: ['panel', 'tableau', 'dashboard'] },
     { id: 'nav-bookings', label: t('nav.bookings'), sublabel: nav, icon: '📋', shortcut: 'b', action: () => go('/admin/bookings'), aliases: ['reservas', 'reservations', 'bookings'] },
-    { id: 'nav-parcours', label: t('nav.parcours'), sublabel: nav, icon: '📍', shortcut: 'k', action: () => go('/admin/parcours'), aliases: ['parcours', 'recorridos', 'tours', 'routes', 'checkin', 'check-in'] },
-    { id: 'nav-parcours-ac', label: 'Arteko · Cibrián', sublabel: t('nav.parcours'), icon: '📍', action: () => go('/admin/parcours/arteko-cibrian'), aliases: ['parcours', 'recorridos', 'checkin'] },
-    { id: 'nav-parcours-cs', label: 'La Central · Sakana', sublabel: t('nav.parcours'), icon: '📍', action: () => go('/admin/parcours/la-central-sakana'), aliases: ['parcours', 'recorridos', 'checkin'] },
-    { id: 'nav-parcours-ae', label: 'Arteztu · Ekain', sublabel: t('nav.parcours'), icon: '📍', action: () => go('/admin/parcours/arteztu-ekain'), aliases: ['parcours', 'recorridos', 'checkin'] },
+    { id: 'nav-parcours', label: t('nav.parcours'), sublabel: nav, icon: '📍', shortcut: 'k', action: () => go('/admin/parcours'), aliases: [...PARCOURS_ALIASES, 'tours', 'routes', 'check-in'] },
+    ...PARCOURS_ENTRIES.map<PaletteItem>(p => ({
+      id: `nav-parcours-${p.slug}`,
+      label: p.label,
+      sublabel: parcoursSub,
+      icon: '📍',
+      action: () => go(`/admin/parcours/${p.slug}`),
+      aliases: PARCOURS_ALIASES,
+    })),
     { id: 'nav-galleries', label: t('nav.galleries'), sublabel: nav, icon: '🏛️', action: () => go('/admin/galleries') },
     { id: 'nav-blast', label: t('nav.blast'), sublabel: nav, icon: '✉', action: () => go('/admin/blast') },
     { id: 'nav-emails', label: t('nav.emails'), sublabel: nav, icon: '✉', action: () => go('/admin/emails') },

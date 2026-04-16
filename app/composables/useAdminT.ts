@@ -1,4 +1,5 @@
 import type { Ref } from 'vue'
+import type { TranslatedText } from '#types/gallery'
 import fr from '../../i18n/admin/fr.json'
 import es from '../../i18n/admin/es.json'
 
@@ -31,10 +32,16 @@ function interpolate(str: string, params?: Record<string, string | number>): str
   })
 }
 
+const INTL_LOCALE: Record<AdminLocale, string> = { fr: 'fr-FR', es: 'es-ES' }
+
 export function useAdminT(): {
   t: (key: string, params?: Record<string, string | number>) => string
   locale: Ref<AdminLocale>
   setLocale: (loc: AdminLocale) => void
+  /** Formate une date ISO (YYYY-MM-DD) via Intl selon la locale admin. Première lettre capitalisée. */
+  formatLongDate: (iso: string, options?: Intl.DateTimeFormatOptions) => string
+  /** Retourne la variante FR ou ES d'un TranslatedText selon la locale admin. */
+  localized: (text: TranslatedText) => string
 } {
   const cookie = useCookie<AdminLocale>('irekiak_admin_lang', {
     default: () => 'fr',
@@ -56,5 +63,19 @@ export function useAdminT(): {
     return interpolate(raw, params)
   }
 
-  return { t, locale, setLocale }
+  const defaultLongDate: Intl.DateTimeFormatOptions = {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  }
+
+  const formatLongDate = (iso: string, options?: Intl.DateTimeFormatOptions): string => {
+    const d = new Date(`${iso}T00:00:00`)
+    const intl = new Intl.DateTimeFormat(INTL_LOCALE[locale.value], options ?? defaultLongDate)
+    return intl.format(d).replace(/^./, c => c.toUpperCase())
+  }
+
+  const localized = (text: TranslatedText): string => text[locale.value]
+
+  return { t, locale, setLocale, formatLongDate, localized }
 }

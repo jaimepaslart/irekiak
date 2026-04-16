@@ -53,7 +53,6 @@ interface SlotInfo {
   language: string
   capacity: number
   booked: number
-  attendedCount: number
 }
 
 interface ParticipantCardData {
@@ -68,17 +67,15 @@ interface ParticipantCardData {
   attendanceNotes: string | null
 }
 
-const routeParam = useRoute()
+const route = useRoute()
 const router = useRouter()
-const routeSlug = computed(() => String(routeParam.params.route ?? ''))
-const slotId = computed(() => String(routeParam.params.slotId ?? ''))
+const routeSlug = computed(() => String(route.params.route ?? ''))
+const slotId = computed(() => String(route.params.slotId ?? ''))
 
-const { t, locale } = useAdminT()
+const { t, formatLongDate } = useAdminT()
 const token = inject<Ref<string>>('adminToken')!
 
-const expectedRoute = computed(() => {
-  return tourRoutes.find(r => (r.slug || r.id.replace(/^route-/, '')) === routeSlug.value) ?? null
-})
+const expectedRoute = computed(() => findRouteBySlug(tourRoutes, routeSlug.value))
 
 const slot = ref<SlotInfo | null>(null)
 const participants = ref<ParticipantCardData[]>([])
@@ -101,7 +98,6 @@ async function load(): Promise<void> {
       `/api/admin/checkin/${slotId.value}`,
       { headers: { 'x-admin-token': token.value } },
     )
-    // Cross-route guard : si le slot n'appartient pas au parcours attendu → 404
     if (expectedRoute.value && res.route.id !== expectedRoute.value.id) {
       throw createError({ statusCode: 404, statusMessage: 'Slot does not belong to this parcours' })
     }
@@ -113,7 +109,6 @@ async function load(): Promise<void> {
       language: res.slot.language,
       capacity: res.slot.maxParticipants,
       booked: res.slot.bookedCount,
-      attendedCount: res.attendedCount,
     }
     participants.value = res.participants.map(p => ({
       id: p.id,
@@ -152,9 +147,6 @@ async function toggleAttendance(bookingId: string, present: boolean): Promise<vo
         body: { bookingId, present },
       },
     )
-    if (slot.value) {
-      slot.value.attendedCount += present ? 1 : -1
-    }
   }
   catch (err: unknown) {
     participants.value[idx]!.attended = previous
@@ -168,13 +160,7 @@ async function toggleAttendance(bookingId: string, present: boolean): Promise<vo
 
 const slotTitle = computed(() => {
   if (!slot.value) return ''
-  const d = new Date(`${slot.value.date}T00:00:00`)
-  const intl = new Intl.DateTimeFormat(locale.value === 'es' ? 'es-ES' : 'fr-FR', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-  })
-  const day = intl.format(d).replace(/^./, c => c.toUpperCase())
+  const day = formatLongDate(slot.value.date)
   return `${day} · ${slot.value.startTime} · ${slot.value.language.toUpperCase()}`
 })
 

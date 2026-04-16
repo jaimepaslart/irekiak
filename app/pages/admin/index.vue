@@ -79,10 +79,6 @@ onMounted(() => { void load() })
 
 const todayIso = new Date().toISOString().split('T')[0]!
 
-function routeSlugFromId(routeId: string): string {
-  return routeId.replace(/^route-/, '')
-}
-
 const upcomingSlots = computed(() => {
   if (!stats.value) return []
   return stats.value.fillRate
@@ -241,7 +237,7 @@ function slotFillVariant(rate: number): 'low' | 'full' | 'normal' {
             <div class="flex items-start justify-between gap-2">
               <div class="min-w-0">
                 <p class="font-mono text-sm">{{ s.date }} · {{ s.startTime }}</p>
-                <p class="text-white/70 mt-1 capitalize">{{ s.routeId.replace('route-', '').replace(/-/g, ' + ') }}</p>
+                <p class="text-white/70 mt-1 capitalize">{{ routeSlugFromId(s.routeId).replace(/-/g, ' + ') }}</p>
               </div>
               <span
                 v-if="slotFillVariant(s.rate) === 'low'"

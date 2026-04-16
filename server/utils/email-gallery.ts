@@ -1,6 +1,7 @@
 import { Resend } from 'resend'
 import { useRuntimeConfig } from '#imports'
 import { withEmailRetry } from './email-retry'
+import { absoluteUrl } from './site-url'
 import {
   cta,
   dataTable,
@@ -52,9 +53,7 @@ const parcoursCtaLabels: Record<Language, string> = {
 function buildParcoursUrl(routeId: string): string | null {
   const slug = routeId.startsWith('route-') ? routeId.slice('route-'.length) : routeId
   if (!slug) return null
-  const config = useRuntimeConfig()
-  const siteUrl = (config.public?.siteUrl as string | undefined) ?? 'https://irekiak.art'
-  return `${siteUrl.replace(/\/$/, '')}/admin/parcours/${slug}`
+  return absoluteUrl(`/admin/parcours/${slug}`)
 }
 
 interface Strings {

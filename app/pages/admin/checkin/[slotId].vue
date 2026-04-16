@@ -1,13 +1,13 @@
 <script setup lang="ts">
-// Legacy redirect : /admin/checkin/[slotId] -> /admin/parcours/[route]/slot/[slotId]
-// Récupère le slot côté API pour retrouver son parcours, puis redirige.
+// Legacy redirect /admin/checkin/[slotId] → /admin/parcours/[route]/slot/[slotId].
+// Conservé pour les anciens liens (emails envoyés avant le refactor d'avril 2026).
 interface CheckinData {
   slot: { id: string }
   route: { id: string }
 }
 
-const routeParam = useRoute()
-const slotId = computed(() => String(routeParam.params.slotId))
+const route = useRoute()
+const slotId = computed(() => String(route.params.slotId))
 
 definePageMeta({ layout: 'admin', i18n: false })
 useSeoMeta({ title: 'Admin · Parcours', robots: 'noindex, nofollow' })
@@ -19,7 +19,7 @@ onMounted(async () => {
     const data = await $fetch<CheckinData>(`/api/admin/checkin/${slotId.value}`, {
       headers: { 'x-admin-token': token.value },
     })
-    const slug = data.route.id.replace(/^route-/, '')
+    const slug = routeSlugFromId(data.route.id)
     await navigateTo(`/admin/parcours/${slug}/slot/${data.slot.id}`, { replace: true })
   }
   catch {

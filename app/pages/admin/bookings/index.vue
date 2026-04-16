@@ -116,8 +116,7 @@ const dateChipOptions = computed(() => {
 })
 
 function abbrevRoute(routeId: string): string {
-  const id = routeId.replace('route-', '')
-  const parts = id.split('-')
+  const parts = routeSlugFromId(routeId).split('-')
   return parts.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join('+')
 }
 

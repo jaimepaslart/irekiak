@@ -178,7 +178,7 @@ function actionColor(a: string): string {
               </dd>
             </div>
             <div class="pt-2">
-              <AdminBaseButton variant="secondary" as="nuxt-link" :to="`/admin/parcours/${data.route.id.replace(/^route-/, '')}/slot/${data.slot.id}`">
+              <AdminBaseButton variant="secondary" as="nuxt-link" :to="`/admin/parcours/${routeSlugFromId(data.route.id)}/slot/${data.slot.id}`">
                 {{ t('bookings.detailViewCheckin') }}
               </AdminBaseButton>
             </div>

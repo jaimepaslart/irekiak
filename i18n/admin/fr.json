@@ -46,7 +46,7 @@
   "auth": {
     "loginRequired": "Authentification requise",
     "tokenLabel": "Admin token",
-    "tokenPlaceholder": "NUXT_ADMIN_TOKEN_SECRET",
+    "tokenPlaceholder": "Votre mot de passe",
     "login": "Se connecter",
     "logout": "Logout",
     "invalidToken": "Token invalide.",

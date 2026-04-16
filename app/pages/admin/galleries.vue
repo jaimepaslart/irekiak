@@ -13,13 +13,14 @@ interface Row {
   contact: Contact | null
 }
 
-definePageMeta({ layout: 'admin' })
+definePageMeta({ layout: 'admin', i18n: false })
 useSeoMeta({ title: 'Admin · Galeries', robots: 'noindex, nofollow' })
 
 const { t } = useAdminT()
 const token = inject<Ref<string>>('adminToken')!
 
 const galleries = ref<Row[]>([])
+const loading = ref(true)
 const errorMessage = ref<string | null>(null)
 const editing = ref<string | null>(null)
 const form = reactive<Contact>({
@@ -28,12 +29,14 @@ const form = reactive<Contact>({
 const saving = ref(false)
 
 async function load() {
+  loading.value = true
   try {
     galleries.value = await $fetch<Row[]>('/api/admin/galleries', { headers: { 'x-admin-token': token.value } })
   }
   catch (err: unknown) {
     errorMessage.value = (err as { statusMessage?: string })?.statusMessage ?? t('galleries.loadFailed')
   }
+  finally { loading.value = false }
 }
 onMounted(() => { void load() })
 
@@ -81,7 +84,11 @@ async function save() {
     <AdminPageHeader :title="t('galleries.title')" :subtitle="t('galleries.subtitle')" />
     <p v-if="errorMessage" class="text-sm text-red-300 mb-4">{{ errorMessage }}</p>
 
-    <div class="space-y-3">
+    <div v-if="loading && galleries.length === 0" class="space-y-3">
+      <AdminSkeleton variant="card" :count="8" />
+    </div>
+
+    <div v-else class="space-y-3">
       <div v-for="g in galleries" :key="g.id" class="bg-edition-dark border border-white/10 rounded-sm p-4">
         <div v-if="editing !== g.id" class="flex flex-wrap items-center justify-between gap-3">
           <div>

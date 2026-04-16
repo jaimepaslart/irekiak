@@ -131,9 +131,9 @@ onBeforeUnmount(() => {
             autocomplete="current-password"
           >
         </label>
-        <button type="submit" class="w-full px-4 py-3 bg-white text-[var(--color-edition)] font-medium rounded-sm hover:bg-white/90 transition-colors">
+        <AdminBaseButton type="submit" variant="primary" class="w-full">
           {{ t('auth.login') }}
-        </button>
+        </AdminBaseButton>
         <p v-if="errorMessage" class="text-sm text-red-300">{{ errorMessage }}</p>
       </form>
     </div>
@@ -164,9 +164,9 @@ onBeforeUnmount(() => {
               <button type="button" :class="['px-2 py-1 rounded-sm transition-colors', locale === 'fr' ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white']" @click="setLocale('fr')">FR</button>
               <button type="button" :class="['px-2 py-1 rounded-sm transition-colors', locale === 'es' ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white']" @click="setLocale('es')">ES</button>
             </div>
-            <button type="button" class="text-xs px-3 py-1.5 border border-red-400/30 text-red-300 rounded-sm hover:bg-red-500/10" @click="logout">
+            <AdminBaseButton variant="danger" @click="logout">
               {{ t('auth.logout') }}
-            </button>
+            </AdminBaseButton>
           </div>
         </div>
         <Transition name="fade">
@@ -207,7 +207,7 @@ onBeforeUnmount(() => {
               <div class="flex justify-between"><dt><kbd class="kbd">Esc</kbd></dt><dd>{{ t('shortcuts.blur') }}</dd></div>
             </dl>
             <div class="mt-6 text-right">
-              <button type="button" class="px-4 py-2 text-sm bg-white text-[var(--color-edition)] rounded-sm hover:bg-white/90" @click="helpOpen = false">{{ t('common.close') }}</button>
+              <AdminBaseButton variant="primary" @click="helpOpen = false">{{ t('common.close') }}</AdminBaseButton>
             </div>
           </div>
         </div>

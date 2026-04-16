@@ -13,15 +13,17 @@ interface SlotOverview {
   attendedCount: number
 }
 
-definePageMeta({ layout: 'admin' })
+definePageMeta({ layout: 'admin', i18n: false })
 useSeoMeta({ title: 'Admin · Check-in overview', robots: 'noindex, nofollow' })
 
 const { t } = useAdminT()
 const token = inject<Ref<string>>('adminToken')!
 const slots = ref<SlotOverview[]>([])
+const loading = ref(true)
 const errorMessage = ref<string | null>(null)
 
 onMounted(async () => {
+  loading.value = true
   try {
     slots.value = await $fetch<SlotOverview[]>('/api/admin/checkin/overview', {
       headers: { 'x-admin-token': token.value },
@@ -30,6 +32,7 @@ onMounted(async () => {
   catch (err: unknown) {
     errorMessage.value = (err as { statusMessage?: string })?.statusMessage ?? t('checkin.loadFailed')
   }
+  finally { loading.value = false }
 })
 
 const byDate = computed(() => {
@@ -56,8 +59,17 @@ function attendedPct(s: SlotOverview) {
 
     <p v-if="errorMessage" class="text-sm text-red-300 mb-4">{{ errorMessage }}</p>
 
+    <template v-if="loading && slots.length === 0">
+      <div class="mb-10">
+        <div class="h-5 w-32 bg-white/10 rounded mb-4 animate-pulse"></div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <AdminSkeleton variant="card" :count="6" />
+        </div>
+      </div>
+    </template>
+
     <AdminEmptyState
-      v-if="!errorMessage && byDate.length === 0"
+      v-else-if="!errorMessage && byDate.length === 0"
       :title="t('checkin.emptyStateOverview')"
       :description="t('checkin.emptyStateOverviewDesc')"
     />

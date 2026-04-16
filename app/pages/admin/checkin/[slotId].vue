@@ -24,17 +24,19 @@ interface CheckinData {
 const routeParam = useRoute()
 const slotId = computed(() => String(routeParam.params.slotId))
 
-definePageMeta({ layout: 'admin' })
+definePageMeta({ layout: 'admin', i18n: false })
 useSeoMeta({ title: 'Admin · Check-in', robots: 'noindex, nofollow' })
 
 const { t } = useAdminT()
 const token = inject<Ref<string>>('adminToken')!
 const data = ref<CheckinData | null>(null)
+const loading = ref(true)
 const errorMessage = ref<string | null>(null)
 
 onMounted(() => { void load() })
 
 async function load() {
+  loading.value = true
   try {
     data.value = await $fetch<CheckinData>(`/api/admin/checkin/${slotId.value}`, {
       headers: { 'x-admin-token': token.value },
@@ -43,6 +45,7 @@ async function load() {
   catch (err: unknown) {
     errorMessage.value = (err as { statusMessage?: string })?.statusMessage ?? t('checkin.loadFailed')
   }
+  finally { loading.value = false }
 }
 
 async function toggleAttendance(p: Participant) {
@@ -76,6 +79,17 @@ function printList() {
     </NuxtLink>
 
     <p v-if="errorMessage" class="text-sm text-red-300">{{ errorMessage }}</p>
+
+    <template v-if="loading && !data">
+      <div class="mb-6">
+        <div class="h-1 w-24 rounded-full mb-4 bg-white/10 animate-pulse"></div>
+        <div class="h-7 w-72 bg-white/10 rounded mb-2 animate-pulse"></div>
+        <div class="h-3 w-64 bg-white/10 rounded animate-pulse"></div>
+      </div>
+      <div class="space-y-3">
+        <AdminSkeleton variant="card" :count="6" />
+      </div>
+    </template>
 
     <template v-if="data">
       <div class="mb-6">

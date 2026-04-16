@@ -1,7 +1,7 @@
 <script setup lang="ts">
 type Lang = 'eu' | 'es' | 'fr' | 'en'
 
-definePageMeta({ layout: 'admin' })
+definePageMeta({ layout: 'admin', i18n: false })
 useSeoMeta({ title: 'Admin · Blast email', robots: 'noindex, nofollow' })
 
 const { t } = useAdminT()

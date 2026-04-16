@@ -16,7 +16,7 @@ interface AuditEntry {
   targetId: string | null
 }
 
-definePageMeta({ layout: 'admin' })
+definePageMeta({ layout: 'admin', i18n: false })
 
 const { t } = useAdminT()
 const { year, startDate, endDate } = useEdition()
@@ -79,7 +79,24 @@ const languagesSubtitle = computed(() => {
     />
 
     <p v-if="errorMessage" class="text-sm text-red-300 mb-6">{{ errorMessage }}</p>
-    <p v-if="loading" class="text-sm text-white/40">{{ t('common.loading') }}</p>
+
+    <template v-if="loading && !stats">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+        <AdminSkeleton variant="stat" :count="4" />
+      </div>
+      <section class="mb-10">
+        <div class="h-5 w-40 bg-white/10 rounded mb-4 animate-pulse"></div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <AdminSkeleton variant="card" :count="3" />
+        </div>
+      </section>
+      <section class="mb-10">
+        <div class="h-5 w-40 bg-white/10 rounded mb-4 animate-pulse"></div>
+        <div class="bg-edition-dark border border-white/10 rounded-sm">
+          <AdminSkeleton variant="row" :count="6" />
+        </div>
+      </section>
+    </template>
 
     <template v-if="stats">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">

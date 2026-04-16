@@ -25,7 +25,7 @@ interface StatsPayload {
   recentBookings: AdminBookingRow[]
 }
 
-definePageMeta({ layout: 'admin' })
+definePageMeta({ layout: 'admin', i18n: false })
 
 const { t } = useAdminT()
 const { dates, year, startDate, endDate } = useEdition()
@@ -43,7 +43,7 @@ const token = inject<Ref<string>>('adminToken')!
 
 const rawBookings = ref<AdminBookingRow[]>([])
 const stats = ref<StatsPayload | null>(null)
-const loading = ref(false)
+const loading = ref(true)
 const errorMessage = ref<string | null>(null)
 
 const statusFilter = ref<'all' | 'upcoming' | 'past' | 'cancelled'>('all')
@@ -203,6 +203,10 @@ function statusBadgeLabel(s: 'confirmed' | 'cancelled' | 'waitlist'): string {
 
     <p v-if="errorMessage" class="text-sm text-red-300 mb-6">{{ errorMessage }}</p>
 
+    <div v-if="loading && !stats" class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+      <AdminSkeleton variant="stat" :count="5" />
+    </div>
+
     <div v-if="stats" class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
       <AdminStatCard
         :label="t('bookings.statsBookings')"
@@ -242,18 +246,14 @@ function statusBadgeLabel(s: 'confirmed' | 'cancelled' | 'waitlist'): string {
 
     <div class="bg-edition-dark border border-white/10 rounded-sm p-4 mb-6">
       <div class="flex flex-wrap gap-2 mb-4">
-        <button
+        <AdminBaseButton
           v-for="tab in statusFilterTabs"
           :key="tab.value"
-          type="button"
-          :class="[
-            'px-4 py-1.5 text-xs uppercase tracking-wider font-mono rounded-sm',
-            statusFilter === tab.value ? 'bg-white text-[var(--color-edition)]' : 'text-white/60 hover:text-white border border-white/15',
-          ]"
+          :variant="statusFilter === tab.value ? 'primary' : 'secondary'"
           @click="statusFilter = tab.value"
         >
           {{ t(tab.key) }}
-        </button>
+        </AdminBaseButton>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
         <select v-model="dateFilter" class="bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-sm text-white">
@@ -301,9 +301,19 @@ function statusBadgeLabel(s: 'confirmed' | 'cancelled' | 'waitlist'): string {
             </tr>
           </thead>
           <tbody>
-            <tr v-if="loading">
-              <td colspan="9" class="px-4 py-10 text-center text-white/40">{{ t('common.loading') }}</td>
-            </tr>
+            <template v-if="loading && rawBookings.length === 0">
+              <tr v-for="n in 8" :key="`skeleton-${n}`" class="border-t border-white/5 animate-pulse">
+                <td class="px-4 py-3"><div class="h-3 w-3 bg-white/10 rounded"></div></td>
+                <td class="px-4 py-3"><div class="h-5 w-20 bg-white/10 rounded-full"></div></td>
+                <td class="px-4 py-3"><div class="h-3 w-24 bg-white/10 rounded"></div></td>
+                <td class="px-4 py-3"><div class="h-3 w-32 bg-white/10 rounded"></div></td>
+                <td class="px-4 py-3"><div class="h-3 w-40 bg-white/10 rounded"></div></td>
+                <td class="px-4 py-3"><div class="h-3 w-6 bg-white/10 rounded mx-auto"></div></td>
+                <td class="px-4 py-3"><div class="h-3 w-8 bg-white/10 rounded"></div></td>
+                <td class="px-4 py-3"><div class="h-3 w-20 bg-white/10 rounded"></div></td>
+                <td class="px-4 py-3"><div class="h-6 w-16 bg-white/10 rounded ml-auto"></div></td>
+              </tr>
+            </template>
             <tr v-else-if="filteredBookings.length === 0">
               <td colspan="9" class="px-0 py-0">
                 <AdminEmptyState :title="t('bookings.emptyState')" :description="t('bookings.emptyStateDesc')" />
@@ -330,8 +340,8 @@ function statusBadgeLabel(s: 'confirmed' | 'cancelled' | 'waitlist'): string {
               <td class="px-4 py-3 font-mono uppercase">{{ b.language }}</td>
               <td class="px-4 py-3 text-white/70">{{ b.routeId.replace('route-', '') }}</td>
               <td class="px-4 py-3 text-right whitespace-nowrap">
-                <NuxtLink :to="`/admin/bookings/${b.id}`" class="text-xs px-2 py-1 border border-white/20 rounded-sm hover:bg-white/10 mr-2">{{ t('bookings.detail') }}</NuxtLink>
-                <button v-if="b.status === 'confirmed'" type="button" class="text-xs px-2 py-1 border border-red-400/30 text-red-300 rounded-sm hover:bg-red-500/10" :title="t('bookings.cancelBooking')" @click="cancelBooking(b.id, `${b.firstName} ${b.lastName}`)">✗</button>
+                <AdminBaseButton variant="secondary" as="nuxt-link" :to="`/admin/bookings/${b.id}`" class="mr-2">{{ t('bookings.detail') }}</AdminBaseButton>
+                <AdminBaseButton v-if="b.status === 'confirmed'" variant="danger" :aria-label="t('bookings.cancelBooking')" @click="cancelBooking(b.id, `${b.firstName} ${b.lastName}`)">✗</AdminBaseButton>
               </td>
             </tr>
           </tbody>
@@ -341,9 +351,9 @@ function statusBadgeLabel(s: 'confirmed' | 'cancelled' | 'waitlist'): string {
       <div v-if="filteredBookings.length > pageSize" class="flex items-center justify-between px-4 py-3 border-t border-white/10 text-xs text-white/50 font-mono">
         <span>{{ t('bookings.paginationRange', { start: (currentPage - 1) * pageSize + 1, end: Math.min(currentPage * pageSize, filteredBookings.length), total: filteredBookings.length }) }}</span>
         <div class="flex items-center gap-2">
-          <button type="button" class="px-3 py-1 border border-white/15 rounded-sm disabled:opacity-30" :disabled="currentPage <= 1" @click="currentPage--">←</button>
+          <AdminBaseButton variant="secondary" :disabled="currentPage <= 1" @click="currentPage--">←</AdminBaseButton>
           <span>{{ t('bookings.paginationOf', { current: currentPage, total: totalPages }) }}</span>
-          <button type="button" class="px-3 py-1 border border-white/15 rounded-sm disabled:opacity-30" :disabled="currentPage >= totalPages" @click="currentPage++">→</button>
+          <AdminBaseButton variant="secondary" :disabled="currentPage >= totalPages" @click="currentPage++">→</AdminBaseButton>
         </div>
       </div>
     </div>

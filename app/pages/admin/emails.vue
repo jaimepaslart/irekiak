@@ -8,7 +8,7 @@ interface Entry {
   eventType: string
 }
 
-definePageMeta({ layout: 'admin' })
+definePageMeta({ layout: 'admin', i18n: false })
 useSeoMeta({ title: 'Admin · Emails', robots: 'noindex, nofollow' })
 
 const { t } = useAdminT()
@@ -17,18 +17,23 @@ const entries = ref<Entry[]>([])
 const total = ref(0)
 const page = ref(1)
 const pageSize = 50
+const loading = ref(true)
+const loaded = ref(false)
 const errorMessage = ref<string | null>(null)
 
 async function load() {
+  loading.value = true
   try {
     const offset = (page.value - 1) * pageSize
     const res = await $fetch<{ entries: Entry[], total: number }>(`/api/admin/emails?limit=${pageSize}&offset=${offset}`, { headers: { 'x-admin-token': token.value } })
     entries.value = res.entries
     total.value = res.total
+    loaded.value = true
   }
   catch (err: unknown) {
     errorMessage.value = (err as { statusMessage?: string })?.statusMessage ?? t('common.error')
   }
+  finally { loading.value = false }
 }
 onMounted(() => { void load() })
 watch(page, () => { void load() })
@@ -55,13 +60,16 @@ function eventColor(type: string) {
       <div class="flex items-center justify-between px-4 py-3 border-b border-white/10 text-xs text-white/50 font-mono">
         <span>{{ t('emails.pagination', { start: rangeStart, end: rangeEnd, total }) }}</span>
         <div class="flex items-center gap-2">
-          <button type="button" class="px-3 py-1 border border-white/15 rounded-sm disabled:opacity-30" :disabled="page <= 1" @click="page--">←</button>
-          <button type="button" class="px-3 py-1 border border-white/15 rounded-sm disabled:opacity-30" :disabled="page >= totalPages" @click="page++">→</button>
+          <AdminBaseButton variant="secondary" :disabled="page <= 1" @click="page--">←</AdminBaseButton>
+          <AdminBaseButton variant="secondary" :disabled="page >= totalPages" @click="page++">→</AdminBaseButton>
         </div>
       </div>
 
       <div class="overflow-x-auto">
-        <table v-if="entries.length > 0" class="w-full text-sm">
+        <div v-if="loading && !loaded">
+          <AdminSkeleton variant="row" :count="8" />
+        </div>
+        <table v-else-if="entries.length > 0" class="w-full text-sm">
           <thead class="bg-white/5">
             <tr class="text-left text-xs uppercase tracking-wider text-white/50 font-mono">
               <th class="px-4 py-3">{{ t('emails.columnWhen') }}</th>

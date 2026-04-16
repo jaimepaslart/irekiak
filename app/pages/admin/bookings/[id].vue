@@ -21,7 +21,7 @@ interface DetailPayload {
   attendance: { bookingId: string, checkedInAt: string, checkedInBy: string, notes: string | null } | null
 }
 
-definePageMeta({ layout: 'admin' })
+definePageMeta({ layout: 'admin', i18n: false })
 
 const { t } = useAdminT()
 useSeoMeta({ title: () => t('bookings.seoTitleDetail'), robots: 'noindex, nofollow' })
@@ -150,8 +150,25 @@ function actionColor(a: string): string {
       {{ t('bookings.detailBack') }}
     </NuxtLink>
 
-    <p v-if="loading" class="text-white/40">{{ t('common.loading') }}</p>
     <p v-if="errorMessage" class="text-sm text-red-300">{{ errorMessage }}</p>
+
+    <template v-if="loading && !data">
+      <div class="mb-6">
+        <div class="h-8 w-64 bg-white/10 rounded mb-2 animate-pulse"></div>
+        <div class="h-3 w-40 bg-white/10 rounded animate-pulse"></div>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2">
+          <AdminSkeleton variant="card" :count="1" />
+        </div>
+        <div>
+          <AdminSkeleton variant="card" :count="1" />
+        </div>
+      </div>
+      <div class="mt-6">
+        <AdminSkeleton variant="card" :count="1" />
+      </div>
+    </template>
 
     <template v-if="data">
       <AdminPageHeader

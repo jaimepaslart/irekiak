@@ -10,7 +10,7 @@ interface Slot {
   remaining: number
 }
 
-definePageMeta({ layout: 'admin' })
+definePageMeta({ layout: 'admin', i18n: false })
 
 const { t } = useAdminT()
 const { year } = useEdition()
@@ -127,8 +127,6 @@ function resetForm() {
     </div>
 
     <form v-else class="bg-edition-dark border border-white/10 rounded-sm p-6 max-w-3xl space-y-5" @submit.prevent="submit">
-      <p v-if="loading" class="text-white/40">{{ t('bookings.loadingSlots') }}</p>
-
       <label class="block">
         <span class="text-xs uppercase tracking-wider text-white/40 block mb-2">{{ t('bookings.fieldSlotRequired') }}</span>
         <select v-model="form.tourSlotId" required class="w-full bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-white">

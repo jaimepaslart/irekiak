@@ -1,5 +1,5 @@
 <script setup lang="ts">
-definePageMeta({ layout: 'admin' })
+definePageMeta({ layout: 'admin', i18n: false })
 useSeoMeta({ title: 'Admin · Settings', robots: 'noindex, nofollow' })
 
 const { t } = useAdminT()
@@ -138,9 +138,9 @@ async function exportMarketing() {
       <div class="bg-edition-dark border border-white/10 rounded-sm p-5">
         <h2 class="text-base font-semibold mb-3">{{ t('settings.sectionLinks') }}</h2>
         <div class="flex flex-wrap gap-2">
-          <NuxtLink to="/admin/galleries" class="text-sm px-4 py-2 border border-white/20 rounded-sm hover:bg-white/10">{{ t('settings.linkGalleries') }}</NuxtLink>
-          <NuxtLink to="/admin/blast" class="text-sm px-4 py-2 border border-white/20 rounded-sm hover:bg-white/10">{{ t('settings.linkBlast') }}</NuxtLink>
-          <NuxtLink to="/admin/checkin" class="text-sm px-4 py-2 border border-white/20 rounded-sm hover:bg-white/10">{{ t('settings.linkCheckin') }}</NuxtLink>
+          <AdminBaseButton variant="secondary" as="nuxt-link" to="/admin/galleries">{{ t('settings.linkGalleries') }}</AdminBaseButton>
+          <AdminBaseButton variant="secondary" as="nuxt-link" to="/admin/blast">{{ t('settings.linkBlast') }}</AdminBaseButton>
+          <AdminBaseButton variant="secondary" as="nuxt-link" to="/admin/checkin">{{ t('settings.linkCheckin') }}</AdminBaseButton>
         </div>
       </div>
     </div>

@@ -366,7 +366,11 @@
     "testEmailSuccess": "✓ Envoyé. ID : {id}",
     "testEmailFailure": "✗ Erreur : {error}",
     "saveSuccess": "✓ Enregistré.",
-    "saveFailure": "✗ Erreur."
+    "saveFailure": "✗ Erreur.",
+    "testEmailTemplatePlain": "Simple",
+    "testEmailTemplateConfirmation": "Confirmation de réservation",
+    "testEmailTemplateCancellation": "Annulation",
+    "testEmailTemplateGalleryNotification": "Notification galerie"
   },
   "audit": {
     "title": "Audit log",
@@ -436,15 +440,24 @@
     "openLabel": "Ouvrir la palette de commandes"
   },
   "parcours": {
-    "title": "Parcours",
-    "subtitle": "3 routes guidées dans Donostia",
+    "title": "Les parcours",
+    "subtitle": "3 itinéraires guidés à travers Donostia",
+    "editionTag": "Irekiak {year} · Édition",
     "slots": "créneaux",
+    "slotOne": "1 créneau",
+    "slotMany": "{count} créneaux",
+    "bookedOne": "1 inscrit",
+    "bookedMany": "{count} inscrits",
+    "arrivedOne": "1 arrivé",
+    "arrivedMany": "{count} arrivés",
     "booked": "inscrits",
     "arrived": "arrivés",
     "back": "← Tous les parcours",
     "backToRoute": "← Retour au parcours",
+    "allRoutes": "Tous les parcours",
+    "routeLabel": "Parcours",
     "nextSlot": "Prochain créneau",
-    "allSlots": "Tous les créneaux",
+    "allSlots": "Autres créneaux",
     "checkInTitle": "Check-in",
     "noSlotsYet": "Pas encore d'inscriptions",
     "noSlotsDesc": "Les réservations apparaîtront ici dès qu'elles arrivent.",
@@ -456,6 +469,12 @@
     "saveError": "Erreur lors de l'enregistrement",
     "personSingular": "personne",
     "personPlural": "personnes",
-    "specialNeeds": "Besoins spéciaux"
+    "specialNeeds": "Besoins spéciaux",
+    "viewCheckin": "Voir le check-in",
+    "checkinEyebrow": "Check-in",
+    "arrivedLabel": "arrivés",
+    "outOf": "sur",
+    "lowFill": "Faible remplissage",
+    "full": "Complet"
   }
 }

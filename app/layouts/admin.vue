@@ -136,33 +136,44 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[var(--color-edition)] text-white">
-    <div v-if="!token" class="max-w-md mx-auto mt-24 px-6 pt-20">
-      <div class="flex items-center justify-between mb-2">
-        <h1 class="text-2xl">{{ t('nav.admin') }} · Irekiak</h1>
-        <div class="flex items-center gap-1 text-xs font-mono">
-          <button type="button" :class="['px-2 py-1 rounded-sm', locale === 'fr' ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white']" @click="setLocale('fr')">FR</button>
-          <span class="text-white/20">·</span>
-          <button type="button" :class="['px-2 py-1 rounded-sm', locale === 'es' ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white']" @click="setLocale('es')">ES</button>
+  <div class="min-h-screen bg-[var(--color-edition)] text-white editorial-grain relative">
+    <div v-if="!token" class="min-h-screen flex items-center justify-center px-6 py-12">
+      <div class="w-full max-w-md relative editorial-in">
+        <div class="absolute top-0 right-0 flex items-center gap-1 text-[10px] font-mono uppercase tracking-[0.18em]">
+          <button type="button" :class="['px-2 py-1 rounded-sm transition-colors', locale === 'fr' ? 'text-gold' : 'text-white/30 hover:text-white/70']" @click="setLocale('fr')">FR</button>
+          <span class="text-white/15">·</span>
+          <button type="button" :class="['px-2 py-1 rounded-sm transition-colors', locale === 'es' ? 'text-gold' : 'text-white/30 hover:text-white/70']" @click="setLocale('es')">ES</button>
         </div>
-      </div>
-      <p class="text-sm text-white/50 mb-8">{{ t('auth.loginRequired') }}</p>
-      <form class="space-y-4" @submit.prevent="login">
-        <label class="block">
-          <span class="text-xs uppercase tracking-wider text-white/40 font-mono block mb-2">{{ t('auth.tokenLabel') }}</span>
-          <input
-            v-model="tokenInput"
-            type="password"
-            class="w-full px-4 py-3 bg-white/5 border border-white/15 rounded-sm text-white focus:outline-none focus:border-white/40"
-            :placeholder="t('auth.tokenPlaceholder')"
-            autocomplete="current-password"
+
+        <div class="eyebrow text-gold mb-6">IREKIAK 2026 · {{ locale === 'es' ? 'EDICIÓN' : 'ÉDITION' }}</div>
+        <h1 class="font-serif text-4xl md:text-5xl font-normal text-white leading-[1.05] tracking-[-0.01em] mb-3">{{ t('nav.admin') }}</h1>
+        <p class="text-sm text-white/50 italic font-serif mb-1">{{ t('auth.loginRequired') }}</p>
+        <div class="h-px w-16 bg-[var(--color-accent-gold)] my-8"></div>
+
+        <form class="space-y-6" @submit.prevent="login">
+          <label class="block">
+            <span class="eyebrow block mb-3 text-white/40">{{ t('auth.tokenLabel') }}</span>
+            <input
+              v-model="tokenInput"
+              type="password"
+              class="w-full px-4 py-4 bg-transparent border border-white/15 rounded-sm text-white font-mono text-sm tracking-wider focus:outline-none focus:border-[var(--color-accent-gold)] focus:bg-white/[0.02] transition-colors placeholder:text-white/20 placeholder:font-mono placeholder:tracking-wider"
+              :placeholder="t('auth.tokenPlaceholder')"
+              autocomplete="current-password"
+            >
+          </label>
+          <button
+            type="submit"
+            class="w-full px-6 py-4 bg-[var(--color-accent-gold)] text-[var(--color-edition)] font-medium text-sm uppercase tracking-[0.18em] hover:bg-[var(--color-accent-gold)]/90 rounded-sm transition-colors focus-gold"
           >
-        </label>
-        <AdminBaseButton type="submit" variant="primary" class="w-full">
-          {{ t('auth.login') }}
-        </AdminBaseButton>
-        <p v-if="errorMessage" class="text-sm text-red-300">{{ errorMessage }}</p>
-      </form>
+            {{ t('auth.login') }}
+          </button>
+          <p v-if="errorMessage" class="text-sm text-red-300 italic font-serif">{{ errorMessage }}</p>
+        </form>
+
+        <p class="mt-12 text-[10px] uppercase tracking-[0.22em] text-white/25 font-mono text-center">
+          Gallery Weekend · Donostia · San Sebastián
+        </p>
+      </div>
     </div>
 
     <div v-else>

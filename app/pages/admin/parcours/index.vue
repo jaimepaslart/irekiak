@@ -13,6 +13,7 @@ definePageMeta({ layout: 'admin', i18n: false })
 useSeoMeta({ title: 'Admin · Parcours', robots: 'noindex, nofollow' })
 
 const { t, localized } = useAdminT()
+const { year } = useEdition()
 const token = inject<Ref<string>>('adminToken')!
 
 interface SlotOverview {
@@ -22,15 +23,15 @@ interface SlotOverview {
   attendedCount: number
 }
 
-// Pré-indexation (une passe) → évite O(routes × galleries) + O(routes × slots)
-// à chaque invalidation. Les datasets sont statiques donc calculés hors computed.
+const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI'] as const
+
 const galleriesById = new Map(galleries.map(g => [g.id, g]))
 const slotCountByRouteId = tourSlots.reduce<Record<string, number>>((acc, s) => {
   acc[s.routeId] = (acc[s.routeId] ?? 0) + 1
   return acc
 }, {})
 
-const routeCards = tourRoutes.map((r) => {
+const routeCards = tourRoutes.map((r, i) => {
   const galleryRefs = r.galleryIds
     .map(gid => galleriesById.get(gid))
     .filter((g): g is NonNullable<typeof g> => Boolean(g))
@@ -38,7 +39,7 @@ const routeCards = tourRoutes.map((r) => {
     id: r.id,
     slug: slugOfRoute(r),
     name: r.name,
-    color: r.color,
+    roman: ROMAN[i] ?? String(i + 1),
     galleries: galleryRefs,
     slotCount: slotCountByRouteId[r.id] ?? 0,
   }
@@ -66,31 +67,75 @@ async function loadStats(): Promise<void> {
 }
 
 onMounted(() => { void loadStats() })
+
+function slotLabel(count: number): string {
+  return count <= 1 ? t('parcours.slotOne') : t('parcours.slotMany', { count })
+}
+function bookedLabel(count: number): string {
+  return count <= 1 ? t('parcours.bookedOne', { count }) : t('parcours.bookedMany', { count })
+}
+function arrivedLabel(count: number): string {
+  return count <= 1 ? t('parcours.arrivedOne', { count }) : t('parcours.arrivedMany', { count })
+}
 </script>
 
 <template>
-  <div>
-    <AdminPageHeader :title="t('parcours.title')" :subtitle="t('parcours.subtitle')" />
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+  <div class="relative max-w-4xl mx-auto">
+    <div class="absolute inset-x-0 -top-10 -bottom-10 editorial-grain pointer-events-none opacity-60" aria-hidden="true"></div>
+
+    <section class="relative mb-10 md:mb-14 editorial-in">
+      <div class="eyebrow mb-4">
+        {{ t('parcours.editionTag', { year }) }}
+      </div>
+      <h1 class="font-serif text-3xl md:text-4xl text-white" style="font-weight: 400; letter-spacing: -0.01em; line-height: 1.1;">
+        {{ t('parcours.title') }}
+      </h1>
+      <p class="mt-2 text-sm text-white/55">
+        <span class="italic font-serif">{{ t('parcours.subtitle') }}</span>
+      </p>
+      <div class="mt-6 h-px w-24 bg-[var(--color-accent-gold)] opacity-50"></div>
+    </section>
+
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
       <NuxtLink
-        v-for="route in routeCards"
+        v-for="(route, i) in routeCards"
         :key="route.id"
         :to="`/admin/parcours/${route.slug}`"
-        class="block p-6 rounded-md border border-white/10 bg-edition-dark hover:bg-white/5 transition-colors group"
-        :style="`border-left: 4px solid ${route.color}`"
+        class="group relative block overflow-hidden border border-white/10 bg-[var(--color-edition-dark)] rounded-sm p-7 md:p-8 editorial-in focus-gold transition-[border-color,transform] duration-300 hover:border-white/20 hover-lift"
+        :style="{ animationDelay: `${i * 90}ms` }"
       >
-        <h2 class="text-xl font-light text-white mb-1 group-hover:text-white">
+        <span
+          class="absolute inset-y-0 left-0 w-[2px] bg-[var(--color-accent-gold)] opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+          aria-hidden="true"
+        ></span>
+
+        <div class="eyebrow mb-5">
+          {{ route.roman }} · {{ t('parcours.routeLabel') }}
+        </div>
+
+        <h2 class="font-serif text-2xl text-white leading-tight mb-2" style="font-weight: 400; letter-spacing: -0.01em;">
           {{ localized(route.name) }}
         </h2>
-        <p class="text-sm text-white/60 mb-4">
+
+        <p class="font-serif italic text-sm text-white/60 mb-8">
           {{ route.galleries.map(g => g.name).join(' · ') }}
         </p>
-        <div class="flex flex-wrap items-center gap-x-6 gap-y-1 text-xs text-white/50 font-mono">
-          <span>{{ route.slotCount }} {{ t('parcours.slots') }}</span>
-          <span v-if="stats[route.id]">{{ stats[route.id]!.booked }} {{ t('parcours.booked') }}</span>
-          <span v-if="stats[route.id]" class="text-emerald-300">{{ stats[route.id]!.attended }} {{ t('parcours.arrived') }}</span>
+
+        <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-white/45 font-mono uppercase tracking-wider tabular-nums">
+          <span>{{ slotLabel(route.slotCount) }}</span>
+          <template v-if="stats[route.id]">
+            <span class="text-gold/70">·</span>
+            <span>{{ bookedLabel(stats[route.id]!.booked) }}</span>
+            <span class="text-gold/70">·</span>
+            <span>{{ arrivedLabel(stats[route.id]!.attended) }}</span>
+          </template>
         </div>
+
+        <span
+          class="arrow-nudge absolute bottom-6 right-6 text-gold text-lg leading-none"
+          aria-hidden="true"
+        >→</span>
       </NuxtLink>
-    </div>
+    </section>
   </div>
 </template>

@@ -215,7 +215,7 @@ const humanizedAudit = computed<TimelineEntry[]>(() => {
       }
     }
 
-    if (a.action === 'checkin.in') {
+    if (a.action === 'checkin.in' || a.action === 'attendance.check') {
       return {
         id: a.id,
         glyph: '✓',
@@ -226,7 +226,7 @@ const humanizedAudit = computed<TimelineEntry[]>(() => {
       }
     }
 
-    if (a.action === 'checkin.out') {
+    if (a.action === 'checkin.out' || a.action === 'attendance.uncheck') {
       return {
         id: a.id,
         glyph: '↩',

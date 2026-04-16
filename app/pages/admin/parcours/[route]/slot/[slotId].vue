@@ -72,7 +72,7 @@ const router = useRouter()
 const routeSlug = computed(() => String(route.params.route ?? ''))
 const slotId = computed(() => String(route.params.slotId ?? ''))
 
-const { t, formatLongDate } = useAdminT()
+const { t, localized, formatLongDate } = useAdminT()
 const token = inject<Ref<string>>('adminToken')!
 
 const expectedRoute = computed(() => findRouteBySlug(tourRoutes, routeSlug.value))
@@ -158,14 +158,16 @@ async function toggleAttendance(bookingId: string, present: boolean): Promise<vo
   }
 }
 
-const slotTitle = computed(() => {
-  if (!slot.value) return ''
-  const day = formatLongDate(slot.value.date)
-  return `${day} · ${slot.value.startTime} · ${slot.value.language.toUpperCase()}`
-})
+const routeName = computed(() => expectedRoute.value ? localized(expectedRoute.value.name) : '')
+const longDate = computed(() => slot.value ? formatLongDate(slot.value.date) : '')
 
 const totalParticipants = computed(() => participants.value.length)
 const attendedCount = computed(() => participants.value.filter(p => p.attended).length)
+
+const progressPct = computed(() => {
+  if (totalParticipants.value === 0) return 0
+  return Math.round((attendedCount.value / totalParticipants.value) * 100)
+})
 
 function backToRoute(): void {
   void router.push(`/admin/parcours/${routeSlug.value}`)
@@ -173,35 +175,69 @@ function backToRoute(): void {
 </script>
 
 <template>
-  <div>
+  <div class="relative max-w-4xl mx-auto">
+    <div class="absolute inset-x-0 -top-10 -bottom-10 editorial-grain pointer-events-none opacity-60" aria-hidden="true"></div>
+
     <button
       type="button"
-      class="inline-flex items-center text-sm text-white/60 hover:text-white transition-colors mb-4"
+      class="relative inline-flex items-center text-xs text-white/50 hover:text-gold font-mono uppercase tracking-[0.18em] transition-colors mb-6 arrow-nudge-parent"
       @click="backToRoute"
     >
-      {{ t('parcours.backToRoute') }}
+      <span class="arrow-nudge-back mr-1">←</span> {{ t('parcours.backToRoute') }}
     </button>
 
-    <p v-if="errorMessage" class="text-sm text-red-300 mb-4">{{ errorMessage }}</p>
+    <p v-if="errorMessage" class="relative text-sm text-red-300 mb-4">{{ errorMessage }}</p>
 
     <template v-if="loading && !slot">
-      <div class="space-y-3">
+      <div class="relative space-y-3">
         <AdminSkeleton variant="card" :count="6" />
       </div>
     </template>
 
     <template v-else-if="slot">
-      <h2 class="text-lg font-light mb-2">{{ slotTitle }}</h2>
+      <section class="relative mb-10 md:mb-12 editorial-in">
+        <div class="eyebrow mb-4">
+          {{ t('parcours.checkinEyebrow') }} · {{ routeName }}
+        </div>
+        <h1 class="font-serif text-3xl md:text-4xl text-white" style="font-weight: 400; letter-spacing: -0.01em; line-height: 1.1;">
+          {{ longDate }}
+        </h1>
+        <p class="mt-2 flex items-baseline gap-3 text-white/70">
+          <span class="font-serif text-2xl md:text-3xl tabular-nums" style="font-weight: 400;">{{ slot.startTime }}</span>
+          <span class="text-white/35 text-sm tabular-nums">→ {{ slot.endTime }}</span>
+          <span class="text-white/30 text-sm">·</span>
+          <span class="text-xs text-white/50 uppercase tracking-wider font-mono">{{ slot.language.toUpperCase() }}</span>
+        </p>
+        <div class="mt-6 h-px w-24 bg-[var(--color-accent-gold)] opacity-50"></div>
+      </section>
 
-      <div class="my-6 text-center">
-        <div class="inline-flex items-baseline gap-1">
-          <span class="text-5xl font-light tabular-nums text-emerald-300">{{ attendedCount }}</span>
-          <span class="text-3xl font-light tabular-nums text-white/40">/{{ totalParticipants }}</span>
+      <section
+        class="relative mb-12 md:mb-14 editorial-in"
+        :style="{ animationDelay: '120ms' }"
+        aria-live="polite"
+      >
+        <div class="flex flex-col items-center text-center">
+          <div class="flex items-baseline justify-center gap-2 mb-2">
+            <span
+              class="font-serif text-7xl md:text-8xl text-white tabular-nums leading-none transition-transform duration-300"
+              style="font-weight: 400; letter-spacing: -0.03em;"
+              :class="{ 'pulse-subtle': attendedCount > 0 && attendedCount < totalParticipants }"
+            >
+              {{ attendedCount }}
+            </span>
+            <span class="font-serif text-3xl md:text-4xl text-white/35 tabular-nums" style="font-weight: 400;">
+              /{{ totalParticipants }}
+            </span>
+          </div>
+          <p class="font-serif italic text-sm text-white/55 mb-5">{{ t('parcours.arrivedLabel') }}</p>
+          <div class="w-full max-w-xs h-[3px] bg-white/10 overflow-hidden">
+            <div
+              class="h-full transition-[width] duration-700 ease-out"
+              :style="{ width: `${progressPct}%`, backgroundColor: 'var(--color-accent-gold)' }"
+            />
+          </div>
         </div>
-        <div class="text-xs uppercase tracking-wider text-white/50 font-mono mt-1">
-          {{ t('parcours.arrived') }}
-        </div>
-      </div>
+      </section>
 
       <AdminEmptyState
         v-if="participants.length === 0"
@@ -210,12 +246,13 @@ function backToRoute(): void {
         icon="📋"
       />
 
-      <div v-else class="space-y-3">
+      <div v-else class="relative space-y-4">
         <AdminParcoursParticipantCard
-          v-for="p in participants"
+          v-for="(p, i) in participants"
           :key="p.id"
           :participant="p"
           :saving="savingIds.has(p.id)"
+          :index="i"
           @toggle="toggleAttendance"
         />
       </div>

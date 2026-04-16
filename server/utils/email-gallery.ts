@@ -1,7 +1,7 @@
 import { Resend } from 'resend'
 import { useRuntimeConfig } from '#imports'
 import { withEmailRetry } from './email-retry'
-import { signRouteToken } from './galeriste-token'
+import { ALLOWED_ROUTE_SLUGS, signRouteToken } from './galeriste-token'
 import {
   cta,
   dataTable,
@@ -50,7 +50,7 @@ const galeristeCtaLabels: Record<Language, string> = {
   en: 'View my bookings',
 }
 
-const ALLOWED_GALERISTE_SLUGS = new Set(['arteko-cibrian', 'central-sakana', 'arteztu-ekain'])
+const ALLOWED_GALERISTE_SLUGS = new Set<string>(ALLOWED_ROUTE_SLUGS)
 
 function buildGaleristeUrl(routeId: string): string | null {
   const slug = routeId.startsWith('route-') ? routeId.slice('route-'.length) : routeId

@@ -182,7 +182,7 @@ function backHome(): void {
               {{ t('galeriste.nextSlot') }}
             </h3>
             <GaleristeSlotCard
-              :slot="nextSlot"
+              :slot-data="nextSlot"
               :route-slug="routeSlug"
               is-primary
             />
@@ -196,7 +196,7 @@ function backHome(): void {
               <GaleristeSlotCard
                 v-for="s in otherSlots"
                 :key="s.id"
-                :slot="s"
+                :slot-data="s"
                 :route-slug="routeSlug"
               />
             </div>

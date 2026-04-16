@@ -1,4 +1,4 @@
-import { and, desc, eq, ne, sql } from 'drizzle-orm'
+import { eq, ne, sql } from 'drizzle-orm'
 import { defineEventHandler } from 'h3'
 import { db } from '../../../db'
 import { attendance, bookings, timeSlots, tourRoutes } from '../../../db/schema'

@@ -2,8 +2,9 @@
 import type { Ref } from 'vue'
 
 interface GaleristeRouteMeta {
-  routeSlug: string
-  routeName: { eu: string, es: string, fr: string, en: string }
+  id: string
+  slug: string
+  name: { eu: string, es: string, fr: string, en: string }
   galleries: Array<{ id: string, name: { eu: string, es: string, fr: string, en: string }, color: string }>
 }
 
@@ -19,7 +20,7 @@ const routeMeta = useState<GaleristeRouteMeta | null>(
 
 const displayName = computed(() => {
   if (!routeMeta.value) return ''
-  const n = routeMeta.value.routeName
+  const n = routeMeta.value.name
   return n[locale.value] || n.fr || n.eu
 })
 

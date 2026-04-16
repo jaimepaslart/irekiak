@@ -11,17 +11,18 @@ interface SlotData {
 }
 
 interface Props {
-  slot: SlotData
+  slotData: SlotData
   routeSlug: string
   isPrimary?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), { isPrimary: false })
+const slot = computed(() => props.slotData)
 
 const { t, locale } = useAdminT()
 
 const dateLabel = computed(() => {
-  const d = new Date(`${props.slot.date}T00:00:00`)
+  const d = new Date(`${props.slotData.date}T00:00:00`)
   const intl = new Intl.DateTimeFormat(locale.value === 'es' ? 'es-ES' : 'fr-FR', {
     weekday: 'long',
     day: 'numeric',
@@ -33,7 +34,7 @@ const dateLabel = computed(() => {
 const dayBadge = computed(() => {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
-  const slotDate = new Date(`${props.slot.date}T00:00:00`)
+  const slotDate = new Date(`${props.slotData.date}T00:00:00`)
   const diff = Math.round((slotDate.getTime() - today.getTime()) / (24 * 60 * 60 * 1000))
   if (diff === 0) return t('galeriste.today')
   if (diff === 1) return t('galeriste.tomorrow')
@@ -41,15 +42,15 @@ const dayBadge = computed(() => {
 })
 
 const fillPct = computed(() => {
-  if (props.slot.capacity === 0) return 0
-  return Math.min(100, Math.round((props.slot.booked / props.slot.capacity) * 100))
+  if (props.slotData.capacity === 0) return 0
+  return Math.min(100, Math.round((props.slotData.booked / props.slotData.capacity) * 100))
 })
 
 const allAttended = computed(() =>
-  props.slot.booked > 0 && props.slot.attendedCount >= props.slot.booked,
+  props.slotData.booked > 0 && props.slotData.attendedCount >= props.slotData.booked,
 )
 
-const targetUrl = computed(() => `/galeristes/${props.routeSlug}/slot/${props.slot.id}`)
+const targetUrl = computed(() => `/galeristes/${props.routeSlug}/slot/${props.slotData.id}`)
 </script>
 
 <template>

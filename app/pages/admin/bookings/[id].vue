@@ -145,7 +145,7 @@ const timelineEntries = computed<TimelineEntry[]>(() => {
 </script>
 
 <template>
-  <div class="relative max-w-5xl">
+  <div class="relative max-w-5xl mx-auto">
     <AdminGrain />
 
     <NuxtLink

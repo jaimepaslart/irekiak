@@ -73,7 +73,7 @@ const quickLinks = computed<QuickLink[]>(() => [
 </script>
 
 <template>
-  <div class="relative max-w-3xl">
+  <div class="relative max-w-3xl mx-auto">
     <AdminGrain />
 
     <AdminHeroSection

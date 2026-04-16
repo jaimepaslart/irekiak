@@ -26,7 +26,18 @@ interface StatsPayload {
 }
 
 definePageMeta({ layout: 'admin' })
-useSeoMeta({ title: 'Admin · Réservations', robots: 'noindex, nofollow' })
+
+const { t } = useAdminT()
+const { dates, year, startDate, endDate } = useEdition()
+
+const dateRangeLabel = computed(() => {
+  const startDay = startDate.value.slice(8, 10)
+  const endDay = endDate.value.slice(8, 10)
+  const month = startDate.value.slice(5, 7)
+  return `${startDay}-${endDay}.${month}`
+})
+
+useSeoMeta({ title: () => t('bookings.seoTitleList'), robots: 'noindex, nofollow' })
 
 const token = inject<Ref<string>>('adminToken')!
 
@@ -83,6 +94,15 @@ const pagedBookings = computed(() => {
 
 const selectedIds = computed(() => Object.keys(selected).filter(id => selected[id]))
 
+const statusFilterTabs: Array<{ value: 'all' | 'upcoming' | 'past' | 'cancelled', key: string }> = [
+  { value: 'all', key: 'bookings.filterAll' },
+  { value: 'upcoming', key: 'bookings.filterUpcoming' },
+  { value: 'past', key: 'bookings.filterPast' },
+  { value: 'cancelled', key: 'bookings.filterCancelled' },
+]
+
+const editionDates = computed(() => dates.value)
+
 watch([statusFilter, routeFilter, languageFilter, dateFilter, searchQuery], () => {
   currentPage.value = 1
   for (const k of Object.keys(selected)) delete selected[k]
@@ -102,13 +122,13 @@ async function loadAll() {
     stats.value = s
   }
   catch (err: unknown) {
-    errorMessage.value = (err as { statusMessage?: string })?.statusMessage ?? 'Failed to fetch'
+    errorMessage.value = (err as { statusMessage?: string })?.statusMessage ?? t('bookings.loadFailed')
   }
   finally { loading.value = false }
 }
 
 async function cancelBooking(id: string, name: string) {
-  if (!confirm(`Annuler la réservation de ${name} ?`)) return
+  if (!confirm(t('bookings.cancelSingleConfirm', { name }))) return
   try {
     await $fetch(`/api/admin/bookings/${id}/cancel`, {
       method: 'POST', headers: { 'x-admin-token': token.value },
@@ -116,14 +136,14 @@ async function cancelBooking(id: string, name: string) {
     await loadAll()
   }
   catch (err: unknown) {
-    alert('Cancel failed: ' + ((err as { statusMessage?: string })?.statusMessage ?? 'unknown'))
+    alert(t('bookings.cancelFailed') + ': ' + ((err as { statusMessage?: string })?.statusMessage ?? ''))
   }
 }
 
 async function bulkCancel() {
   const ids = selectedIds.value
   if (ids.length === 0) return
-  if (!confirm(`Annuler ${ids.length} réservation(s) ?`)) return
+  if (!confirm(t('bookings.bulkCancelConfirm', { count: ids.length }))) return
   for (const id of ids) {
     try {
       await $fetch(`/api/admin/bookings/${id}/cancel`, {
@@ -152,64 +172,62 @@ function exportCsv() {
   URL.revokeObjectURL(url)
 }
 
-function statusLabel(s: string) {
-  return s === 'confirmed' ? '✓ Confirmé' : s === 'cancelled' ? '✗ Annulé' : s
+function statusBadgeStatus(s: 'confirmed' | 'cancelled' | 'waitlist'): 'confirmed' | 'cancelled' | 'waitlist' {
+  return s
 }
-function statusClass(s: string) {
-  if (s === 'confirmed') return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
-  if (s === 'cancelled') return 'bg-red-500/20 text-red-300 border-red-500/30'
-  return 'bg-white/10 text-white/70 border-white/20'
+function statusBadgeLabel(s: 'confirmed' | 'cancelled' | 'waitlist'): string {
+  if (s === 'confirmed') return t('bookings.statusConfirmed')
+  if (s === 'cancelled') return t('bookings.statusCancelled')
+  return t('bookings.statusWaitlist')
 }
 </script>
 
 <template>
   <div>
-    <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
-      <div>
-        <h1 class="m-0 text-2xl">Réservations</h1>
-        <p class="text-sm text-white/50 mt-1">Irekiak 2026 · 29-31 mai</p>
-      </div>
-      <div class="flex items-center gap-2 flex-wrap">
-        <NuxtLink to="/admin/bookings/new" class="text-sm px-4 py-2 bg-white text-[var(--color-edition)] rounded-sm hover:bg-white/90 font-medium">+ Nouveau</NuxtLink>
-        <button type="button" class="text-sm px-4 py-2 border border-white/20 rounded-sm hover:bg-white/10" @click="loadAll">↻ Rafraîchir</button>
-        <button type="button" class="text-sm px-4 py-2 border border-white/20 rounded-sm hover:bg-white/10" @click="exportCsv">↓ CSV</button>
-      </div>
-    </div>
+    <AdminPageHeader
+      :title="t('bookings.title')"
+      :subtitle="t('bookings.editionSubtitle', { year, range: dateRangeLabel })"
+    >
+      <template #actions>
+        <AdminBaseButton variant="primary" as="nuxt-link" to="/admin/bookings/new">
+          {{ t('bookings.new') }}
+        </AdminBaseButton>
+        <AdminBaseButton variant="secondary" type="button" @click="loadAll">
+          {{ t('bookings.refresh') }}
+        </AdminBaseButton>
+        <AdminBaseButton variant="secondary" type="button" @click="exportCsv">
+          {{ t('bookings.csvExport') }}
+        </AdminBaseButton>
+      </template>
+    </AdminPageHeader>
 
     <p v-if="errorMessage" class="text-sm text-red-300 mb-6">{{ errorMessage }}</p>
 
-    <!-- Stats -->
     <div v-if="stats" class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
-      <div class="bg-edition-dark border border-white/10 rounded-sm p-4">
-        <p class="text-xs uppercase tracking-wider text-white/40 font-mono mb-1">Réservations</p>
-        <p class="text-2xl font-bold">{{ stats.totals.bookingsCount }}</p>
-        <p class="text-xs text-white/40">{{ stats.totals.cancelledCount }} annulées</p>
-      </div>
-      <div class="bg-edition-dark border border-white/10 rounded-sm p-4">
-        <p class="text-xs uppercase tracking-wider text-white/40 font-mono mb-1">Participants</p>
-        <p class="text-2xl font-bold">{{ stats.totals.guests }}</p>
-        <p class="text-xs text-white/40">sur {{ stats.totals.capacity }} places</p>
-      </div>
-      <div class="bg-edition-dark border border-white/10 rounded-sm p-4">
-        <p class="text-xs uppercase tracking-wider text-white/40 font-mono mb-1">Remplissage</p>
-        <p class="text-2xl font-bold">{{ stats.totals.avgFillRate }}%</p>
-        <div class="mt-2 h-1 w-full bg-white/10 rounded-full overflow-hidden">
-          <div class="h-full bg-white/80" :style="{ width: `${stats.totals.avgFillRate}%` }" />
-        </div>
-      </div>
-      <div class="bg-edition-dark border border-white/10 rounded-sm p-4">
-        <p class="text-xs uppercase tracking-wider text-white/40 font-mono mb-1">30 mai</p>
-        <p class="text-2xl font-bold">{{ stats.byDate['2026-05-30'] ?? 0 }}</p>
-      </div>
-      <div class="bg-edition-dark border border-white/10 rounded-sm p-4">
-        <p class="text-xs uppercase tracking-wider text-white/40 font-mono mb-1">31 mai</p>
-        <p class="text-2xl font-bold">{{ stats.byDate['2026-05-31'] ?? 0 }}</p>
-      </div>
+      <AdminStatCard
+        :label="t('bookings.statsBookings')"
+        :value="stats.totals.bookingsCount"
+        :subtitle="t('bookings.statsCancelled', { count: stats.totals.cancelledCount })"
+      />
+      <AdminStatCard
+        :label="t('bookings.statsParticipants')"
+        :value="stats.totals.guests"
+        :subtitle="t('bookings.statsCapacityOf', { capacity: stats.totals.capacity })"
+      />
+      <AdminStatCard
+        :label="t('bookings.statsFillRate')"
+        :value="`${stats.totals.avgFillRate}%`"
+      />
+      <AdminStatCard
+        v-for="d in editionDates.slice(1)"
+        :key="d"
+        :label="`${d.slice(8, 10)}.${d.slice(5, 7)}`"
+        :value="stats.byDate[d] ?? 0"
+      />
     </div>
 
-    <!-- Check-in shortcuts -->
     <div v-if="stats && stats.fillRate.some(f => f.booked > 0)" class="bg-edition-dark border border-white/10 rounded-sm p-4 mb-6">
-      <p class="text-xs uppercase tracking-wider text-white/40 font-mono mb-3">Check-in rapide</p>
+      <p class="text-xs uppercase tracking-wider text-white/40 font-mono mb-3">{{ t('dashboard.quickCheckin') }}</p>
       <div class="flex flex-wrap gap-2">
         <NuxtLink
           v-for="slot in stats.fillRate.filter(f => f.booked > 0)"
@@ -222,75 +240,79 @@ function statusClass(s: string) {
       </div>
     </div>
 
-    <!-- Filters -->
     <div class="bg-edition-dark border border-white/10 rounded-sm p-4 mb-6">
       <div class="flex flex-wrap gap-2 mb-4">
         <button
-          v-for="s in (['all', 'upcoming', 'past', 'cancelled'] as const)"
-          :key="s"
+          v-for="tab in statusFilterTabs"
+          :key="tab.value"
+          type="button"
           :class="[
             'px-4 py-1.5 text-xs uppercase tracking-wider font-mono rounded-sm',
-            statusFilter === s ? 'bg-white text-[var(--color-edition)]' : 'text-white/60 hover:text-white border border-white/15',
+            statusFilter === tab.value ? 'bg-white text-[var(--color-edition)]' : 'text-white/60 hover:text-white border border-white/15',
           ]"
-          @click="statusFilter = s"
-        >{{ s }}</button>
+          @click="statusFilter = tab.value"
+        >
+          {{ t(tab.key) }}
+        </button>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
         <select v-model="dateFilter" class="bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-sm text-white">
-          <option value="all">Toutes les dates</option>
+          <option value="all">{{ t('bookings.filterByDate') }}</option>
           <option v-for="d in availableDates" :key="d" :value="d">{{ d }}</option>
         </select>
         <select v-model="routeFilter" class="bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-sm text-white">
-          <option value="all">Tous les parcours</option>
+          <option value="all">{{ t('bookings.filterByRoute') }}</option>
           <option v-for="r in availableRoutes" :key="r" :value="r">{{ r }}</option>
         </select>
         <select v-model="languageFilter" class="bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-sm text-white">
-          <option value="all">Toutes les langues</option>
+          <option value="all">{{ t('bookings.filterByLanguage') }}</option>
           <option value="eu">Euskara</option>
           <option value="es">Español</option>
           <option value="fr">Français</option>
           <option value="en">English</option>
         </select>
-        <input v-model="searchQuery" type="search" placeholder="Nom, email, id…" class="bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-sm text-white placeholder-white/40">
+        <input v-model="searchQuery" type="search" :placeholder="t('bookings.searchPlaceholder')" class="bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-sm text-white placeholder-white/40">
       </div>
     </div>
 
-    <!-- Bulk actions bar -->
     <div v-if="selectedIds.length > 0" class="bg-emerald-500/10 border border-emerald-500/30 rounded-sm p-3 mb-4 flex items-center justify-between gap-3">
-      <span class="text-sm">{{ selectedIds.length }} sélectionné(s)</span>
+      <span class="text-sm">{{ t('bookings.bulkSelected', { count: selectedIds.length }) }}</span>
       <div class="flex gap-2">
-        <button type="button" class="text-xs px-3 py-1.5 border border-red-400/30 text-red-300 rounded-sm hover:bg-red-500/10" @click="bulkCancel">✗ Cancel selected</button>
+        <AdminBaseButton variant="danger" type="button" @click="bulkCancel">
+          {{ t('bookings.bulkCancel') }}
+        </AdminBaseButton>
       </div>
     </div>
 
-    <!-- Table -->
     <div class="bg-edition-dark border border-white/10 rounded-sm overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
           <thead class="bg-white/5">
             <tr class="text-left text-xs uppercase tracking-wider text-white/50 font-mono">
-              <th class="px-4 py-3 w-10"></th>
-              <th class="px-4 py-3">Status</th>
-              <th class="px-4 py-3">Date</th>
-              <th class="px-4 py-3">Visiteur</th>
-              <th class="px-4 py-3">Contact</th>
-              <th class="px-4 py-3">Nb</th>
-              <th class="px-4 py-3">Lg</th>
-              <th class="px-4 py-3">Parcours</th>
-              <th class="px-4 py-3 text-right">Actions</th>
+              <th class="px-4 py-3 w-10" />
+              <th class="px-4 py-3">{{ t('bookings.columnStatus') }}</th>
+              <th class="px-4 py-3">{{ t('bookings.columnDate') }}</th>
+              <th class="px-4 py-3">{{ t('bookings.columnVisitor') }}</th>
+              <th class="px-4 py-3">{{ t('bookings.columnContact') }}</th>
+              <th class="px-4 py-3">{{ t('bookings.columnParticipants') }}</th>
+              <th class="px-4 py-3">{{ t('bookings.columnLanguage') }}</th>
+              <th class="px-4 py-3">{{ t('bookings.columnRoute') }}</th>
+              <th class="px-4 py-3 text-right">{{ t('bookings.columnActions') }}</th>
             </tr>
           </thead>
           <tbody>
             <tr v-if="loading">
-              <td colspan="9" class="px-4 py-10 text-center text-white/40">Chargement…</td>
+              <td colspan="9" class="px-4 py-10 text-center text-white/40">{{ t('common.loading') }}</td>
             </tr>
             <tr v-else-if="filteredBookings.length === 0">
-              <td colspan="9" class="px-4 py-10 text-center text-white/40">Aucune réservation</td>
+              <td colspan="9" class="px-0 py-0">
+                <AdminEmptyState :title="t('bookings.emptyState')" :description="t('bookings.emptyStateDesc')" />
+              </td>
             </tr>
             <tr v-for="b in pagedBookings" :key="b.id" class="border-t border-white/5 hover:bg-white/5">
               <td class="px-4 py-3"><input v-model="selected[b.id]" type="checkbox" class="accent-white"></td>
               <td class="px-4 py-3">
-                <span class="inline-block text-[10px] px-2 py-0.5 rounded-full border" :class="statusClass(b.status)">{{ statusLabel(b.status) }}</span>
+                <AdminBadgeStatus :status="statusBadgeStatus(b.status)" :label="statusBadgeLabel(b.status)" />
               </td>
               <td class="px-4 py-3 font-mono text-xs">
                 <span class="text-white">{{ b.slotDate }}</span>
@@ -298,7 +320,7 @@ function statusClass(s: string) {
               </td>
               <td class="px-4 py-3">
                 <NuxtLink :to="`/admin/bookings/${b.id}`" class="font-medium hover:underline">{{ b.firstName }} {{ b.lastName }}</NuxtLink>
-                <div class="text-xs text-white/40 font-mono">{{ new Date(b.createdAt).toLocaleDateString('fr-FR') }}</div>
+                <div class="text-xs text-white/40 font-mono">{{ new Date(b.createdAt).toLocaleDateString() }}</div>
               </td>
               <td class="px-4 py-3">
                 <a :href="`mailto:${b.email}`" class="text-white hover:underline text-xs">{{ b.email }}</a>
@@ -308,8 +330,8 @@ function statusClass(s: string) {
               <td class="px-4 py-3 font-mono uppercase">{{ b.language }}</td>
               <td class="px-4 py-3 text-white/70">{{ b.routeId.replace('route-', '') }}</td>
               <td class="px-4 py-3 text-right whitespace-nowrap">
-                <NuxtLink :to="`/admin/bookings/${b.id}`" class="text-xs px-2 py-1 border border-white/20 rounded-sm hover:bg-white/10 mr-2">Détail</NuxtLink>
-                <button v-if="b.status === 'confirmed'" type="button" class="text-xs px-2 py-1 border border-red-400/30 text-red-300 rounded-sm hover:bg-red-500/10" @click="cancelBooking(b.id, `${b.firstName} ${b.lastName}`)">✗</button>
+                <NuxtLink :to="`/admin/bookings/${b.id}`" class="text-xs px-2 py-1 border border-white/20 rounded-sm hover:bg-white/10 mr-2">{{ t('bookings.detail') }}</NuxtLink>
+                <button v-if="b.status === 'confirmed'" type="button" class="text-xs px-2 py-1 border border-red-400/30 text-red-300 rounded-sm hover:bg-red-500/10" :title="t('bookings.cancelBooking')" @click="cancelBooking(b.id, `${b.firstName} ${b.lastName}`)">✗</button>
               </td>
             </tr>
           </tbody>
@@ -317,10 +339,10 @@ function statusClass(s: string) {
       </div>
 
       <div v-if="filteredBookings.length > pageSize" class="flex items-center justify-between px-4 py-3 border-t border-white/10 text-xs text-white/50 font-mono">
-        <span>{{ (currentPage - 1) * pageSize + 1 }}-{{ Math.min(currentPage * pageSize, filteredBookings.length) }} / {{ filteredBookings.length }}</span>
+        <span>{{ t('bookings.paginationRange', { start: (currentPage - 1) * pageSize + 1, end: Math.min(currentPage * pageSize, filteredBookings.length), total: filteredBookings.length }) }}</span>
         <div class="flex items-center gap-2">
           <button type="button" class="px-3 py-1 border border-white/15 rounded-sm disabled:opacity-30" :disabled="currentPage <= 1" @click="currentPage--">←</button>
-          <span>{{ currentPage }} / {{ totalPages }}</span>
+          <span>{{ t('bookings.paginationOf', { current: currentPage, total: totalPages }) }}</span>
           <button type="button" class="px-3 py-1 border border-white/15 rounded-sm disabled:opacity-30" :disabled="currentPage >= totalPages" @click="currentPage++">→</button>
         </div>
       </div>

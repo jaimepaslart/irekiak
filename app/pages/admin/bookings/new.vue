@@ -11,7 +11,12 @@ interface Slot {
 }
 
 definePageMeta({ layout: 'admin' })
-useSeoMeta({ title: 'Admin · Nouvelle réservation', robots: 'noindex, nofollow' })
+
+const { t } = useAdminT()
+const { year } = useEdition()
+const nextYear = computed(() => year.value + 1)
+
+useSeoMeta({ title: () => t('bookings.seoTitleNew'), robots: 'noindex, nofollow' })
 
 const token = inject<Ref<string>>('adminToken')!
 
@@ -55,7 +60,7 @@ onMounted(async () => {
     slots.value = await $fetch<Slot[]>('/api/bookings/availability')
   }
   catch (err: unknown) {
-    errorMessage.value = (err as { statusMessage?: string })?.statusMessage ?? 'Failed to load slots'
+    errorMessage.value = (err as { statusMessage?: string })?.statusMessage ?? t('bookings.loadFailed')
   }
   finally { loading.value = false }
 })
@@ -86,41 +91,48 @@ async function submit() {
   }
   catch (err: unknown) {
     const e = err as { statusMessage?: string, data?: { remaining?: number } }
-    errorMessage.value = e?.statusMessage ?? 'Failed'
+    errorMessage.value = e?.statusMessage ?? t('bookings.submitFailed')
     if (e?.data?.remaining !== undefined) {
-      errorMessage.value += ` (reste ${e.data.remaining} places, cochez "Bypass capacity" pour forcer)`
+      errorMessage.value += t('bookings.remainingPlacesHint', { remaining: e.data.remaining })
     }
   }
   finally { submitting.value = false }
+}
+
+function resetForm() {
+  successBookingId.value = null
+  Object.assign(form, { firstName: '', lastName: '', email: '', phone: '', specialNeeds: '' })
 }
 </script>
 
 <template>
   <div>
-    <NuxtLink to="/admin/bookings" class="inline-flex items-center gap-2 text-sm text-white/50 hover:text-white mb-6">← Réservations</NuxtLink>
+    <NuxtLink to="/admin/bookings" class="inline-flex items-center gap-2 text-sm text-white/50 hover:text-white mb-6">
+      {{ t('bookings.newBack') }}
+    </NuxtLink>
 
-    <h1 class="m-0 text-2xl mb-2">Nouvelle réservation</h1>
-    <p class="text-sm text-white/50 mb-8">Création manuelle (phone-in, walk-in, etc.)</p>
+    <AdminPageHeader :title="t('bookings.newTitle')" :subtitle="t('bookings.newSubtitle')" />
 
-    <!-- Success -->
     <div v-if="successBookingId" class="bg-emerald-500/10 border border-emerald-500/30 rounded-sm p-6 max-w-2xl">
-      <p class="text-emerald-300 mb-3">✓ Réservation créée avec succès.</p>
+      <p class="text-emerald-300 mb-3">{{ t('bookings.createSuccess') }}</p>
       <p class="text-sm text-white/70 font-mono mb-4">{{ successBookingId }}</p>
       <div class="flex gap-3">
-        <NuxtLink :to="`/admin/bookings/${successBookingId}`" class="px-4 py-2 text-sm bg-white text-[var(--color-edition)] rounded-sm hover:bg-white/90">Voir la réservation</NuxtLink>
-        <button type="button" class="px-4 py-2 text-sm border border-white/20 rounded-sm hover:bg-white/10" @click="successBookingId = null; Object.assign(form, { firstName: '', lastName: '', email: '', phone: '', specialNeeds: '' })">Créer une autre</button>
+        <AdminBaseButton variant="primary" as="nuxt-link" :to="`/admin/bookings/${successBookingId}`">
+          {{ t('bookings.viewBooking') }}
+        </AdminBaseButton>
+        <AdminBaseButton variant="secondary" type="button" @click="resetForm">
+          {{ t('bookings.createAnother') }}
+        </AdminBaseButton>
       </div>
     </div>
 
-    <!-- Form -->
     <form v-else class="bg-edition-dark border border-white/10 rounded-sm p-6 max-w-3xl space-y-5" @submit.prevent="submit">
-      <p v-if="loading" class="text-white/40">Chargement des créneaux…</p>
+      <p v-if="loading" class="text-white/40">{{ t('bookings.loadingSlots') }}</p>
 
-      <!-- Slot -->
       <label class="block">
-        <span class="text-xs uppercase tracking-wider text-white/40 block mb-2">Créneau *</span>
+        <span class="text-xs uppercase tracking-wider text-white/40 block mb-2">{{ t('bookings.fieldSlotRequired') }}</span>
         <select v-model="form.tourSlotId" required class="w-full bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-white">
-          <option value="">— Choisir —</option>
+          <option value="">{{ t('bookings.fieldSlotPlaceholder') }}</option>
           <option v-for="s in slots" :key="s.id" :value="s.id">
             {{ s.date }} · {{ s.startTime }} · {{ s.language.toUpperCase() }} · {{ s.routeId.replace('route-', '') }} ({{ s.remaining }}/{{ s.maxParticipants }})
           </option>
@@ -129,27 +141,27 @@ async function submit() {
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <label class="block">
-          <span class="text-xs uppercase tracking-wider text-white/40 block mb-2">Prénom *</span>
+          <span class="text-xs uppercase tracking-wider text-white/40 block mb-2">{{ t('bookings.fieldFirstNameRequired') }}</span>
           <input v-model="form.firstName" required class="w-full bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-white">
         </label>
         <label class="block">
-          <span class="text-xs uppercase tracking-wider text-white/40 block mb-2">Nom *</span>
+          <span class="text-xs uppercase tracking-wider text-white/40 block mb-2">{{ t('bookings.fieldLastNameRequired') }}</span>
           <input v-model="form.lastName" required class="w-full bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-white">
         </label>
         <label class="block">
-          <span class="text-xs uppercase tracking-wider text-white/40 block mb-2">Email *</span>
+          <span class="text-xs uppercase tracking-wider text-white/40 block mb-2">{{ t('bookings.fieldEmailRequired') }}</span>
           <input v-model="form.email" type="email" required class="w-full bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-white">
         </label>
         <label class="block">
-          <span class="text-xs uppercase tracking-wider text-white/40 block mb-2">Téléphone</span>
+          <span class="text-xs uppercase tracking-wider text-white/40 block mb-2">{{ t('bookings.fieldPhone') }}</span>
           <input v-model="form.phone" class="w-full bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-white">
         </label>
         <label class="block">
-          <span class="text-xs uppercase tracking-wider text-white/40 block mb-2">Participants *</span>
+          <span class="text-xs uppercase tracking-wider text-white/40 block mb-2">{{ t('bookings.fieldParticipantsRequired') }}</span>
           <input v-model.number="form.numberOfPeople" type="number" min="1" max="12" required class="w-full bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-white">
         </label>
         <label class="block">
-          <span class="text-xs uppercase tracking-wider text-white/40 block mb-2">Langue</span>
+          <span class="text-xs uppercase tracking-wider text-white/40 block mb-2">{{ t('bookings.fieldLanguage') }}</span>
           <select v-model="form.language" class="w-full bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-white">
             <option value="eu">Euskara</option>
             <option value="es">Español</option>
@@ -160,38 +172,39 @@ async function submit() {
       </div>
 
       <label class="block">
-        <span class="text-xs uppercase tracking-wider text-white/40 block mb-2">Besoins spécifiques</span>
+        <span class="text-xs uppercase tracking-wider text-white/40 block mb-2">{{ t('bookings.fieldSpecialNeeds') }}</span>
         <textarea v-model="form.specialNeeds" rows="2" maxlength="1000" class="w-full bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-white" />
       </label>
 
-      <!-- Options admin -->
       <fieldset class="border border-white/10 rounded-sm p-4 space-y-3">
-        <legend class="text-xs uppercase tracking-wider text-white/40 px-2 font-mono">Options admin</legend>
+        <legend class="text-xs uppercase tracking-wider text-white/40 px-2 font-mono">{{ t('bookings.optionsAdmin') }}</legend>
         <label class="flex items-center gap-2 text-sm">
           <input v-model="form.notify" type="checkbox" class="accent-white">
-          Envoyer email de confirmation au visiteur
+          {{ t('bookings.fieldSendEmailVisitor') }}
         </label>
         <label class="flex items-center gap-2 text-sm">
           <input v-model="form.notifyGalleries" type="checkbox" class="accent-white">
-          Notifier les galeries du parcours
+          {{ t('bookings.fieldNotifyGalleries') }}
         </label>
         <label class="flex items-center gap-2 text-sm">
           <input v-model="form.bypassCapacity" type="checkbox" class="accent-white">
-          Bypass capacité (si plein)
+          {{ t('bookings.fieldBypassCapacity') }}
         </label>
         <label class="flex items-center gap-2 text-sm">
           <input v-model="form.acceptsMarketing" type="checkbox" class="accent-white">
-          Opt-in marketing (édition 2027)
+          {{ t('bookings.fieldMarketingOptIn', { year: nextYear }) }}
         </label>
       </fieldset>
 
       <p v-if="errorMessage" class="text-sm text-red-300">{{ errorMessage }}</p>
 
       <div class="flex gap-3 justify-end">
-        <NuxtLink to="/admin/bookings" class="px-4 py-2 text-sm text-white/60 hover:text-white">Annuler</NuxtLink>
-        <button type="submit" class="px-6 py-2 text-sm font-medium bg-white text-[var(--color-edition)] rounded-sm hover:bg-white/90 disabled:opacity-50" :disabled="submitting">
-          {{ submitting ? '…' : 'Créer la réservation' }}
-        </button>
+        <AdminBaseButton variant="ghost" as="nuxt-link" to="/admin/bookings">
+          {{ t('common.cancel') }}
+        </AdminBaseButton>
+        <AdminBaseButton variant="primary" type="submit" :disabled="submitting" :loading="submitting">
+          {{ submitting ? t('bookings.submitCreating') : t('bookings.submitCreate') }}
+        </AdminBaseButton>
       </div>
     </form>
   </div>

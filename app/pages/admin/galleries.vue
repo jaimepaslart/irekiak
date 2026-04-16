@@ -16,6 +16,7 @@ interface Row {
 definePageMeta({ layout: 'admin' })
 useSeoMeta({ title: 'Admin · Galeries', robots: 'noindex, nofollow' })
 
+const { t } = useAdminT()
 const token = inject<Ref<string>>('adminToken')!
 
 const galleries = ref<Row[]>([])
@@ -31,7 +32,7 @@ async function load() {
     galleries.value = await $fetch<Row[]>('/api/admin/galleries', { headers: { 'x-admin-token': token.value } })
   }
   catch (err: unknown) {
-    errorMessage.value = (err as { statusMessage?: string })?.statusMessage ?? 'Failed'
+    errorMessage.value = (err as { statusMessage?: string })?.statusMessage ?? t('galleries.loadFailed')
   }
 }
 onMounted(() => { void load() })
@@ -69,7 +70,7 @@ async function save() {
     await load()
   }
   catch (err: unknown) {
-    alert((err as { statusMessage?: string })?.statusMessage ?? 'Save failed')
+    alert((err as { statusMessage?: string })?.statusMessage ?? t('galleries.saveFailed'))
   }
   finally { saving.value = false }
 }
@@ -77,8 +78,7 @@ async function save() {
 
 <template>
   <div>
-    <h1 class="m-0 text-2xl mb-2">Contacts galeries</h1>
-    <p class="text-sm text-white/50 mb-8">Override les contacts email des galeries (les valeurs ici prennent le pas sur <code class="text-xs bg-white/10 px-1 rounded">data/galleries.ts</code>).</p>
+    <AdminPageHeader :title="t('galleries.title')" :subtitle="t('galleries.subtitle')" />
     <p v-if="errorMessage" class="text-sm text-red-300 mb-4">{{ errorMessage }}</p>
 
     <div class="space-y-3">
@@ -88,32 +88,34 @@ async function save() {
             <h2 class="text-base font-semibold">{{ g.name }}</h2>
             <div class="text-sm text-white/70 mt-1">
               <span v-if="g.contact"><strong>{{ g.contact.email }}</strong> · {{ g.contact.preferredLanguage.toUpperCase() }}</span>
-              <span v-else class="text-white/40">Aucun contact</span>
+              <span v-else class="text-white/40">{{ t('galleries.noContact') }}</span>
             </div>
             <div v-if="g.contact" class="text-xs text-white/40 mt-1 space-x-3 font-mono">
               <span>notifyOnBooking: {{ g.contact.notifyOnBooking ? '✓' : '✗' }}</span>
               <span>receiveDailyDigest: {{ g.contact.receiveDailyDigest ? '✓' : '✗' }}</span>
             </div>
           </div>
-          <button type="button" class="text-xs px-3 py-1.5 border border-white/20 rounded-sm hover:bg-white/10" @click="startEdit(g)">✎ Éditer</button>
+          <AdminBaseButton variant="secondary" @click="startEdit(g)">
+            {{ t('galleries.editButton') }}
+          </AdminBaseButton>
         </div>
 
         <form v-else class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm" @submit.prevent="save">
           <h3 class="sm:col-span-2 text-base font-semibold">{{ g.name }}</h3>
           <label>
-            <span class="text-xs uppercase tracking-wider text-white/40 block mb-1">Email</span>
+            <span class="text-xs uppercase tracking-wider text-white/40 block mb-1">{{ t('galleries.fieldEmail') }}</span>
             <input v-model="form.email" type="email" class="w-full bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-white">
           </label>
           <label>
-            <span class="text-xs uppercase tracking-wider text-white/40 block mb-1">Nom contact</span>
+            <span class="text-xs uppercase tracking-wider text-white/40 block mb-1">{{ t('galleries.fieldContactName') }}</span>
             <input v-model="form.name" class="w-full bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-white">
           </label>
           <label>
-            <span class="text-xs uppercase tracking-wider text-white/40 block mb-1">Téléphone</span>
+            <span class="text-xs uppercase tracking-wider text-white/40 block mb-1">{{ t('galleries.fieldPhone') }}</span>
             <input v-model="form.phone" class="w-full bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-white">
           </label>
           <label>
-            <span class="text-xs uppercase tracking-wider text-white/40 block mb-1">Langue</span>
+            <span class="text-xs uppercase tracking-wider text-white/40 block mb-1">{{ t('galleries.fieldLanguage') }}</span>
             <select v-model="form.preferredLanguage" class="w-full bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-white">
               <option value="eu">Euskara</option>
               <option value="es">Español</option>
@@ -123,17 +125,19 @@ async function save() {
           </label>
           <label class="flex items-center gap-2">
             <input v-model="form.notifyOnBooking" type="checkbox" class="accent-white">
-            Notifier à chaque booking
+            {{ t('galleries.notifyOnBooking') }}
           </label>
           <label class="flex items-center gap-2">
             <input v-model="form.receiveDailyDigest" type="checkbox" class="accent-white">
-            Digest quotidien J-1
+            {{ t('galleries.receiveDailyDigest') }}
           </label>
           <div class="sm:col-span-2 flex gap-3 justify-end mt-2">
-            <button type="button" class="px-4 py-2 text-sm text-white/60 hover:text-white" :disabled="saving" @click="editing = null">Annuler</button>
-            <button type="submit" class="px-5 py-2 text-sm font-medium bg-white text-[var(--color-edition)] rounded-sm hover:bg-white/90 disabled:opacity-50" :disabled="saving">
-              {{ saving ? '…' : 'Enregistrer' }}
-            </button>
+            <AdminBaseButton variant="ghost" :disabled="saving" @click="editing = null">
+              {{ t('galleries.cancelEdit') }}
+            </AdminBaseButton>
+            <AdminBaseButton variant="primary" type="submit" :loading="saving" :disabled="saving">
+              {{ saving ? t('galleries.saving') : t('galleries.saveChanges') }}
+            </AdminBaseButton>
           </div>
         </form>
       </div>

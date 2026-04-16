@@ -3,6 +3,8 @@ const STORAGE_KEY = 'irekiak_admin_token'
 const STORAGE_KEY_TS = 'irekiak_admin_token_ts'
 const SESSION_TIMEOUT_MS = 60 * 60 * 1000
 
+const { t, locale, setLocale } = useAdminT()
+
 const token = ref('')
 const tokenInput = ref('')
 const errorMessage = ref<string | null>(null)
@@ -30,13 +32,12 @@ onMounted(() => {
 async function login() {
   const value = tokenInput.value.trim()
   if (!value) return
-  // Verify via a lightweight endpoint before persisting
   try {
     await $fetch('/api/admin/stats', { headers: { 'x-admin-token': value } })
   }
   catch (err: unknown) {
     const code = (err as { statusCode?: number })?.statusCode
-    errorMessage.value = code === 401 ? 'Token invalide.' : 'Erreur serveur.'
+    errorMessage.value = code === 401 ? t('auth.invalidToken') : t('auth.serverError')
     return
   }
   token.value = value
@@ -57,24 +58,21 @@ function logout() {
   navigateTo('/admin/bookings')
 }
 
-// Expose token to child pages via provide/inject
 provide('adminToken', token)
 provide('adminLogout', logout)
 
-const navItems = [
-  { to: '/admin', label: 'Dashboard' },
-  { to: '/admin/bookings', label: 'Réservations' },
-  { to: '/admin/bookings/new', label: '+ Nouveau' },
-  { to: '/admin/checkin', label: 'Check-in' },
-  { to: '/admin/galleries', label: 'Galeries' },
-  { to: '/admin/blast', label: 'Blast' },
-  { to: '/admin/emails', label: 'Emails' },
-  { to: '/admin/settings', label: 'Settings' },
-  { to: '/admin/audit', label: 'Audit' },
-]
+const navItems = computed(() => [
+  { to: '/admin', label: t('nav.dashboard') },
+  { to: '/admin/bookings', label: t('nav.bookings') },
+  { to: '/admin/bookings/new', label: t('nav.newBooking') },
+  { to: '/admin/checkin', label: t('nav.checkin') },
+  { to: '/admin/galleries', label: t('nav.galleries') },
+  { to: '/admin/blast', label: t('nav.blast') },
+  { to: '/admin/emails', label: t('nav.emails') },
+  { to: '/admin/settings', label: t('nav.settings') },
+  { to: '/admin/audit', label: t('nav.audit') },
+])
 
-// Keyboard shortcuts: b = bookings, c = create, k = check-in, d = dashboard,
-// s = settings, a = audit, ? = help modal, / = focus search
 const helpOpen = ref(false)
 function handleKeyDown(e: KeyboardEvent) {
   if (!token.value) return
@@ -112,56 +110,65 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="min-h-screen bg-[var(--color-edition)] text-white">
-    <!-- Login gate -->
     <div v-if="!token" class="max-w-md mx-auto mt-24 px-6 pt-20">
-      <h1 class="text-2xl mb-2">Admin · Irekiak</h1>
-      <p class="text-sm text-white/50 mb-8">Authentification requise</p>
+      <div class="flex items-center justify-between mb-2">
+        <h1 class="text-2xl">{{ t('nav.admin') }} · Irekiak</h1>
+        <div class="flex items-center gap-1 text-xs font-mono">
+          <button type="button" :class="['px-2 py-1 rounded-sm', locale === 'fr' ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white']" @click="setLocale('fr')">FR</button>
+          <span class="text-white/20">·</span>
+          <button type="button" :class="['px-2 py-1 rounded-sm', locale === 'es' ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white']" @click="setLocale('es')">ES</button>
+        </div>
+      </div>
+      <p class="text-sm text-white/50 mb-8">{{ t('auth.loginRequired') }}</p>
       <form class="space-y-4" @submit.prevent="login">
         <label class="block">
-          <span class="text-xs uppercase tracking-wider text-white/40 font-mono block mb-2">Admin token</span>
+          <span class="text-xs uppercase tracking-wider text-white/40 font-mono block mb-2">{{ t('auth.tokenLabel') }}</span>
           <input
             v-model="tokenInput"
             type="password"
             class="w-full px-4 py-3 bg-white/5 border border-white/15 rounded-sm text-white focus:outline-none focus:border-white/40"
-            placeholder="NUXT_ADMIN_TOKEN_SECRET"
+            :placeholder="t('auth.tokenPlaceholder')"
             autocomplete="current-password"
           >
         </label>
         <button type="submit" class="w-full px-4 py-3 bg-white text-[var(--color-edition)] font-medium rounded-sm hover:bg-white/90 transition-colors">
-          Se connecter
+          {{ t('auth.login') }}
         </button>
         <p v-if="errorMessage" class="text-sm text-red-300">{{ errorMessage }}</p>
       </form>
     </div>
 
-    <!-- Shell -->
     <div v-else>
-      <!-- Top bar -->
       <header class="sticky top-0 z-50 bg-[var(--color-edition-dark)]/95 backdrop-blur border-b border-white/10">
-        <div class="max-w-[1400px] mx-auto px-4 md:px-8 py-3 flex items-center justify-between">
-          <div class="flex items-center gap-4">
-            <button type="button" class="md:hidden p-2" :aria-label="navOpen ? 'Fermer' : 'Menu'" @click="navOpen = !navOpen">
+        <div class="max-w-[1400px] mx-auto px-4 md:px-8 py-3 flex items-center justify-between gap-4">
+          <div class="flex items-center gap-4 min-w-0">
+            <button type="button" class="md:hidden p-2" :aria-label="navOpen ? t('nav.mobileClose') : t('nav.mobileMenu')" @click="navOpen = !navOpen">
               <svg v-if="!navOpen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
               <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
-            <NuxtLink to="/admin" class="font-mono text-sm uppercase tracking-wider">Irekiak · Admin</NuxtLink>
-            <nav class="hidden md:flex items-center gap-1">
+            <NuxtLink to="/admin" class="font-mono text-sm uppercase tracking-wider whitespace-nowrap">Irekiak · {{ t('nav.admin') }}</NuxtLink>
+            <nav class="hidden md:flex items-center gap-1 overflow-x-auto">
               <NuxtLink
                 v-for="item in navItems"
                 :key="item.to"
                 :to="item.to"
-                class="px-3 py-1.5 text-sm rounded-sm text-white/60 hover:text-white hover:bg-white/5 transition-colors"
+                class="px-3 py-1.5 text-sm rounded-sm text-white/60 hover:text-white hover:bg-white/5 transition-colors whitespace-nowrap"
                 active-class="text-white bg-white/10"
               >
                 {{ item.label }}
               </NuxtLink>
             </nav>
           </div>
-          <button type="button" class="text-xs px-3 py-1.5 border border-red-400/30 text-red-300 rounded-sm hover:bg-red-500/10" @click="logout">
-            Logout
-          </button>
+          <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1 text-xs font-mono">
+              <button type="button" :class="['px-2 py-1 rounded-sm transition-colors', locale === 'fr' ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white']" @click="setLocale('fr')">FR</button>
+              <button type="button" :class="['px-2 py-1 rounded-sm transition-colors', locale === 'es' ? 'bg-white/10 text-white' : 'text-white/40 hover:text-white']" @click="setLocale('es')">ES</button>
+            </div>
+            <button type="button" class="text-xs px-3 py-1.5 border border-red-400/30 text-red-300 rounded-sm hover:bg-red-500/10" @click="logout">
+              {{ t('auth.logout') }}
+            </button>
+          </div>
         </div>
-        <!-- Mobile nav -->
         <Transition name="fade">
           <nav v-if="navOpen" class="md:hidden border-t border-white/10 bg-[var(--color-edition-dark)]">
             <div class="max-w-[1400px] mx-auto px-4 py-2 flex flex-col">
@@ -184,24 +191,23 @@ onBeforeUnmount(() => {
         <slot />
       </main>
 
-      <!-- Keyboard shortcuts help modal -->
       <Transition name="fade">
         <div v-if="helpOpen" class="fixed inset-0 z-[1000] flex items-center justify-center bg-black/70 backdrop-blur-sm px-6" @click.self="helpOpen = false">
           <div class="max-w-md w-full bg-[var(--color-edition)] border border-white/15 rounded-sm p-6 md:p-8">
-            <h3 class="text-lg font-semibold mb-4">Raccourcis clavier</h3>
+            <h3 class="text-lg font-semibold mb-4">{{ t('shortcuts.title') }}</h3>
             <dl class="space-y-2 text-sm">
-              <div class="flex justify-between"><dt><kbd class="kbd">d</kbd></dt><dd>Dashboard</dd></div>
-              <div class="flex justify-between"><dt><kbd class="kbd">b</kbd></dt><dd>Réservations</dd></div>
-              <div class="flex justify-between"><dt><kbd class="kbd">c</kbd></dt><dd>Nouvelle réservation</dd></div>
-              <div class="flex justify-between"><dt><kbd class="kbd">k</kbd></dt><dd>Check-in</dd></div>
-              <div class="flex justify-between"><dt><kbd class="kbd">s</kbd></dt><dd>Settings</dd></div>
-              <div class="flex justify-between"><dt><kbd class="kbd">a</kbd></dt><dd>Audit log</dd></div>
-              <div class="flex justify-between"><dt><kbd class="kbd">/</kbd></dt><dd>Focus recherche</dd></div>
-              <div class="flex justify-between"><dt><kbd class="kbd">?</kbd></dt><dd>Cette aide</dd></div>
-              <div class="flex justify-between"><dt><kbd class="kbd">Esc</kbd></dt><dd>Sortir d'un champ</dd></div>
+              <div class="flex justify-between"><dt><kbd class="kbd">d</kbd></dt><dd>{{ t('shortcuts.dashboard') }}</dd></div>
+              <div class="flex justify-between"><dt><kbd class="kbd">b</kbd></dt><dd>{{ t('shortcuts.bookings') }}</dd></div>
+              <div class="flex justify-between"><dt><kbd class="kbd">c</kbd></dt><dd>{{ t('shortcuts.newBooking') }}</dd></div>
+              <div class="flex justify-between"><dt><kbd class="kbd">k</kbd></dt><dd>{{ t('shortcuts.checkin') }}</dd></div>
+              <div class="flex justify-between"><dt><kbd class="kbd">s</kbd></dt><dd>{{ t('shortcuts.settings') }}</dd></div>
+              <div class="flex justify-between"><dt><kbd class="kbd">a</kbd></dt><dd>{{ t('shortcuts.audit') }}</dd></div>
+              <div class="flex justify-between"><dt><kbd class="kbd">/</kbd></dt><dd>{{ t('shortcuts.search') }}</dd></div>
+              <div class="flex justify-between"><dt><kbd class="kbd">?</kbd></dt><dd>{{ t('shortcuts.help') }}</dd></div>
+              <div class="flex justify-between"><dt><kbd class="kbd">Esc</kbd></dt><dd>{{ t('shortcuts.blur') }}</dd></div>
             </dl>
             <div class="mt-6 text-right">
-              <button type="button" class="px-4 py-2 text-sm bg-white text-[var(--color-edition)] rounded-sm hover:bg-white/90" @click="helpOpen = false">Fermer</button>
+              <button type="button" class="px-4 py-2 text-sm bg-white text-[var(--color-edition)] rounded-sm hover:bg-white/90" @click="helpOpen = false">{{ t('common.close') }}</button>
             </div>
           </div>
         </div>

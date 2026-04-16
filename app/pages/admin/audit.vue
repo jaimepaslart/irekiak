@@ -19,6 +19,7 @@ interface AuditPayload {
 definePageMeta({ layout: 'admin' })
 useSeoMeta({ title: 'Admin · Audit log', robots: 'noindex, nofollow' })
 
+const { t } = useAdminT()
 const token = inject<Ref<string>>('adminToken')!
 const entries = ref<AuditEntry[]>([])
 const total = ref(0)
@@ -47,7 +48,7 @@ async function load() {
     total.value = res.total
   }
   catch (err: unknown) {
-    errorMessage.value = (err as { statusMessage?: string })?.statusMessage ?? 'Failed'
+    errorMessage.value = (err as { statusMessage?: string })?.statusMessage ?? t('common.error')
   }
 }
 
@@ -67,16 +68,16 @@ function actionColor(a: string): string {
 
 <template>
   <div>
-    <h1 class="m-0 text-2xl mb-8">Audit log</h1>
+    <AdminPageHeader :title="t('audit.title')" :subtitle="t('audit.subtitle')" />
     <p v-if="errorMessage" class="text-sm text-red-300 mb-6">{{ errorMessage }}</p>
 
     <div class="flex flex-wrap gap-3 mb-6">
       <select v-model="actorFilter" class="bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-sm text-white">
-        <option value="all">All actors</option>
+        <option value="all">{{ t('audit.filterActor') }}</option>
         <option v-for="a in actors" :key="a" :value="a">{{ a }}</option>
       </select>
       <select v-model="actionFilter" class="bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-sm text-white">
-        <option value="all">All actions</option>
+        <option value="all">{{ t('audit.filterAction') }}</option>
         <option v-for="a in actions" :key="a" :value="a">{{ a }}</option>
       </select>
       <p class="text-xs text-white/40 font-mono self-center">{{ filtered.length }} / {{ entries.length }}</p>
@@ -84,21 +85,21 @@ function actionColor(a: string): string {
 
     <div class="bg-edition-dark border border-white/10 rounded-sm overflow-hidden">
       <div class="flex items-center justify-between px-4 py-3 border-b border-white/10 text-xs text-white/50 font-mono">
-        <span>{{ entries.length }} entrées (page {{ page }} / {{ totalPages }}) · {{ total }} total</span>
+        <span>{{ t('audit.pagination', { count: entries.length, page, totalPages, total }) }}</span>
         <div class="flex items-center gap-2">
           <button type="button" class="px-3 py-1 border border-white/15 rounded-sm disabled:opacity-30" :disabled="page <= 1" @click="page--">←</button>
           <button type="button" class="px-3 py-1 border border-white/15 rounded-sm disabled:opacity-30" :disabled="page >= totalPages" @click="page++">→</button>
         </div>
       </div>
       <div class="overflow-x-auto">
-        <table class="w-full text-sm">
+        <table v-if="filtered.length > 0" class="w-full text-sm">
           <thead class="bg-white/5">
             <tr class="text-left text-xs uppercase tracking-wider text-white/50 font-mono">
-              <th class="px-4 py-3">When</th>
-              <th class="px-4 py-3">Actor</th>
-              <th class="px-4 py-3">Action</th>
-              <th class="px-4 py-3">Target</th>
-              <th class="px-4 py-3">Metadata</th>
+              <th class="px-4 py-3">{{ t('audit.columnWhen') }}</th>
+              <th class="px-4 py-3">{{ t('audit.columnActor') }}</th>
+              <th class="px-4 py-3">{{ t('audit.columnAction') }}</th>
+              <th class="px-4 py-3">{{ t('audit.columnTarget') }}</th>
+              <th class="px-4 py-3">{{ t('audit.columnMetadata') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -120,6 +121,7 @@ function actionColor(a: string): string {
             </tr>
           </tbody>
         </table>
+        <AdminEmptyState v-else icon="📋" :title="t('audit.emptyState')" />
       </div>
     </div>
   </div>

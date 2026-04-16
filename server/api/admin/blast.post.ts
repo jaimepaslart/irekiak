@@ -1,4 +1,4 @@
-import { and, eq, ne } from 'drizzle-orm'
+import { eq, ne } from 'drizzle-orm'
 import { Resend } from 'resend'
 import { createError, defineEventHandler, readValidatedBody } from 'h3'
 import { z } from 'zod'
@@ -9,14 +9,23 @@ import { logAudit } from '../../utils/audit'
 import { withEmailRetry } from '../../utils/email-retry'
 import { requireAdminToken } from '../../utils/require-admin'
 
+type Lang = 'eu' | 'es' | 'fr' | 'en'
+
+const localizedString = z.object({
+  eu: z.string().trim().max(5000).optional(),
+  es: z.string().trim().max(5000).optional(),
+  fr: z.string().trim().min(1).max(5000),
+  en: z.string().trim().max(5000).optional(),
+})
+
 const schema = z.object({
   scope: z.discriminatedUnion('type', [
     z.object({ type: z.literal('all') }),
     z.object({ type: z.literal('date'), date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/) }),
     z.object({ type: z.literal('slot'), slotId: z.string().min(1) }),
   ]),
-  subject: z.string().trim().min(3).max(200),
-  body: z.string().trim().min(10).max(5000),
+  subject: localizedString,
+  message: localizedString,
 })
 
 function escHtml(v: string): string {
@@ -42,6 +51,18 @@ function buildHtml(subject: string, body: string): string {
 </table></body></html>`
 }
 
+function pickLocalized(dict: { eu?: string, es?: string, fr: string, en?: string }, lang: Lang): string {
+  const v = dict[lang]
+  if (v && v.trim().length > 0) return v
+  return dict.fr
+}
+
+function normalizeLang(raw: string): Lang {
+  const v = raw.toLowerCase()
+  if (v === 'eu' || v === 'es' || v === 'fr' || v === 'en') return v
+  return 'fr'
+}
+
 /**
  * POST /api/admin/blast — Send email to all confirmed attendees matching scope.
  */
@@ -54,44 +75,48 @@ export default defineEventHandler(async (event) => {
     return r.data
   })
 
-  // Collect recipients
-  let recipients: Array<{ id: string, email: string }> = []
+  let recipients: Array<{ id: string, email: string, language: string, slotId: string, slotDate: string }> = []
   const allConfirmed = await db
-    .select({ id: bookings.id, email: bookings.email, slotId: bookings.slotId, slotDate: timeSlots.date })
+    .select({ id: bookings.id, email: bookings.email, language: bookings.language, slotId: bookings.slotId, slotDate: timeSlots.date })
     .from(bookings)
     .innerJoin(timeSlots, eq(bookings.slotId, timeSlots.id))
     .where(ne(bookings.status, 'cancelled'))
     .all()
 
-  if (parsed.scope.type === 'all') {
+  const scope = parsed.scope
+  if (scope.type === 'all') {
     recipients = allConfirmed
   }
-  else if (parsed.scope.type === 'date') {
-    recipients = allConfirmed.filter(r => r.slotDate === parsed.scope.date)
+  else if (scope.type === 'date') {
+    recipients = allConfirmed.filter(r => r.slotDate === scope.date)
   }
   else {
-    recipients = allConfirmed.filter(r => r.slotId === parsed.scope.slotId)
+    recipients = allConfirmed.filter(r => r.slotId === scope.slotId)
   }
 
-  // Dedupe by email
-  const uniqEmails = [...new Set(recipients.map(r => r.email))]
+  const byEmail = new Map<string, Lang>()
+  for (const r of recipients) {
+    if (!byEmail.has(r.email)) byEmail.set(r.email, normalizeLang(r.language))
+  }
 
   const config = useRuntimeConfig()
   if (!config.resendApiKey) {
     throw createError({ statusCode: 503, statusMessage: 'Resend not configured' })
   }
   const resend = new Resend(config.resendApiKey)
-  const html = buildHtml(parsed.subject, parsed.body)
 
   let sent = 0
   let failed = 0
-  for (const email of uniqEmails) {
+  for (const [email, lang] of byEmail) {
+    const subject = pickLocalized(parsed.subject, lang)
+    const body = pickLocalized(parsed.message, lang)
+    const html = buildHtml(subject, body)
     try {
       await withEmailRetry(async () => {
         const { error } = await resend.emails.send({
           from: config.fromEmail,
           to: email,
-          subject: parsed.subject,
+          subject,
           html,
         })
         if (error) throw new Error(`Resend: ${error.message ?? 'unknown'}`)
@@ -107,8 +132,15 @@ export default defineEventHandler(async (event) => {
     actor: 'admin',
     action: 'blast.send',
     targetType: 'blast',
-    metadata: { scope: parsed.scope, subject: parsed.subject, recipients: uniqEmails.length, sent, failed },
+    metadata: {
+      scope,
+      subjectFr: parsed.subject.fr,
+      languages: (['eu', 'es', 'fr', 'en'] as const).filter(k => parsed.subject[k]),
+      recipients: byEmail.size,
+      sent,
+      failed,
+    },
   })
 
-  return { ok: true, recipients: uniqEmails.length, sent, failed }
+  return { ok: true, recipients: byEmail.size, sent, failed }
 })

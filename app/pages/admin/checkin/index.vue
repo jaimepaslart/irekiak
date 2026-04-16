@@ -16,6 +16,7 @@ interface SlotOverview {
 definePageMeta({ layout: 'admin' })
 useSeoMeta({ title: 'Admin · Check-in overview', robots: 'noindex, nofollow' })
 
+const { t } = useAdminT()
 const token = inject<Ref<string>>('adminToken')!
 const slots = ref<SlotOverview[]>([])
 const errorMessage = ref<string | null>(null)
@@ -27,7 +28,7 @@ onMounted(async () => {
     })
   }
   catch (err: unknown) {
-    errorMessage.value = (err as { statusMessage?: string })?.statusMessage ?? 'Failed'
+    errorMessage.value = (err as { statusMessage?: string })?.statusMessage ?? t('checkin.loadFailed')
   }
 })
 
@@ -51,10 +52,15 @@ function attendedPct(s: SlotOverview) {
 
 <template>
   <div>
-    <h1 class="m-0 text-2xl mb-2">Check-in</h1>
-    <p class="text-sm text-white/50 mb-8">Vue d'ensemble des créneaux et présence</p>
+    <AdminPageHeader :title="t('checkin.overviewTitle')" :subtitle="t('checkin.overviewSubtitle')" />
 
     <p v-if="errorMessage" class="text-sm text-red-300 mb-4">{{ errorMessage }}</p>
+
+    <AdminEmptyState
+      v-if="!errorMessage && byDate.length === 0"
+      :title="t('checkin.emptyStateOverview')"
+      :description="t('checkin.emptyStateOverviewDesc')"
+    />
 
     <div v-for="[date, dateSlots] in byDate" :key="date" class="mb-10">
       <h2 class="text-lg font-semibold mb-4">{{ date }}</h2>
@@ -75,7 +81,7 @@ function attendedPct(s: SlotOverview) {
           <div class="mt-4 space-y-2">
             <div>
               <div class="flex items-center justify-between text-xs text-white/60 mb-1">
-                <span>Inscrits</span><span>{{ s.bookedCount }} / {{ s.maxParticipants }}</span>
+                <span>{{ t('checkin.registered') }}</span><span>{{ s.bookedCount }} / {{ s.maxParticipants }}</span>
               </div>
               <div class="h-1 w-full bg-white/10 rounded-full overflow-hidden">
                 <div class="h-full bg-white/70" :style="{ width: `${fillPct(s)}%` }" />
@@ -83,7 +89,7 @@ function attendedPct(s: SlotOverview) {
             </div>
             <div v-if="s.bookedCount > 0">
               <div class="flex items-center justify-between text-xs text-emerald-300/80 mb-1">
-                <span>Présents</span><span>{{ s.attendedCount }} / {{ s.bookedCount }}</span>
+                <span>{{ t('checkin.present') }}</span><span>{{ s.attendedCount }} / {{ s.bookedCount }}</span>
               </div>
               <div class="h-1 w-full bg-white/10 rounded-full overflow-hidden">
                 <div class="h-full bg-emerald-400" :style="{ width: `${attendedPct(s)}%` }" />

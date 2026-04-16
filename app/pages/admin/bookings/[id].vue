@@ -22,7 +22,9 @@ interface DetailPayload {
 }
 
 definePageMeta({ layout: 'admin' })
-useSeoMeta({ title: 'Admin · Détail réservation', robots: 'noindex, nofollow' })
+
+const { t } = useAdminT()
+useSeoMeta({ title: () => t('bookings.seoTitleDetail'), robots: 'noindex, nofollow' })
 
 const token = inject<Ref<string>>('adminToken')!
 const route = useRoute()
@@ -62,7 +64,7 @@ async function load() {
     })
   }
   catch (err: unknown) {
-    errorMessage.value = (err as { statusMessage?: string })?.statusMessage ?? 'Failed to load'
+    errorMessage.value = (err as { statusMessage?: string })?.statusMessage ?? t('bookings.loadError')
   }
   finally { loading.value = false }
 }
@@ -96,7 +98,7 @@ async function save() {
     await load()
   }
   catch (err: unknown) {
-    alert((err as { statusMessage?: string })?.statusMessage ?? 'Save failed')
+    alert((err as { statusMessage?: string })?.statusMessage ?? t('bookings.saveError'))
   }
   finally { saving.value = false }
 }
@@ -106,16 +108,16 @@ async function resend() {
     await $fetch(`/api/admin/bookings/${bookingId.value}/resend`, {
       method: 'POST', headers: { 'x-admin-token': token.value },
     })
-    alert('Email renvoyé au visiteur.')
+    alert(t('bookings.resendSuccess'))
     await load()
   }
   catch (err: unknown) {
-    alert((err as { statusMessage?: string })?.statusMessage ?? 'Resend failed')
+    alert((err as { statusMessage?: string })?.statusMessage ?? t('bookings.resendFailed'))
   }
 }
 
 async function cancel() {
-  if (!confirm('Annuler cette réservation ? Le visiteur et les galeries seront notifiés.')) return
+  if (!confirm(t('bookings.confirmCancel'))) return
   try {
     await $fetch(`/api/admin/bookings/${bookingId.value}/cancel`, {
       method: 'POST', headers: { 'x-admin-token': token.value },
@@ -123,15 +125,16 @@ async function cancel() {
     await load()
   }
   catch (err: unknown) {
-    alert((err as { statusMessage?: string })?.statusMessage ?? 'Cancel failed')
+    alert((err as { statusMessage?: string })?.statusMessage ?? t('bookings.cancelError'))
   }
 }
 
-function statusClass(s: string) {
-  if (s === 'confirmed') return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
-  if (s === 'cancelled') return 'bg-red-500/20 text-red-300 border-red-500/30'
-  return 'bg-white/10 text-white/70 border-white/20'
+function statusBadgeLabel(s: 'confirmed' | 'cancelled' | 'waitlist'): string {
+  if (s === 'confirmed') return t('bookings.statusConfirmed')
+  if (s === 'cancelled') return t('bookings.statusCancelled')
+  return t('bookings.statusWaitlist')
 }
+
 function actionColor(a: string): string {
   if (a.includes('cancel')) return 'text-red-300'
   if (a.includes('create')) return 'text-emerald-300'
@@ -144,149 +147,139 @@ function actionColor(a: string): string {
 <template>
   <div>
     <NuxtLink to="/admin/bookings" class="inline-flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors mb-6">
-      ← Réservations
+      {{ t('bookings.detailBack') }}
     </NuxtLink>
 
-    <p v-if="loading" class="text-white/40">Chargement…</p>
+    <p v-if="loading" class="text-white/40">{{ t('common.loading') }}</p>
     <p v-if="errorMessage" class="text-sm text-red-300">{{ errorMessage }}</p>
 
     <template v-if="data">
-      <!-- Header -->
-      <div class="flex flex-wrap items-start justify-between gap-4 mb-8">
-        <div>
-          <div class="flex items-center gap-3 mb-1">
-            <h1 class="m-0 text-2xl">{{ data.booking.firstName }} {{ data.booking.lastName }}</h1>
-            <span class="inline-block text-xs px-3 py-1 rounded-full border uppercase" :class="statusClass(data.booking.status)">
-              {{ data.booking.status }}
-            </span>
-          </div>
-          <p class="text-sm text-white/50 font-mono">{{ data.booking.id }}</p>
-        </div>
-        <div class="flex flex-wrap gap-2">
-          <button v-if="!editing && data.booking.status === 'confirmed'" type="button" class="text-xs px-4 py-2 border border-white/25 rounded-sm hover:bg-white/10" @click="editing = true">
-            ✎ Éditer
-          </button>
-          <button v-if="data.booking.status === 'confirmed'" type="button" class="text-xs px-4 py-2 border border-white/25 rounded-sm hover:bg-white/10" @click="resend">
-            ✉ Resend email
-          </button>
-          <button v-if="data.booking.status === 'confirmed'" type="button" class="text-xs px-4 py-2 border border-red-400/30 text-red-300 rounded-sm hover:bg-red-500/10" @click="cancel">
-            ✗ Annuler
-          </button>
-        </div>
-      </div>
+      <AdminPageHeader
+        :title="`${data.booking.firstName} ${data.booking.lastName}`"
+        :subtitle="data.booking.id"
+      >
+        <template #actions>
+          <AdminBadgeStatus :status="data.booking.status" :label="statusBadgeLabel(data.booking.status)" />
+          <AdminBaseButton v-if="!editing && data.booking.status === 'confirmed'" variant="secondary" type="button" @click="editing = true">
+            {{ t('bookings.detailEdit') }}
+          </AdminBaseButton>
+          <AdminBaseButton v-if="data.booking.status === 'confirmed'" variant="secondary" type="button" @click="resend">
+            {{ t('bookings.detailResend') }}
+          </AdminBaseButton>
+          <AdminBaseButton v-if="data.booking.status === 'confirmed'" variant="danger" type="button" @click="cancel">
+            {{ t('bookings.detailCancel') }}
+          </AdminBaseButton>
+        </template>
+      </AdminPageHeader>
 
-      <!-- Info grid -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Booking info -->
         <section class="lg:col-span-2 bg-edition-dark border border-white/10 rounded-sm p-6">
           <h2 class="text-base font-semibold mb-4 flex items-center gap-2">
             <span class="w-1 h-4 rounded-full" :style="{ backgroundColor: data.route.color }" />
-            Réservation
+            {{ t('bookings.detailSection') }}
           </h2>
 
-          <!-- View mode -->
           <dl v-if="!editing" class="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8 text-sm">
             <div>
-              <dt class="text-white/40 uppercase tracking-wider text-xs font-mono mb-1">Email</dt>
+              <dt class="text-white/40 uppercase tracking-wider text-xs font-mono mb-1">{{ t('bookings.detailFieldEmail') }}</dt>
               <dd class="text-white break-all"><a :href="`mailto:${data.booking.email}`" class="hover:underline">{{ data.booking.email }}</a></dd>
             </div>
             <div v-if="data.booking.phone">
-              <dt class="text-white/40 uppercase tracking-wider text-xs font-mono mb-1">Téléphone</dt>
+              <dt class="text-white/40 uppercase tracking-wider text-xs font-mono mb-1">{{ t('bookings.detailFieldPhone') }}</dt>
               <dd class="text-white">{{ data.booking.phone }}</dd>
             </div>
             <div>
-              <dt class="text-white/40 uppercase tracking-wider text-xs font-mono mb-1">Participants</dt>
+              <dt class="text-white/40 uppercase tracking-wider text-xs font-mono mb-1">{{ t('bookings.detailFieldParticipants') }}</dt>
               <dd class="text-white">{{ data.booking.numberOfPeople }}</dd>
             </div>
             <div>
-              <dt class="text-white/40 uppercase tracking-wider text-xs font-mono mb-1">Langue</dt>
+              <dt class="text-white/40 uppercase tracking-wider text-xs font-mono mb-1">{{ t('bookings.detailFieldLanguage') }}</dt>
               <dd class="text-white uppercase font-mono">{{ data.booking.language }}</dd>
             </div>
-            <div class="sm:col-span-2" v-if="data.booking.specialNeeds">
-              <dt class="text-white/40 uppercase tracking-wider text-xs font-mono mb-1">Besoins spécifiques</dt>
+            <div v-if="data.booking.specialNeeds" class="sm:col-span-2">
+              <dt class="text-white/40 uppercase tracking-wider text-xs font-mono mb-1">{{ t('bookings.detailFieldSpecialNeeds') }}</dt>
               <dd class="text-white/90">{{ data.booking.specialNeeds }}</dd>
             </div>
             <div>
-              <dt class="text-white/40 uppercase tracking-wider text-xs font-mono mb-1">Marketing opt-in</dt>
+              <dt class="text-white/40 uppercase tracking-wider text-xs font-mono mb-1">{{ t('bookings.detailFieldMarketing') }}</dt>
               <dd class="text-white">{{ data.booking.acceptsMarketing ? '✓' : '—' }}</dd>
             </div>
             <div>
-              <dt class="text-white/40 uppercase tracking-wider text-xs font-mono mb-1">Créé le</dt>
+              <dt class="text-white/40 uppercase tracking-wider text-xs font-mono mb-1">{{ t('bookings.detailFieldCreatedAt') }}</dt>
               <dd class="text-white/70 font-mono text-xs">{{ data.booking.createdAt }}</dd>
             </div>
           </dl>
 
-          <!-- Edit mode -->
           <form v-else class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm" @submit.prevent="save">
             <label class="block">
-              <span class="text-xs uppercase tracking-wider text-white/40 block mb-1">Prénom</span>
+              <span class="text-xs uppercase tracking-wider text-white/40 block mb-1">{{ t('bookings.fieldFirstName') }}</span>
               <input v-model="form.firstName" class="w-full bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-white">
             </label>
             <label class="block">
-              <span class="text-xs uppercase tracking-wider text-white/40 block mb-1">Nom</span>
+              <span class="text-xs uppercase tracking-wider text-white/40 block mb-1">{{ t('bookings.fieldLastName') }}</span>
               <input v-model="form.lastName" class="w-full bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-white">
             </label>
             <label class="block">
-              <span class="text-xs uppercase tracking-wider text-white/40 block mb-1">Email</span>
+              <span class="text-xs uppercase tracking-wider text-white/40 block mb-1">{{ t('bookings.fieldEmail') }}</span>
               <input v-model="form.email" type="email" class="w-full bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-white">
             </label>
             <label class="block">
-              <span class="text-xs uppercase tracking-wider text-white/40 block mb-1">Téléphone</span>
+              <span class="text-xs uppercase tracking-wider text-white/40 block mb-1">{{ t('bookings.fieldPhone') }}</span>
               <input v-model="form.phone" class="w-full bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-white">
             </label>
             <label class="block">
-              <span class="text-xs uppercase tracking-wider text-white/40 block mb-1">Participants (max 4)</span>
+              <span class="text-xs uppercase tracking-wider text-white/40 block mb-1">{{ t('bookings.editParticipantsLabel') }}</span>
               <input v-model.number="form.numberOfPeople" type="number" min="1" max="4" class="w-full bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-white">
             </label>
             <label class="block sm:col-span-2">
-              <span class="text-xs uppercase tracking-wider text-white/40 block mb-1">Besoins spécifiques</span>
+              <span class="text-xs uppercase tracking-wider text-white/40 block mb-1">{{ t('bookings.fieldSpecialNeeds') }}</span>
               <textarea v-model="form.specialNeeds" rows="3" maxlength="1000" class="w-full bg-white/5 border border-white/15 rounded-sm px-3 py-2 text-white" />
             </label>
             <div class="sm:col-span-2 flex gap-3 justify-end mt-2">
-              <button type="button" class="px-4 py-2 text-sm text-white/60 hover:text-white" :disabled="saving" @click="editing = false">Annuler</button>
-              <button type="submit" class="px-5 py-2 text-sm font-medium bg-white text-[var(--color-edition)] rounded-sm hover:bg-white/90 disabled:opacity-50" :disabled="saving">
-                {{ saving ? '…' : 'Enregistrer' }}
-              </button>
+              <AdminBaseButton variant="ghost" type="button" :disabled="saving" @click="editing = false">
+                {{ t('common.cancel') }}
+              </AdminBaseButton>
+              <AdminBaseButton variant="primary" type="submit" :disabled="saving" :loading="saving">
+                {{ saving ? t('bookings.detailSaving') : t('common.save') }}
+              </AdminBaseButton>
             </div>
           </form>
         </section>
 
-        <!-- Slot + route -->
         <section class="bg-edition-dark border border-white/10 rounded-sm p-6">
-          <h2 class="text-base font-semibold mb-4">Créneau</h2>
+          <h2 class="text-base font-semibold mb-4">{{ t('bookings.detailSlot') }}</h2>
           <dl class="space-y-3 text-sm">
             <div>
-              <dt class="text-white/40 uppercase tracking-wider text-xs font-mono mb-1">Parcours</dt>
+              <dt class="text-white/40 uppercase tracking-wider text-xs font-mono mb-1">{{ t('bookings.detailFieldRoute') }}</dt>
               <dd class="text-white">{{ data.route.nameEu }}</dd>
             </div>
             <div>
-              <dt class="text-white/40 uppercase tracking-wider text-xs font-mono mb-1">Date</dt>
+              <dt class="text-white/40 uppercase tracking-wider text-xs font-mono mb-1">{{ t('bookings.detailFieldDate') }}</dt>
               <dd class="text-white font-mono">{{ data.slot.date }} · {{ data.slot.startTime }}—{{ data.slot.endTime }}</dd>
             </div>
             <div>
-              <dt class="text-white/40 uppercase tracking-wider text-xs font-mono mb-1">Capacité</dt>
+              <dt class="text-white/40 uppercase tracking-wider text-xs font-mono mb-1">{{ t('bookings.detailFieldCapacity') }}</dt>
               <dd class="text-white">{{ data.slot.bookedCount }} / {{ data.slot.maxParticipants }}</dd>
             </div>
             <div>
-              <dt class="text-white/40 uppercase tracking-wider text-xs font-mono mb-1">Check-in</dt>
+              <dt class="text-white/40 uppercase tracking-wider text-xs font-mono mb-1">{{ t('bookings.detailFieldCheckin') }}</dt>
               <dd>
                 <span v-if="data.attendance" class="text-emerald-300">✓ {{ data.attendance.checkedInAt }}</span>
-                <span v-else class="text-white/40">Non pointé</span>
+                <span v-else class="text-white/40">{{ t('bookings.detailNotCheckedIn') }}</span>
               </dd>
             </div>
             <div class="pt-2">
-              <NuxtLink :to="`/admin/checkin/${data.slot.id}`" class="text-xs px-3 py-1.5 border border-white/20 rounded-sm hover:bg-white/10 inline-block">
-                → Voir check-in
-              </NuxtLink>
+              <AdminBaseButton variant="secondary" as="nuxt-link" :to="`/admin/checkin/${data.slot.id}`">
+                {{ t('bookings.detailViewCheckin') }}
+              </AdminBaseButton>
             </div>
           </dl>
         </section>
       </div>
 
-      <!-- Audit timeline -->
       <section class="mt-6 bg-edition-dark border border-white/10 rounded-sm p-6">
-        <h2 class="text-base font-semibold mb-4">Historique</h2>
-        <div v-if="data.audit.length === 0" class="text-sm text-white/40">Aucun événement.</div>
+        <h2 class="text-base font-semibold mb-4">{{ t('bookings.detailHistory') }}</h2>
+        <div v-if="data.audit.length === 0" class="text-sm text-white/40">{{ t('bookings.detailNoEvents') }}</div>
         <ol v-else class="space-y-2">
           <li v-for="e in data.audit" :key="e.id" class="flex items-start gap-3 text-sm border-b border-white/5 pb-2 last:border-0">
             <span class="text-xs text-white/40 font-mono shrink-0 w-36">{{ e.timestamp }}</span>

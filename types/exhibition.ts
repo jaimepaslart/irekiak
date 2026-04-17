@@ -36,5 +36,7 @@ export interface ExhibitionCard {
   description: TranslatedText
   imageUrl: string
   externalUrl: string | null
+  startDate: string
+  endDate: string
   overridden: boolean
 }

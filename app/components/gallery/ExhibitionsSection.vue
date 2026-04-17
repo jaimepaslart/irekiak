@@ -18,8 +18,8 @@ const jsonLd = computed(() => {
     'name': tr(c.title),
     'description': tr(c.description),
     'image': c.imageUrl.startsWith('http') ? c.imageUrl : `${siteUrl}${c.imageUrl}`,
-    'startDate': '2026-05-29',
-    'endDate': '2026-05-31',
+    'startDate': c.startDate,
+    'endDate': c.endDate,
     'performer': { '@type': 'Person', 'name': c.artist },
     'location': {
       '@type': 'Place',

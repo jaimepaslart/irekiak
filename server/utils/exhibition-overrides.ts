@@ -58,6 +58,8 @@ function buildCard(exh: Exhibition, override: ExhibitionOverrideRow | null): Exh
     description: mergeTranslated(override, exh.description, 'description'),
     imageUrl: resolveImageUrl(override, exh),
     externalUrl: override?.externalUrl ?? gallery?.website ?? null,
+    startDate: exh.startDate,
+    endDate: exh.endDate,
     overridden: isOverridden(override),
   }
 }

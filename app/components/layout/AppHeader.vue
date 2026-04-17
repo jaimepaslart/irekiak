@@ -31,10 +31,8 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
 
 <template>
   <header
-    class="fixed top-0 z-50 w-full transition-all duration-300"
-    :class="scrolled
-      ? 'bg-[var(--color-edition)]/95 backdrop-blur-sm border-b border-white/10'
-      : 'bg-transparent'"
+    class="fixed top-0 z-50 w-full transition-all duration-300 bg-[var(--color-edition)]/80 backdrop-blur-md"
+    :class="scrolled ? 'bg-[var(--color-edition)]/95 border-b border-white/10' : ''"
   >
     <nav class="flex items-center justify-between h-16 px-6 md:px-12 max-w-[1200px] mx-auto" aria-label="Main navigation">
       <NuxtLink :to="localePath('/')" class="block shrink-0">

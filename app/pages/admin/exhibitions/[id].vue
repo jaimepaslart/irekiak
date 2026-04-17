@@ -24,6 +24,7 @@ const token = inject<Ref<string>>('adminToken')!
 
 const id = computed(() => String(route.params.id ?? ''))
 const card = ref<ExhibitionCard | null>(null)
+const defaults = ref<ExhibitionCard | null>(null)
 const override = ref<ExhibitionOverrideRow | null>(null)
 const loading = ref(true)
 const errorMessage = ref<string | null>(null)
@@ -64,24 +65,26 @@ async function load() {
   loading.value = true
   errorMessage.value = null
   try {
-    const res = await $fetch<{ card: ExhibitionCard, override: ExhibitionOverrideRow | null }>(
+    const res = await $fetch<{ card: ExhibitionCard, defaults: ExhibitionCard, override: ExhibitionOverrideRow | null }>(
       `/api/admin/exhibitions/${id.value}`,
       { headers: { 'x-admin-token': token.value } },
     )
     card.value = res.card
+    defaults.value = res.defaults
     override.value = res.override
-    // Pre-fill from the override only: otherwise pressing Save without editing
-    // would persist the merged defaults as overrides.
-    form.artistName = res.override?.artistName ?? ''
-    form.titleEu = res.override?.titleEu ?? ''
-    form.titleEs = res.override?.titleEs ?? ''
-    form.titleFr = res.override?.titleFr ?? ''
-    form.titleEn = res.override?.titleEn ?? ''
-    form.descriptionEu = res.override?.descriptionEu ?? ''
-    form.descriptionEs = res.override?.descriptionEs ?? ''
-    form.descriptionFr = res.override?.descriptionFr ?? ''
-    form.descriptionEn = res.override?.descriptionEn ?? ''
-    form.externalUrl = res.override?.externalUrl ?? ''
+    // Pre-fill with the effective (merged) values so they're editable in place.
+    // On save we compare each field to its default and send null when unchanged
+    // (see save()) so unmodified fields stay "default", not "overridden".
+    form.artistName = res.card.artist
+    form.titleEu = res.card.title.eu
+    form.titleEs = res.card.title.es
+    form.titleFr = res.card.title.fr
+    form.titleEn = res.card.title.en
+    form.descriptionEu = res.card.description.eu
+    form.descriptionEs = res.card.description.es
+    form.descriptionFr = res.card.description.fr
+    form.descriptionEn = res.card.description.en
+    form.externalUrl = res.card.externalUrl ?? ''
   }
   catch (err: unknown) {
     errorMessage.value = (err as { statusMessage?: string })?.statusMessage ?? t('exhibitions.loadFailed')
@@ -98,24 +101,34 @@ function showFeedback(msg: string) {
   }, 3000)
 }
 
+// Returns the trimmed form value, or null if it matches the default (= no override).
+function diffOrNull(formValue: string, defaultValue: string | null | undefined): string | null {
+  const v = formValue.trim()
+  const d = (defaultValue ?? '').trim()
+  if (v === '') return null
+  if (v === d) return null
+  return v
+}
+
 async function save() {
-  if (!card.value) return
+  if (!card.value || !defaults.value) return
+  const d = defaults.value
   saving.value = true
   try {
     await $fetch(`/api/admin/exhibitions/${id.value}`, {
       method: 'POST',
       headers: { 'x-admin-token': token.value, 'Content-Type': 'application/json' },
       body: {
-        artistName: form.artistName || null,
-        titleEu: form.titleEu || null,
-        titleEs: form.titleEs || null,
-        titleFr: form.titleFr || null,
-        titleEn: form.titleEn || null,
-        descriptionEu: form.descriptionEu || null,
-        descriptionEs: form.descriptionEs || null,
-        descriptionFr: form.descriptionFr || null,
-        descriptionEn: form.descriptionEn || null,
-        externalUrl: form.externalUrl || null,
+        artistName: diffOrNull(form.artistName, d.artist),
+        titleEu: diffOrNull(form.titleEu, d.title.eu),
+        titleEs: diffOrNull(form.titleEs, d.title.es),
+        titleFr: diffOrNull(form.titleFr, d.title.fr),
+        titleEn: diffOrNull(form.titleEn, d.title.en),
+        descriptionEu: diffOrNull(form.descriptionEu, d.description.eu),
+        descriptionEs: diffOrNull(form.descriptionEs, d.description.es),
+        descriptionFr: diffOrNull(form.descriptionFr, d.description.fr),
+        descriptionEn: diffOrNull(form.descriptionEn, d.description.en),
+        externalUrl: diffOrNull(form.externalUrl, d.externalUrl),
       },
     })
     showFeedback(t('exhibitions.feedback.saved'))
@@ -185,16 +198,21 @@ function onDrop(e: DragEvent) {
 const titleKey = computed(() => TITLE_KEY[activeLocale.value])
 const descriptionKey = computed(() => DESCRIPTION_KEY[activeLocale.value])
 
-// Clearing a field to an empty string = "no override" = fallback to default.
-function restoreTitle() { form[titleKey.value] = '' }
-function restoreDescription() { form[descriptionKey.value] = '' }
-function restoreArtist() { form.artistName = '' }
-function restoreUrl() { form.externalUrl = '' }
+// "Restore default" resets to the raw default value (same as data/exhibitions.ts).
+function restoreTitle() { if (defaults.value) form[titleKey.value] = defaults.value.title[activeLocale.value] }
+function restoreDescription() { if (defaults.value) form[descriptionKey.value] = defaults.value.description[activeLocale.value] }
+function restoreArtist() { if (defaults.value) form.artistName = defaults.value.artist }
+function restoreUrl() { if (defaults.value) form.externalUrl = defaults.value.externalUrl ?? '' }
 
-const previewTitle = computed(() => form[titleKey.value] || card.value?.title[activeLocale.value] || '')
-const previewArtist = computed(() => form.artistName || card.value?.artist || '')
-const previewUrl = computed(() => form.externalUrl || card.value?.externalUrl || '')
-const previewParagraphs = computed(() => splitParagraphs(form[descriptionKey.value] || card.value?.description[activeLocale.value]))
+const artistDiffers = computed(() => defaults.value ? form.artistName.trim() !== defaults.value.artist.trim() : false)
+const titleDiffers = computed(() => defaults.value ? form[titleKey.value].trim() !== defaults.value.title[activeLocale.value].trim() : false)
+const descriptionDiffers = computed(() => defaults.value ? form[descriptionKey.value].trim() !== defaults.value.description[activeLocale.value].trim() : false)
+const urlDiffers = computed(() => defaults.value ? form.externalUrl.trim() !== (defaults.value.externalUrl ?? '').trim() : false)
+
+const previewTitle = computed(() => form[titleKey.value])
+const previewArtist = computed(() => form.artistName)
+const previewUrl = computed(() => form.externalUrl)
+const previewParagraphs = computed(() => splitParagraphs(form[descriptionKey.value]))
 </script>
 
 <template>
@@ -269,7 +287,7 @@ const previewParagraphs = computed(() => splitParagraphs(form[descriptionKey.val
           <div class="flex items-center justify-between mb-3">
             <div class="eyebrow">{{ t('exhibitions.fieldArtist') }}</div>
             <button
-              v-if="form.artistName"
+              v-if="artistDiffers"
               type="button"
               class="text-[10px] text-white/40 hover:text-gold font-mono uppercase tracking-[0.18em] transition-colors"
               @click="restoreArtist"
@@ -280,8 +298,7 @@ const previewParagraphs = computed(() => splitParagraphs(form[descriptionKey.val
           <input
             v-model="form.artistName"
             type="text"
-            :placeholder="card.artist"
-            class="w-full px-4 py-3 bg-white/[0.02] border border-white/10 rounded-sm text-white text-sm transition-colors focus:outline-none focus:border-[var(--color-accent-gold)] focus:bg-white/[0.04] placeholder:text-white/25"
+            class="w-full px-4 py-3 bg-white/[0.02] border border-white/10 rounded-sm text-white text-sm transition-colors focus:outline-none focus:border-[var(--color-accent-gold)] focus:bg-white/[0.04]"
           >
           <p class="text-[11px] text-white/35 mt-2 italic">{{ t('exhibitions.fieldArtistHelp') }}</p>
         </section>
@@ -306,7 +323,7 @@ const previewParagraphs = computed(() => splitParagraphs(form[descriptionKey.val
               <div class="flex items-center justify-between mb-2">
                 <span class="eyebrow">{{ t('exhibitions.fieldTitle') }}</span>
                 <button
-                  v-if="form[titleKey]"
+                  v-if="titleDiffers"
                   type="button"
                   class="text-[10px] text-white/40 hover:text-gold font-mono uppercase tracking-[0.18em] transition-colors"
                   @click="restoreTitle"
@@ -317,15 +334,14 @@ const previewParagraphs = computed(() => splitParagraphs(form[descriptionKey.val
               <input
                 v-model="form[titleKey]"
                 type="text"
-                :placeholder="card.title[activeLocale]"
-                class="w-full px-4 py-3 bg-white/[0.02] border border-white/10 rounded-sm text-white text-sm transition-colors focus:outline-none focus:border-[var(--color-accent-gold)] focus:bg-white/[0.04] placeholder:text-white/25"
+                class="w-full px-4 py-3 bg-white/[0.02] border border-white/10 rounded-sm text-white text-sm transition-colors focus:outline-none focus:border-[var(--color-accent-gold)] focus:bg-white/[0.04]"
               >
             </div>
             <div>
               <div class="flex items-center justify-between mb-2">
                 <span class="eyebrow">{{ t('exhibitions.fieldDescription') }}</span>
                 <button
-                  v-if="form[descriptionKey]"
+                  v-if="descriptionDiffers"
                   type="button"
                   class="text-[10px] text-white/40 hover:text-gold font-mono uppercase tracking-[0.18em] transition-colors"
                   @click="restoreDescription"
@@ -336,8 +352,7 @@ const previewParagraphs = computed(() => splitParagraphs(form[descriptionKey.val
               <textarea
                 v-model="form[descriptionKey]"
                 rows="10"
-                :placeholder="card.description[activeLocale]"
-                class="w-full px-4 py-3 bg-white/[0.02] border border-white/10 rounded-sm text-white text-sm leading-relaxed transition-colors focus:outline-none focus:border-[var(--color-accent-gold)] focus:bg-white/[0.04] resize-y placeholder:text-white/25"
+                class="w-full px-4 py-3 bg-white/[0.02] border border-white/10 rounded-sm text-white text-sm leading-relaxed transition-colors focus:outline-none focus:border-[var(--color-accent-gold)] focus:bg-white/[0.04] resize-y"
               />
               <p class="text-[11px] text-white/35 mt-2 italic">{{ t('exhibitions.fieldDescriptionHelp') }}</p>
             </div>
@@ -349,7 +364,7 @@ const previewParagraphs = computed(() => splitParagraphs(form[descriptionKey.val
           <div class="flex items-center justify-between mb-2">
             <span class="eyebrow">{{ t('exhibitions.fieldExternalUrl') }}</span>
             <button
-              v-if="form.externalUrl"
+              v-if="urlDiffers"
               type="button"
               class="text-[10px] text-white/40 hover:text-gold font-mono uppercase tracking-[0.18em] transition-colors"
               @click="restoreUrl"
@@ -360,7 +375,7 @@ const previewParagraphs = computed(() => splitParagraphs(form[descriptionKey.val
           <input
             v-model="form.externalUrl"
             type="url"
-            :placeholder="card.externalUrl || 'https://'"
+            placeholder="https://"
             class="w-full px-4 py-3 bg-white/[0.02] border border-white/10 rounded-sm text-white text-sm transition-colors focus:outline-none focus:border-[var(--color-accent-gold)] focus:bg-white/[0.04] placeholder:text-white/25"
           >
           <p class="text-[11px] text-white/35 mt-2 italic">{{ t('exhibitions.fieldExternalUrlHelp') }}</p>

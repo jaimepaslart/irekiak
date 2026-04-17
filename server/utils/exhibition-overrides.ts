@@ -73,11 +73,15 @@ export function getExhibitionCard(id: string): ExhibitionCard | null {
   return buildCard(exh, override)
 }
 
-export function getExhibitionWithOverride(id: string): { card: ExhibitionCard, override: ExhibitionOverrideRow | null } | null {
+export function getExhibitionWithOverride(id: string): { card: ExhibitionCard, defaults: ExhibitionCard, override: ExhibitionOverrideRow | null } | null {
   const exh = exhibitionsById.get(id)
   if (!exh) return null
   const override = db.select().from(exhibitionOverrides).where(eq(exhibitionOverrides.exhibitionId, id)).get() ?? null
-  return { card: buildCard(exh, override), override }
+  return {
+    card: buildCard(exh, override),
+    defaults: buildCard(exh, null),
+    override,
+  }
 }
 
 export function listExhibitionCards(): ExhibitionCard[] {

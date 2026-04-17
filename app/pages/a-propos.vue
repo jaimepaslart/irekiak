@@ -44,7 +44,7 @@ useScrollReveal()
       <div class="reveal-on-scroll border-t border-white/10 pt-12">
         <h2 class="mb-6">Kolaboratzaileak</h2>
         <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <div v-for="partner in ['Tabakalera', 'DonostiKultura', 'Donostia Udala', 'San Telmo Museoa', 'Kursaal', 'Kutxa Fundazioa']" :key="partner"
+          <div v-for="partner in ['Tabakalera', 'DonostiKultura', 'Donostia Udala', 'San Telmo Museoa', 'Kutxa Fundazioa']" :key="partner"
             class="p-4 border border-white/10 text-center">
             <p class="text-sm text-white/60">{{ partner }}</p>
           </div>

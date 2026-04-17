@@ -187,7 +187,7 @@ usePageSeo('home')
         </p>
         <h2 class="mb-8">{{ t('nav.map') }}</h2>
         <p class="text-white/60 mb-10 max-w-lg mx-auto">
-          8 galeries, 3 routes, 1 ville
+          6 galeries, 3 routes, 1 ville
         </p>
         <NuxtLink
           :to="localePath('/carte')"

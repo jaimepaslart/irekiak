@@ -5,7 +5,6 @@ const partners = [
   'DonostiKultura',
   'Donostia / San Sebastián',
   'San Telmo Museoa',
-  'Kursaal',
   'Kutxa Fundazioa',
 ]
 </script>

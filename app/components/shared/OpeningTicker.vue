@@ -9,14 +9,12 @@ const dayLabelsFr: Record<string, string> = {
 
 const monthShort = 'MAI'
 
-// Build ticker: "++ Ven 29 MAI 17:30-21:00 | Sam 30 MAI 11:00-19:00 | Dim 31 MAI 11:00-14:00 | Tabakalera: ... ++"
 const tickerText = computed(() => {
   const parts = currentEdition.days.map((d) => {
     const label = dayLabelsFr[d.id] ?? d.id
     const dayNum = d.date.split('-')[2]
     return `${label} ${dayNum} ${monthShort} ${d.hours}`
   })
-  parts.push('Tabakalera : Ost-Ig 11:00-13:00, 16:00-20:00')
   return `++ ${parts.join(' | ')} ++`
 })
 </script>

@@ -2,7 +2,7 @@
 
 ## Projet
 Site web du Gallery Weekend Irekiak à Donostia-San Sebastián, Pays Basque.
-Événement de 4 jours (jeudi-dimanche) avec 8 galeries, visites guidées, et programme culturel.
+Événement de 3 jours (vendredi-dimanche) avec 6 galeries, visites guidées, et programme culturel.
 
 - **URL**: https://irekiak.eus
 - **Langues**: Euskara (défaut), Español, Français, English

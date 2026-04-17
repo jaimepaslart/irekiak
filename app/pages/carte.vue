@@ -45,6 +45,8 @@ function selectGallery(id: string) {
       const marker = markersByGalleryId.get(id)
       marker?.openPopup()
     }
+    // Close the mobile sheet so the selected gallery is actually visible on the map.
+    mobileSheetOpen.value = false
   }
 }
 
@@ -71,22 +73,20 @@ onMounted(async () => {
   await nextTick()
   if (!mapContainer.value) return
 
-  const { $L, $GeoSearchControl, $OpenStreetMapProvider } = useNuxtApp()
+  const { $L } = useNuxtApp()
   const L = $L as typeof import('leaflet')
-  const GeoSearchControl = $GeoSearchControl as typeof import('leaflet-geosearch').GeoSearchControl
-  const OpenStreetMapProvider = $OpenStreetMapProvider as typeof import('leaflet-geosearch').OpenStreetMapProvider
 
-  // @ts-expect-error gestureHandling is added by leaflet-gesture-handling
+  // @ts-expect-error gestureHandling + gestureHandlingOptions are added by leaflet-gesture-handling
   map = L.map(mapContainer.value, {
     center: MAP_CENTER,
     zoom: MAP_ZOOM,
+    zoomControl: false,
+    attributionControl: false,
     gestureHandling: true,
-    zoomControl: true,
+    gestureHandlingOptions: { duration: 1000, touch: true, scroll: false },
   })
 
-  // Dark tiles (violet-friendly)
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
     subdomains: 'abcd',
     maxZoom: 20,
   }).addTo(map)
@@ -137,28 +137,6 @@ onMounted(async () => {
   }
 
   map.addLayer(cluster)
-
-  // Locate control
-  // @ts-expect-error Locate is added by leaflet.locatecontrol
-  L.control.locate({
-    position: 'topright',
-    flyTo: true,
-    strings: { title: t('common.locateMe') || 'Show me where I am' },
-    locateOptions: { maxZoom: 17, enableHighAccuracy: true },
-  }).addTo(map)
-
-  // Geo search
-  const searchControl = new (GeoSearchControl as unknown as new (opts: Record<string, unknown>) => L.Control)({
-    provider: new OpenStreetMapProvider(),
-    style: 'bar',
-    showMarker: false,
-    autoClose: true,
-    retainZoomLevel: false,
-    searchLabel: t('common.searchAddress') || 'Search address',
-    keepResult: false,
-    position: 'topleft',
-  })
-  map.addControl(searchControl)
 })
 
 onBeforeUnmount(() => {
@@ -173,20 +151,26 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="flex flex-col md:flex-row min-h-[calc(100vh-4rem)] pt-16">
-    <!-- Sidebar (desktop) / bottom sheet toggle (mobile) -->
+    <!-- Sidebar (desktop always visible · mobile full overlay toggled by FAB) -->
     <aside
       class="md:w-80 md:shrink-0 border-r border-white/10 bg-edition-dark overflow-y-auto transition-transform md:translate-y-0 md:static md:block md:[animation:fade-in-right_500ms_cubic-bezier(0.23,1,0.32,1)_forwards]"
       :class="[
-        'fixed md:relative left-0 right-0 z-[1001]',
-        'bottom-0 md:bottom-auto top-auto md:top-auto',
-        mobileSheetOpen ? 'translate-y-0' : 'translate-y-[calc(100%-4rem)]',
-        'max-h-[75vh] md:max-h-none md:h-auto rounded-t-lg md:rounded-none',
+        'fixed md:relative inset-0 z-[1001]',
+        mobileSheetOpen ? 'translate-y-0' : 'translate-y-full md:translate-y-0',
       ]"
     >
-      <!-- Mobile drag handle -->
-      <div class="md:hidden w-full py-3 flex items-center justify-center border-b border-white/10">
-        <span class="w-10 h-1 bg-white/30 rounded-full" />
-      </div>
+      <!-- Mobile close button -->
+      <button
+        type="button"
+        class="md:hidden absolute top-4 right-4 p-2 text-white/60 hover:text-white"
+        :aria-label="t('common.close')"
+        @click="mobileSheetOpen = false"
+      >
+        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
 
       <div class="p-6">
         <h1 class="hidden md:block text-xl font-bold mb-6">{{ t('nav.map') }}</h1>
@@ -224,6 +208,13 @@ onBeforeUnmount(() => {
             </button>
           </li>
         </ul>
+
+        <footer class="mt-8 pt-4 border-t border-white/5 text-[10px] text-white/25 font-mono leading-relaxed">
+          ©
+          <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" class="hover:text-white/50 underline-offset-2 hover:underline">OpenStreetMap</a>
+          · ©
+          <a href="https://carto.com/attributions" target="_blank" rel="noopener" class="hover:text-white/50 underline-offset-2 hover:underline">CARTO</a>
+        </footer>
       </div>
     </aside>
 
@@ -254,21 +245,18 @@ onBeforeUnmount(() => {
 
       <!-- Mobile FAB to toggle sidebar -->
       <button
-        class="md:hidden fixed bottom-6 right-6 z-[1002] w-14 h-14 rounded-full bg-white text-[var(--color-edition)] shadow-lg flex items-center justify-center scale-press"
-        :aria-label="mobileSheetOpen ? t('common.close') : t('nav.galleries')"
-        @click="mobileSheetOpen = !mobileSheetOpen"
+        v-if="!mobileSheetOpen"
+        class="md:hidden fixed bottom-6 right-6 z-[1000] w-14 h-14 rounded-full bg-white text-[var(--color-edition)] shadow-lg flex items-center justify-center scale-press"
+        :aria-label="t('nav.galleries')"
+        @click="mobileSheetOpen = true"
       >
-        <svg v-if="!mobileSheetOpen" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <line x1="8" y1="6" x2="21" y2="6" />
           <line x1="8" y1="12" x2="21" y2="12" />
           <line x1="8" y1="18" x2="21" y2="18" />
           <line x1="3" y1="6" x2="3.01" y2="6" />
           <line x1="3" y1="12" x2="3.01" y2="12" />
           <line x1="3" y1="18" x2="3.01" y2="18" />
-        </svg>
-        <svg v-else class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <line x1="18" y1="6" x2="6" y2="18" />
-          <line x1="6" y1="6" x2="18" y2="18" />
         </svg>
       </button>
 

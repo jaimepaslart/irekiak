@@ -417,3 +417,8 @@
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.035 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
   background-size: 160px 160px;
 }
+
+/* Safety net: hide Leaflet's in-map attribution (already disabled via
+   attributionControl:false, but this prevents any stray re-insertion).
+   Attribution to OSM + CARTO is rendered in the map page sidebar. */
+.leaflet-control-attribution { display: none !important; }

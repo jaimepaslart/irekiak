@@ -27,12 +27,12 @@ usePageSeo('home')
           src="/logo-big.webp"
           alt=""
           aria-hidden="true"
-          class="h-auto w-full max-w-[200px] md:max-w-[240px] mb-8 animate-fade-in-up"
+          class="h-auto w-full max-w-[140px] md:max-w-[160px] mb-10 animate-fade-in-up"
           style="animation-delay: 150ms"
         >
-        <h1 class="font-serif display-headline text-white mb-6 text-4xl md:text-5xl lg:text-6xl animate-fade-in-up" style="animation-delay: 220ms">
+        <h1 class="display-headline text-white mb-6 text-4xl md:text-5xl lg:text-6xl animate-fade-in-up" style="animation-delay: 220ms">
           Gallery Weekend<br>
-          <span class="italic text-white/80">Donostia · San Sebastián</span>
+          <span class="text-white/75">Donostia · San Sebastián</span>
         </h1>
         <p class="font-mono text-2xl md:text-3xl text-white tabular-nums mb-8 animate-fade-in-up" style="animation-delay: 300ms">
           {{ currentEdition.dateRangeLabel }}
@@ -59,12 +59,8 @@ usePageSeo('home')
           src="/images/exhibitions/sugerencias-prusianas-monologo-prusiano-i.jpg"
           alt="Rafa Satrústegui — Sugerencias prusianas"
           format="webp"
-          sizes="(min-width: 1024px) 58vw, 100vw"
-          width="1600"
-          height="2000"
-          preload
+          sizes="sm:100vw md:100vw lg:58vw"
           loading="eager"
-          fetchpriority="high"
           class="absolute inset-0 w-full h-full object-cover img-fade-in"
         />
         <div class="absolute inset-0 bg-gradient-to-t from-[var(--color-edition)]/40 via-transparent to-transparent" aria-hidden="true" />

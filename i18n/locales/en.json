@@ -69,7 +69,8 @@
     "free": "Free",
     "spotsLeft": "{count} spots left",
     "full": "Full",
-    "privacyPolicy": "Privacy policy"
+    "privacyPolicy": "Privacy policy",
+    "close": "Close"
   },
   "tours": {
     "galleries": "Galleries on this route",
@@ -146,5 +147,13 @@
     "message": "Message",
     "send": "Send",
     "success": "Your message has been sent. Thank you!"
+  },
+  "map": {
+    "routes": "Routes",
+    "routesSuffix": "routes",
+    "locate": "Where am I?",
+    "locating": "Locating…",
+    "locateError": "Unable to locate you.",
+    "directions": "Directions"
   }
 }

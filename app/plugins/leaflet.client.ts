@@ -1,6 +1,5 @@
 import L from 'leaflet'
 import 'leaflet.markercluster'
-import 'leaflet-gesture-handling'
 
 // Fix default icon paths (Leaflet icon bug with bundlers)
 delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })._getIconUrl

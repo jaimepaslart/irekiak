@@ -69,7 +69,8 @@
     "free": "Gratuit",
     "spotsLeft": "{count} places disponibles",
     "full": "Complet",
-    "privacyPolicy": "Politique de confidentialité"
+    "privacyPolicy": "Politique de confidentialité",
+    "close": "Fermer"
   },
   "tours": {
     "galleries": "Galeries sur cet itinéraire",
@@ -146,5 +147,13 @@
     "message": "Message",
     "send": "Envoyer",
     "success": "Votre message a été envoyé. Merci !"
+  },
+  "map": {
+    "routes": "Parcours",
+    "routesSuffix": "parcours",
+    "locate": "Où suis-je ?",
+    "locating": "Recherche…",
+    "locateError": "Localisation impossible.",
+    "directions": "Y aller"
   }
 }

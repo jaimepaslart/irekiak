@@ -69,7 +69,8 @@
     "free": "Doako",
     "spotsLeft": "{count} leku libre",
     "full": "Beteta",
-    "privacyPolicy": "Pribatutasun politika"
+    "privacyPolicy": "Pribatutasun politika",
+    "close": "Itxi"
   },
   "tours": {
     "galleries": "Ibilbide honetako galeriak",
@@ -146,5 +147,13 @@
     "message": "Mezua",
     "send": "Bidali",
     "success": "Zure mezua bidali da. Eskerrik asko!"
+  },
+  "map": {
+    "routes": "Ibilbideak",
+    "routesSuffix": "ibilbide",
+    "locate": "Non nago?",
+    "locating": "Bilatzen…",
+    "locateError": "Kokapena eskuratu ezin izan da.",
+    "directions": "Joan"
   }
 }

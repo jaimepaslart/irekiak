@@ -22,6 +22,8 @@ const showIntro = ref(true)
 let map: LeafletMap | null = null
 const markersByGalleryId = new Map<string, Marker>()
 const polylines: Polyline[] = []
+let userMarker: Marker | null = null
+const isLocating = ref(false)
 
 /**
  * Returns the color of the first tour route that contains this gallery.
@@ -30,6 +32,47 @@ const polylines: Polyline[] = []
 function getGalleryColor(galleryId: string): string {
   const route = tourRoutes.find(r => r.galleryIds.includes(galleryId))
   return route?.color ?? '#FFFFFF'
+}
+
+function locateMe() {
+  if (!navigator.geolocation || !map) {
+    alert(t('map.locateError'))
+    return
+  }
+  isLocating.value = true
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      isLocating.value = false
+      if (!map) return
+      const { latitude, longitude } = pos.coords
+      const { $L } = useNuxtApp()
+      const L = $L as typeof import('leaflet')
+      if (userMarker) {
+        userMarker.setLatLng([latitude, longitude])
+      }
+      else {
+        userMarker = L.marker([latitude, longitude], {
+          icon: L.divIcon({
+            className: 'user-location-marker',
+            html: '<div class="relative flex items-center justify-center w-5 h-5"><div class="absolute w-5 h-5 rounded-full bg-sky-400/30 animate-ping"></div><div class="relative w-3 h-3 rounded-full bg-sky-400 ring-2 ring-white shadow-md"></div></div>',
+            iconSize: [20, 20],
+            iconAnchor: [10, 10],
+          }),
+          interactive: false,
+        }).addTo(map)
+      }
+      map.flyTo([latitude, longitude], 16, { duration: 0.8 })
+    },
+    () => {
+      isLocating.value = false
+      alert(t('map.locateError'))
+    },
+    { enableHighAccuracy: true, timeout: 10_000 },
+  )
+}
+
+function directionsHref(lat: number, lng: number): string {
+  return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`
 }
 
 function selectGallery(id: string) {
@@ -76,14 +119,11 @@ onMounted(async () => {
   const { $L } = useNuxtApp()
   const L = $L as typeof import('leaflet')
 
-  // @ts-expect-error gestureHandling + gestureHandlingOptions are added by leaflet-gesture-handling
   map = L.map(mapContainer.value, {
     center: MAP_CENTER,
     zoom: MAP_ZOOM,
     zoomControl: false,
     attributionControl: false,
-    gestureHandling: true,
-    gestureHandlingOptions: { duration: 1000, touch: true, scroll: false },
   })
 
   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', {
@@ -146,6 +186,7 @@ onBeforeUnmount(() => {
   }
   markersByGalleryId.clear()
   polylines.length = 0
+  userMarker = null
 })
 </script>
 
@@ -177,7 +218,7 @@ onBeforeUnmount(() => {
 
         <!-- Routes legend -->
         <div class="mb-6">
-          <p class="text-xs uppercase tracking-wider text-white/40 font-mono mb-3">Routes</p>
+          <p class="text-xs uppercase tracking-wider text-white/40 font-mono mb-3">{{ t('map.routes') }}</p>
           <div class="space-y-2">
             <div v-for="route in tourRoutes" :key="route.id" class="group flex items-center gap-2 cursor-default">
               <span class="w-2.5 h-2.5 rounded-full shrink-0 transition-transform duration-300 group-hover:scale-150" :style="{ backgroundColor: route.color }" />
@@ -229,6 +270,26 @@ onBeforeUnmount(() => {
         </template>
       </ClientOnly>
 
+      <!-- Locate me button (top-right overlay) -->
+      <button
+        type="button"
+        class="absolute top-4 right-4 z-[999] w-11 h-11 rounded-full bg-[var(--color-edition)]/90 backdrop-blur-sm border border-white/15 text-white shadow-lg flex items-center justify-center hover:bg-[var(--color-edition)] transition-colors disabled:opacity-60"
+        :aria-label="t('map.locate')"
+        :title="isLocating ? t('map.locating') : t('map.locate')"
+        :disabled="isLocating"
+        @click="locateMe"
+      >
+        <svg v-if="!isLocating" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="3" />
+          <circle cx="12" cy="12" r="8" />
+          <line x1="12" y1="2" x2="12" y2="4" />
+          <line x1="12" y1="20" x2="12" y2="22" />
+          <line x1="2" y1="12" x2="4" y2="12" />
+          <line x1="20" y1="12" x2="22" y2="12" />
+        </svg>
+        <span v-else class="inline-block w-4 h-4 border-2 border-white/70 border-t-transparent rounded-full animate-spin" aria-hidden="true" />
+      </button>
+
       <!-- Intro card (fades out after 3s) -->
       <Transition name="fade-intro">
         <div
@@ -237,7 +298,7 @@ onBeforeUnmount(() => {
         >
           <div class="glass-strong px-6 py-3 rounded-sm">
             <p class="text-xs uppercase tracking-[0.2em] text-white/70 font-mono whitespace-nowrap">
-              {{ galleries.length }} {{ t('nav.galleries') }} &middot; {{ tourRoutes.length }} routes &middot; Donostia
+              {{ galleries.length }} {{ t('nav.galleries') }} &middot; {{ tourRoutes.length }} {{ t('map.routesSuffix') }} &middot; Donostia
             </p>
           </div>
         </div>
@@ -275,12 +336,26 @@ onBeforeUnmount(() => {
               </div>
               <p class="text-sm text-white/60 mb-2">{{ gallery.address }}</p>
               <p class="text-sm text-white/60 mb-4">{{ tr(gallery.openingHours) }}</p>
-              <NuxtLink
-                :to="localePath(`/galleries/${gallery.slug}`)"
-                class="text-sm text-white hover:text-white/80 transition-colors"
-              >
-                {{ t('common.learnMore') }} &rarr;
-              </NuxtLink>
+              <div class="flex flex-wrap items-center gap-x-5 gap-y-2">
+                <NuxtLink
+                  :to="localePath(`/galleries/${gallery.slug}`)"
+                  class="text-sm text-white hover:text-white/80 transition-colors"
+                >
+                  {{ t('common.learnMore') }} &rarr;
+                </NuxtLink>
+                <a
+                  :href="directionsHref(gallery.coordinates.lat, gallery.coordinates.lng)"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-sm text-sky-300 hover:text-sky-200 transition-colors inline-flex items-center gap-1.5"
+                >
+                  {{ t('map.directions') }}
+                  <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M7 17L17 7" />
+                    <path d="M7 7h10v10" />
+                  </svg>
+                </a>
+              </div>
             </div>
           </template>
         </div>

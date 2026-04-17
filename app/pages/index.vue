@@ -19,7 +19,7 @@ usePageSeo('home')
 
     <!-- Hero : split asymétrique 5/7 -->
     <section class="relative grid grid-cols-1 lg:grid-cols-12 lg:min-h-[calc(100vh-4rem)] pt-28 lg:pt-0">
-      <div class="lg:col-span-5 order-2 lg:order-1 flex flex-col justify-center px-6 md:px-12 lg:pl-16 py-12 lg:py-24">
+      <div class="lg:col-span-5 order-2 lg:order-1 flex flex-col justify-center items-center lg:items-start text-center lg:text-left px-6 md:px-12 lg:pl-16 py-12 lg:py-24">
         <p class="eyebrow mb-6 animate-fade-in-up" style="animation-delay: 80ms">
           {{ t('home.heroEyebrow') }}
         </p>
@@ -27,7 +27,7 @@ usePageSeo('home')
           src="/logo-big.webp"
           alt=""
           aria-hidden="true"
-          class="h-auto w-full max-w-[140px] md:max-w-[160px] mb-10 animate-fade-in-up"
+          class="h-auto w-full max-w-[220px] lg:max-w-[160px] mb-10 animate-fade-in-up"
           style="animation-delay: 150ms"
         >
         <h1 class="display-headline text-white mb-6 text-4xl md:text-5xl lg:text-6xl animate-fade-in-up" style="animation-delay: 220ms">
@@ -38,7 +38,7 @@ usePageSeo('home')
           {{ currentEdition.dateRangeLabel }}
         </p>
         <div class="h-px w-12 bg-[var(--color-accent-gold)] mb-8 animate-fade-in-up" style="animation-delay: 360ms" />
-        <div class="flex flex-col sm:flex-row gap-4 sm:gap-5 animate-fade-in-up" style="animation-delay: 420ms">
+        <div class="flex flex-col sm:flex-row gap-4 sm:gap-5 w-full sm:w-auto animate-fade-in-up" style="animation-delay: 420ms">
           <NuxtLink
             :to="localePath('/galleries')"
             class="px-8 py-3 text-sm font-medium bg-white text-[var(--color-edition)] scale-press focus-gold transition-colors duration-300 hover:bg-white/90 text-center"

@@ -1,6 +1,15 @@
 <script setup lang="ts">
 import type { ExhibitionCard } from '#types/exhibition'
 
+interface Props {
+  /**
+   * When true, skip the internal <section> wrapper + header.
+   * Use when a parent section already provides the editorial title & spacing.
+   */
+  embedded?: boolean
+}
+withDefaults(defineProps<Props>(), { embedded: false })
+
 const { t } = useI18n()
 const tr = useTranslated()
 const config = useRuntimeConfig()
@@ -43,7 +52,18 @@ useHead(() => ({
 </script>
 
 <template>
-  <section class="py-24 md:py-32 px-6 md:px-12 bg-edition-dark">
+  <div
+    v-if="embedded"
+    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-12"
+  >
+    <GalleryExhibitionCard
+      v-for="card in cards"
+      :key="card.id"
+      :card="card"
+      class="reveal-on-scroll"
+    />
+  </div>
+  <section v-else class="py-24 md:py-32 px-6 md:px-12 bg-edition-dark">
     <div class="max-w-[1400px] mx-auto">
       <div class="reveal-on-scroll mb-16 max-w-2xl">
         <p class="text-xs uppercase tracking-[0.2em] text-white/40 font-mono mb-3">

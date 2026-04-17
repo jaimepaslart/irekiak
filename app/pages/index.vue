@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { galleries } from '@data/galleries'
 import { tourRoutes } from '@data/tours'
 import { currentEdition } from '@data/editions'
 
@@ -18,229 +17,221 @@ usePageSeo('home')
       <SharedOpeningTicker />
     </div>
 
-    <!-- Hero -->
-    <section class="min-h-screen flex items-center justify-center px-6 pt-24">
-      <div class="max-w-4xl mx-auto text-center">
+    <!-- Hero : split asymétrique 5/7 -->
+    <section class="relative grid grid-cols-1 lg:grid-cols-12 lg:min-h-[calc(100vh-4rem)] pt-24 lg:pt-0">
+      <div class="lg:col-span-5 order-2 lg:order-1 flex flex-col justify-center px-6 md:px-12 lg:pl-16 py-12 lg:py-24">
+        <p class="eyebrow mb-6 animate-fade-in-up" style="animation-delay: 80ms">
+          {{ t('home.heroEyebrow') }}
+        </p>
         <h1 class="sr-only">Irekiak</h1>
         <img
           src="/logo-big.webp"
           alt="Irekiak"
-          class="h-auto w-full max-w-[280px] md:max-w-[500px] mx-auto mb-8 animate-fade-in-up"
-          style="animation-delay: 100ms"
+          class="h-auto w-full max-w-[200px] md:max-w-[240px] mb-8 animate-fade-in-up"
+          style="animation-delay: 150ms"
         >
-
-        <p class="text-lg md:text-xl text-white/70 mb-2 animate-fade-in-up" style="animation-delay: 200ms">
-          Donostia / San Sebastián
+        <p class="font-serif text-white leading-[1.02] tracking-[-0.02em] mb-6 text-4xl md:text-5xl lg:text-6xl animate-fade-in-up" style="animation-delay: 220ms; font-weight: 400;">
+          Gallery Weekend<br>
+          <span class="italic text-white/80">Donostia · San Sebastián</span>
         </p>
-
-        <p class="text-xl md:text-2xl text-white font-mono font-bold mb-14 animate-fade-in-up" style="animation-delay: 300ms">
+        <p class="font-mono text-2xl md:text-3xl text-white tabular-nums mb-8 animate-fade-in-up" style="animation-delay: 300ms">
           {{ currentEdition.dateRangeLabel }}
         </p>
-
-        <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center animate-fade-in-up" style="animation-delay: 400ms">
+        <div class="h-px w-12 bg-[var(--color-accent-gold)] mb-8 animate-fade-in-up" style="animation-delay: 360ms" />
+        <div class="flex flex-col sm:flex-row gap-4 sm:gap-5 animate-fade-in-up" style="animation-delay: 420ms">
           <NuxtLink
             :to="localePath('/galleries')"
-            class="px-8 py-3 text-sm font-medium bg-white text-[var(--color-edition)]
-                   scale-press transition-all duration-300 hover:bg-white/90"
+            class="px-8 py-3 text-sm font-medium bg-white text-[var(--color-edition)] scale-press transition-colors duration-300 hover:bg-white/90 text-center"
           >
             {{ t('nav.galleries') }}
           </NuxtLink>
           <NuxtLink
             :to="localePath('/programme')"
-            class="px-8 py-3 text-sm font-medium border border-white/40 text-white
-                   scale-press transition-all duration-300 hover:bg-white/10 hover:border-white"
+            class="px-8 py-3 text-sm font-medium border border-white/40 text-white scale-press transition-colors duration-300 hover:bg-white/10 hover:border-white text-center"
           >
             {{ t('nav.programme') }}
           </NuxtLink>
         </div>
       </div>
-    </section>
 
-    <!-- Gallery Pills -->
-    <section class="py-20 px-6 md:px-12 bg-edition-dark">
-      <div class="max-w-[1200px] mx-auto">
-        <div class="reveal-on-scroll mb-12 text-center">
-          <p class="text-xs uppercase tracking-[0.2em] text-white/40 font-mono mb-3">
-            {{ galleries.length }} {{ t('nav.galleries') }}
-          </p>
-        </div>
-
-        <div class="reveal-on-scroll">
-          <GalleryPills :galleries="galleries" />
-        </div>
+      <div class="lg:col-span-7 order-1 lg:order-2 relative overflow-hidden bg-edition-dark">
+        <NuxtImg
+          src="/images/exhibitions/sugerencias-prusianas-monologo-prusiano-i.jpg"
+          alt="Rafa Satrústegui — Sugerencias prusianas"
+          format="webp"
+          sizes="sm:100vw md:100vw lg:58vw"
+          class="absolute inset-0 w-full h-full object-cover animate-fade-in-slow"
+          loading="eager"
+        />
+        <div class="absolute inset-0 bg-gradient-to-t from-[var(--color-edition)]/40 via-transparent to-transparent" aria-hidden="true" />
+        <p class="absolute bottom-6 left-6 right-6 text-[10px] font-mono uppercase tracking-[0.22em] text-white/60 max-w-md">
+          Rafa Satrústegui · <span class="italic normal-case tracking-normal font-serif text-white/75">Sugerencias prusianas</span> · Arteko
+        </p>
       </div>
     </section>
 
-    <!-- Expositions (éditoriales) -->
-    <GalleryExhibitionsSection />
+    <!-- Expositions (éditorial, wrapper + GalleryExhibitionsSection embedded) -->
+    <section class="py-24 md:py-40 px-6 md:px-12 bg-edition-dark">
+      <div class="max-w-[1400px] mx-auto">
+        <header class="mb-16 md:mb-24 max-w-3xl reveal-on-scroll">
+          <p class="eyebrow mb-4">06 · {{ t('home.exhibitionsEyebrow') }}</p>
+          <h2 class="font-serif text-5xl md:text-6xl lg:text-7xl leading-[1.02] tracking-[-0.02em] text-white mb-6" style="font-weight: 400;">
+            {{ t('home.exhibitionsTitle') }}
+          </h2>
+          <p class="text-white/60 leading-relaxed text-lg">
+            {{ t('home.exhibitionsSubtitle') }}
+          </p>
+        </header>
+        <GalleryExhibitionsSection embedded />
+      </div>
+    </section>
 
-    <!-- Galeries (cartes compactes) -->
+    <!-- Programme · 3 jours en timeline -->
     <section class="py-24 md:py-32 px-6 md:px-12">
-      <div class="max-w-[1200px] mx-auto">
-        <div class="reveal-on-scroll mb-16">
-          <h2>{{ t('home.galleries') }}</h2>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          <GalleryCard
-            v-for="gallery in galleries"
-            :key="gallery.id"
-            :gallery="gallery"
-            class="reveal-on-scroll"
-          />
-        </div>
-
-        <div class="reveal-on-scroll mt-16 text-center">
+      <div class="max-w-[1400px] mx-auto">
+        <header class="flex flex-col md:flex-row md:items-end md:justify-between gap-8 mb-12 md:mb-16 reveal-on-scroll">
+          <div>
+            <p class="eyebrow mb-3">{{ currentEdition.dateRangeLabelShort }}</p>
+            <h2 class="font-serif text-5xl md:text-6xl leading-[1.02] tracking-[-0.02em] text-white" style="font-weight: 400;">
+              {{ t('nav.programme') }}
+            </h2>
+          </div>
           <NuxtLink
-            :to="localePath('/galleries')"
-            class="group inline-flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors"
+            :to="localePath('/programme')"
+            class="text-sm text-white/60 hover:text-white transition-colors arrow-nudge-parent inline-flex items-center gap-2"
           >
-            {{ t('common.learnMore') }} <span class="arrow-nudge">&rarr;</span>
+            {{ t('common.learnMore') }} <span class="arrow-nudge">→</span>
           </NuxtLink>
-        </div>
-      </div>
-    </section>
-
-    <!-- Programme -->
-    <section class="py-24 md:py-32 px-6 md:px-12 bg-edition-dark">
-      <div class="max-w-[1200px] mx-auto">
-        <div class="reveal-on-scroll mb-16">
-          <p class="text-xs uppercase tracking-[0.2em] text-white/40 font-mono mb-3">
-            {{ currentEdition.dateRangeLabelShort }}
-          </p>
-          <h2>{{ t('nav.programme') }}</h2>
-        </div>
-
-        <div class="reveal-on-scroll grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <NuxtLink
-            v-for="day in currentEdition.days"
+        </header>
+        <div class="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-white/10 border-y border-white/10">
+          <article
+            v-for="(day, i) in currentEdition.days"
             :key="day.id"
-            :to="localePath('/programme')"
-            class="group p-6 md:p-8 border border-white/15 rounded-sm
-                   transition-all duration-300 hover:bg-white/10 hover:border-white/30"
+            class="p-8 md:p-10 relative reveal-on-scroll"
+            :style="{ transitionDelay: `${i * 80}ms` }"
           >
-            <p class="text-3xl md:text-4xl font-bold mb-2 text-white">{{ day.dateShort }}</p>
-            <p class="text-xs text-white/40 uppercase tracking-wider font-mono mb-4">{{ tr(day.label) }}</p>
-            <p class="text-sm text-white/60 font-mono">{{ day.hours }}</p>
-          </NuxtLink>
-        </div>
-
-        <div class="reveal-on-scroll mt-16 text-center">
-          <NuxtLink
-            :to="localePath('/programme')"
-            class="group inline-flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors"
-          >
-            {{ t('common.learnMore') }} <span class="arrow-nudge">&rarr;</span>
-          </NuxtLink>
+            <span class="eyebrow mb-6 block">{{ tr(day.label) }}</span>
+            <p class="font-serif text-6xl md:text-7xl tabular-nums tracking-[-0.02em] text-white leading-none" style="font-weight: 400;">
+              {{ day.dateShort }}
+            </p>
+            <p class="mt-6 font-mono text-xs uppercase tracking-[0.18em] text-white/60 tabular-nums">
+              {{ day.hours }}
+            </p>
+            <p v-if="day.note" class="mt-3 text-sm text-white/45 italic font-serif">
+              {{ tr(day.note) }}
+            </p>
+          </article>
         </div>
       </div>
     </section>
 
-    <!-- Visites guidees -->
-    <section class="py-24 md:py-32 px-6 md:px-12">
-      <div class="max-w-[1200px] mx-auto">
-        <div class="reveal-on-scroll mb-16">
-          <p class="text-xs uppercase tracking-[0.2em] text-white/40 font-mono mb-3">
-            {{ t('common.free') }}
+    <!-- Visites guidées avec map en background -->
+    <section class="relative py-24 md:py-40 px-6 md:px-12 bg-edition-dark overflow-hidden">
+      <img
+        src="/images/galleries/map.png"
+        alt=""
+        class="absolute inset-0 w-full h-full object-cover opacity-[0.10] mix-blend-luminosity"
+        aria-hidden="true"
+      >
+      <div class="absolute inset-0 bg-gradient-to-t from-[var(--color-edition-dark)] via-[var(--color-edition-dark)]/60 to-transparent" aria-hidden="true" />
+      <div class="relative max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12">
+        <header class="lg:col-span-5 reveal-on-scroll">
+          <p class="eyebrow mb-3 text-gold">{{ t('common.free') }}</p>
+          <h2 class="font-serif text-5xl md:text-6xl leading-[1.02] tracking-[-0.02em] text-white mb-6" style="font-weight: 400;">
+            {{ t('nav.tours') }}
+          </h2>
+          <p class="text-white/70 leading-relaxed mb-8 max-w-md">
+            {{ t('home.toursSubtitle') }}
           </p>
-          <h2>{{ t('nav.tours') }}</h2>
-        </div>
-
-        <div class="reveal-on-scroll grid grid-cols-1 md:grid-cols-3 gap-6">
-          <NuxtLink
-            v-for="route in tourRoutes"
-            :key="route.id"
-            :to="localePath(`/visites/${route.slug}`)"
-            class="group p-6 border border-white/15 rounded-sm
-                   transition-all duration-300 hover:bg-white/10 hover:border-white/30"
-          >
-            <div class="flex items-center gap-3 mb-4">
-              <span class="w-3 h-3 rounded-full" :style="{ backgroundColor: route.color }" />
-              <h3 class="text-lg font-semibold text-white">{{ tr(route.name) }}</h3>
-            </div>
-            <p class="text-sm text-white/60 mb-4 line-clamp-2">{{ tr(route.description) }}</p>
-            <div class="flex gap-3 text-xs text-white/40 font-mono">
-              <span>{{ tr(route.duration) }}</span>
-              <span>&middot;</span>
-              <span>{{ tr(route.distance) }}</span>
-            </div>
-          </NuxtLink>
-        </div>
-
-        <div class="reveal-on-scroll mt-12 text-center">
           <NuxtLink
             :to="localePath('/visites')"
-            class="inline-block px-8 py-3 text-sm font-medium bg-white text-[var(--color-edition)]
-                   transition-all duration-300 hover:bg-white/90"
+            class="inline-block px-8 py-3 text-sm font-medium bg-white text-[var(--color-edition)] scale-press hover:bg-white/90 transition-colors"
           >
             {{ t('common.register') }}
           </NuxtLink>
+        </header>
+        <ul class="lg:col-span-7 lg:border-l lg:border-white/10 lg:pl-12 space-y-8 reveal-on-scroll">
+          <li v-for="route in tourRoutes" :key="route.id" class="group">
+            <NuxtLink
+              :to="localePath(`/visites/${route.slug}`)"
+              class="flex items-start gap-5 focus-gold"
+            >
+              <span
+                class="mt-2 w-3 h-3 rounded-full shrink-0 transition-transform duration-300 group-hover:scale-125"
+                :style="{ backgroundColor: route.color }"
+              />
+              <div class="flex-1 min-w-0">
+                <h3 class="font-serif text-2xl text-white group-hover:text-gold transition-colors mb-2" style="font-weight: 500; letter-spacing: -0.01em;">
+                  {{ tr(route.name) }}
+                </h3>
+                <p class="text-sm text-white/55 mb-2 line-clamp-2 max-w-xl">
+                  {{ tr(route.description) }}
+                </p>
+                <p class="text-[11px] font-mono uppercase tracking-[0.18em] text-white/35 tabular-nums">
+                  {{ tr(route.duration) }} · {{ tr(route.distance) }}
+                </p>
+              </div>
+            </NuxtLink>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Colophon : About + Contact + Partners -->
+    <section class="py-20 md:py-24 px-6 md:px-12 border-t border-white/10">
+      <div class="max-w-[1400px] mx-auto grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-16">
+        <div class="md:col-span-5 reveal-on-scroll">
+          <p class="eyebrow mb-3">Irekiak</p>
+          <p class="font-serif text-lg text-white/80 leading-relaxed">
+            {{ t('home.aboutShort') }}
+          </p>
+          <NuxtLink
+            :to="localePath('/a-propos')"
+            class="mt-5 inline-flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors arrow-nudge-parent"
+          >
+            {{ t('common.learnMore') }} <span class="arrow-nudge">→</span>
+          </NuxtLink>
         </div>
-      </div>
-    </section>
-
-    <!-- Carte preview -->
-    <section class="py-24 md:py-32 px-6 md:px-12 bg-edition-dark">
-      <div class="max-w-[1200px] mx-auto text-center reveal-on-scroll">
-        <p class="text-xs uppercase tracking-[0.2em] text-white/40 font-mono mb-3">
-          Donostia / San Sebastián
-        </p>
-        <h2 class="mb-8">{{ t('nav.map') }}</h2>
-        <p class="text-white/60 mb-10 max-w-lg mx-auto">
-          6 galeries, 3 routes, 1 ville
-        </p>
-        <NuxtLink
-          :to="localePath('/carte')"
-          class="inline-block px-8 py-3 text-sm font-medium border border-white/40 text-white
-                 transition-all duration-300 hover:bg-white/10 hover:border-white"
-        >
-          {{ t('nav.map') }} &rarr;
-        </NuxtLink>
-      </div>
-    </section>
-
-    <!-- A propos -->
-    <section class="py-24 md:py-32 px-6 md:px-12">
-      <div class="max-w-2xl mx-auto text-center reveal-on-scroll">
-        <h2 class="mb-8">Irekiak</h2>
-        <p class="text-white/70 leading-relaxed mb-4">
-          Irekiak Gallery Weekend, Donostiako arte galeria astebururaren ekitaldi ofiziala.
-          2010ean sortua, DAGGE (Donostiako Arte Galeria Guztien Elkartea), Tabakalera eta DonostiKultura-k antolatua.
-        </p>
-        <NuxtLink
-          :to="localePath('/a-propos')"
-          class="inline-flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors mt-4"
-        >
-          {{ t('common.learnMore') }} &rarr;
-        </NuxtLink>
-      </div>
-    </section>
-
-    <!-- Partenaires -->
-    <section class="py-16 px-6 md:px-12 border-t border-white/10">
-      <div class="max-w-[1200px] mx-auto reveal-on-scroll">
-        <SharedPartnersSection />
-      </div>
-    </section>
-
-    <!-- Contact -->
-    <section class="py-20 px-6 md:px-12 bg-edition-dark">
-      <div class="max-w-[1200px] mx-auto reveal-on-scroll grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
-        <div>
-          <p class="text-xs uppercase tracking-wider text-white/30 font-mono mb-3">Email</p>
-          <a href="mailto:irekiak@irekiak.eus" class="text-white hover:text-white/80 transition-colors">irekiak@irekiak.eus</a>
+        <div class="md:col-span-4 md:col-start-7 reveal-on-scroll">
+          <p class="eyebrow mb-3">Contact</p>
+          <dl class="space-y-3 text-sm">
+            <div class="flex flex-col">
+              <dt class="sr-only">Email</dt>
+              <dd>
+                <a href="mailto:irekiak@irekiak.eus" class="text-white hover:text-gold transition-colors">
+                  irekiak@irekiak.eus
+                </a>
+              </dd>
+            </div>
+            <div class="flex flex-col">
+              <dt class="sr-only">Instagram</dt>
+              <dd>
+                <a href="https://www.instagram.com/irekiak.gallery.weekend" target="_blank" rel="noopener noreferrer" class="text-white hover:text-gold transition-colors">
+                  @irekiak.gallery.weekend
+                </a>
+              </dd>
+            </div>
+            <div class="flex flex-col">
+              <dt class="sr-only">{{ t('nav.map') }}</dt>
+              <dd class="text-white/70">Alkolea Pasaia 1 · 20012 Donostia</dd>
+            </div>
+          </dl>
         </div>
-        <div>
-          <p class="text-xs uppercase tracking-wider text-white/30 font-mono mb-3">Instagram</p>
-          <a href="https://www.instagram.com/irekiak.gallery.weekend" target="_blank" rel="noopener noreferrer" class="text-white hover:text-white/80 transition-colors">
-            @irekiak.gallery.weekend
-          </a>
-        </div>
-        <div>
-          <p class="text-xs uppercase tracking-wider text-white/30 font-mono mb-3">Donostia</p>
-          <p class="text-white/60">Alkolea Pasaia 1, 20012</p>
+        <div class="md:col-span-3 reveal-on-scroll">
+          <p class="eyebrow mb-3">{{ t('home.partners') }}</p>
+          <SharedPartnersSection class="!flex-col !items-start !gap-3 !justify-start" />
         </div>
       </div>
     </section>
   </div>
 </template>
+
+<style scoped>
+.animate-fade-in-slow {
+  animation: fade-in 900ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+@keyframes fade-in {
+  from { opacity: 0 }
+  to { opacity: 1 }
+}
+</style>

@@ -52,28 +52,15 @@ useHead(() => ({
 </script>
 
 <template>
-  <div
-    v-if="embedded"
-    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-12"
-  >
-    <GalleryExhibitionCard
-      v-for="card in cards"
-      :key="card.id"
-      :card="card"
-      class="reveal-on-scroll"
-    />
-  </div>
-  <section v-else class="py-24 md:py-32 px-6 md:px-12 bg-edition-dark">
-    <div class="max-w-[1400px] mx-auto">
-      <div class="reveal-on-scroll mb-16 max-w-2xl">
-        <p class="text-xs uppercase tracking-[0.2em] text-white/40 font-mono mb-3">
-          29 > 31.05.2026
-        </p>
-        <h2 class="font-serif text-4xl md:text-5xl text-white leading-tight mb-5" style="font-weight: 400; letter-spacing: -0.02em;">
+  <component :is="embedded ? 'div' : 'section'" :class="embedded ? '' : 'py-24 md:py-32 px-6 md:px-12 bg-edition-dark'">
+    <div :class="embedded ? '' : 'max-w-[1400px] mx-auto'">
+      <header v-if="!embedded" class="reveal-on-scroll mb-16 max-w-2xl">
+        <p class="eyebrow mb-3">29 > 31.05.2026</p>
+        <h2 class="font-serif display-headline text-4xl md:text-5xl text-white mb-5">
           {{ t('home.exhibitionsTitle') }}
         </h2>
         <p class="text-white/60 leading-relaxed">{{ t('home.exhibitionsSubtitle') }}</p>
-      </div>
+      </header>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-12">
         <GalleryExhibitionCard
@@ -84,5 +71,5 @@ useHead(() => ({
         />
       </div>
     </div>
-  </section>
+  </component>
 </template>

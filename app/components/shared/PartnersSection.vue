@@ -1,4 +1,9 @@
 <script setup lang="ts">
+interface Props {
+  layout?: 'row' | 'stack'
+}
+withDefaults(defineProps<Props>(), { layout: 'row' })
+
 const partners = [
   'DAGGE',
   'Tabakalera',
@@ -10,7 +15,11 @@ const partners = [
 </script>
 
 <template>
-  <div class="flex flex-wrap items-center justify-center gap-8 md:gap-12">
+  <div
+    :class="layout === 'stack'
+      ? 'flex flex-col items-start gap-3'
+      : 'flex flex-wrap items-center justify-center gap-8 md:gap-12'"
+  >
     <span
       v-for="partner in partners"
       :key="partner"

@@ -31,9 +31,11 @@ export async function saveExhibitionImage(
     throw createError({ statusCode: 400, statusMessage: 'Accepted formats: jpg, png, webp' })
   }
 
+  // Preserve the original aspect ratio: only downscale when the longest
+  // side exceeds 1600px. No crop, no upscale of small uploads.
   const webp = await pipeline
     .rotate()
-    .resize(1200, 1500, { fit: 'cover', position: 'centre' })
+    .resize(1600, 1600, { fit: 'inside', withoutEnlargement: true })
     .webp({ quality: 82 })
     .toBuffer()
 

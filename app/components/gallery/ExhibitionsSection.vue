@@ -55,12 +55,12 @@ useHead(() => ({
         <p class="text-white/60 leading-relaxed">{{ t('home.exhibitionsSubtitle') }}</p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-12">
+      <div class="columns-1 md:columns-2 lg:columns-3 gap-10 md:gap-12 [column-fill:balance]">
         <GalleryExhibitionCard
           v-for="card in cards"
           :key="card.id"
           :card="card"
-          class="reveal-on-scroll"
+          class="reveal-on-scroll mb-10 md:mb-12"
         />
       </div>
     </div>

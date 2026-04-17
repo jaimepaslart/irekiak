@@ -392,8 +392,8 @@ const previewParagraphs = computed(() => splitParagraphs(form[descriptionKey.val
         <div class="sticky top-24">
           <div class="eyebrow mb-3">{{ t('exhibitions.preview') }}</div>
           <article class="border border-white/10 bg-[var(--color-edition-dark)] rounded-sm overflow-hidden">
-            <div class="relative w-full aspect-[4/5] overflow-hidden bg-white/5">
-              <img :src="card.imageUrl" :alt="form.artistName || card.artist" class="w-full h-full object-cover">
+            <div class="relative w-full overflow-hidden bg-white/5">
+              <img :src="card.imageUrl" :alt="form.artistName || card.artist" class="block w-full h-auto">
             </div>
             <div class="p-5">
               <p class="eyebrow mb-2">

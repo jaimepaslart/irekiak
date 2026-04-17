@@ -19,15 +19,15 @@ const isUploaded = computed(() => props.card.imageUrl.startsWith('/api/'))
 </script>
 
 <template>
-  <article class="group flex flex-col">
-    <div class="relative w-full aspect-[4/5] overflow-hidden bg-white/5 rounded-sm mb-5">
+  <article class="group flex flex-col break-inside-avoid">
+    <div class="relative w-full overflow-hidden bg-white/5 rounded-sm mb-5">
       <NuxtImg
         v-if="!isUploaded"
         :src="card.imageUrl"
         :alt="alt"
         format="webp"
         loading="lazy"
-        class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+        class="block w-full h-auto transition-transform duration-700 group-hover:scale-[1.02]"
         sizes="sm:100vw md:50vw lg:33vw"
       />
       <img
@@ -35,7 +35,7 @@ const isUploaded = computed(() => props.card.imageUrl.startsWith('/api/'))
         :src="card.imageUrl"
         :alt="alt"
         loading="lazy"
-        class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+        class="block w-full h-auto transition-transform duration-700 group-hover:scale-[1.02]"
       >
     </div>
 

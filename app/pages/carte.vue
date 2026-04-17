@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { galleries } from '@data/galleries'
 import { tourRoutes } from '@data/tours'
-import { createGalleryMarker } from '~/components/map/MarkerIcon'
-import type { Map as LeafletMap, Marker, Polyline } from 'leaflet'
+import { createGalleryMarker, createUserLocationMarker } from '~/components/map/MarkerIcon'
+import { googleDirectionsUrl } from '~/utils/maps'
+import type { Map as LeafletMap, Marker } from 'leaflet'
 
 const { t } = useI18n()
 const localePath = useLocalePath()
@@ -10,29 +11,28 @@ const tr = useTranslated()
 
 usePageSeo('map')
 
-// Center on Donostia
 const MAP_CENTER: [number, number] = [43.32, -1.98]
 const MAP_ZOOM = 15
+
+const galleriesById = new Map(galleries.map(g => [g.id, g]))
+const colorByGalleryId = new Map(
+  galleries.map(g => [g.id, tourRoutes.find(r => r.galleryIds.includes(g.id))?.color ?? '#FFFFFF']),
+)
 
 const selectedGallery = ref<string | null>(null)
 const mapContainer = ref<HTMLElement | null>(null)
 const mobileSheetOpen = ref(false)
 const showIntro = ref(true)
-
-let map: LeafletMap | null = null
-const markersByGalleryId = new Map<string, Marker>()
-const polylines: Polyline[] = []
-let userMarker: Marker | null = null
 const isLocating = ref(false)
 
-/**
- * Returns the color of the first tour route that contains this gallery.
- * Defaults to white if no route references it.
- */
-function getGalleryColor(galleryId: string): string {
-  const route = tourRoutes.find(r => r.galleryIds.includes(galleryId))
-  return route?.color ?? '#FFFFFF'
-}
+const selectedGalleryData = computed(() =>
+  selectedGallery.value ? galleriesById.get(selectedGallery.value) ?? null : null,
+)
+
+let map: LeafletMap | null = null
+let userMarker: Marker | null = null
+let introTimeout: ReturnType<typeof setTimeout> | null = null
+const markersByGalleryId = new Map<string, Marker>()
 
 function locateMe() {
   if (!navigator.geolocation || !map) {
@@ -45,19 +45,13 @@ function locateMe() {
       isLocating.value = false
       if (!map) return
       const { latitude, longitude } = pos.coords
-      const { $L } = useNuxtApp()
-      const L = $L as typeof import('leaflet')
       if (userMarker) {
         userMarker.setLatLng([latitude, longitude])
       }
       else {
+        const L = useLeaflet()
         userMarker = L.marker([latitude, longitude], {
-          icon: L.divIcon({
-            className: 'user-location-marker',
-            html: '<div class="relative flex items-center justify-center w-5 h-5"><div class="absolute w-5 h-5 rounded-full bg-sky-400/30 animate-ping"></div><div class="relative w-3 h-3 rounded-full bg-sky-400 ring-2 ring-white shadow-md"></div></div>',
-            iconSize: [20, 20],
-            iconAnchor: [10, 10],
-          }),
+          icon: createUserLocationMarker(),
           interactive: false,
         }).addTo(map)
       }
@@ -71,30 +65,23 @@ function locateMe() {
   )
 }
 
-function directionsHref(lat: number, lng: number): string {
-  return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`
-}
-
 function selectGallery(id: string) {
   const wasSelected = selectedGallery.value === id
   selectedGallery.value = wasSelected ? null : id
 
   if (!wasSelected && map) {
-    const gallery = galleries.find(g => g.id === id)
+    const gallery = galleriesById.get(id)
     if (gallery) {
-      map.flyTo([gallery.coordinates.lat, gallery.coordinates.lng], 17, {
-        duration: 0.8,
-      })
-      const marker = markersByGalleryId.get(id)
-      marker?.openPopup()
+      map.flyTo([gallery.coordinates.lat, gallery.coordinates.lng], 17, { duration: 0.8 })
+      markersByGalleryId.get(id)?.openPopup()
     }
-    // Close the mobile sheet so the selected gallery is actually visible on the map.
+    // Hide the mobile sheet so the flown-to marker is actually visible.
     mobileSheetOpen.value = false
   }
 }
 
 function buildPopupHtml(galleryId: string): string {
-  const gallery = galleries.find(g => g.id === galleryId)
+  const gallery = galleriesById.get(galleryId)
   if (!gallery) return ''
   const detailHref = localePath(`/galleries/${gallery.slug}`)
   const learnMore = t('common.learnMore')
@@ -109,15 +96,13 @@ function buildPopupHtml(galleryId: string): string {
 }
 
 onMounted(async () => {
-  // Hide the intro card after 3 seconds
-  setTimeout(() => { showIntro.value = false }, 3000)
+  introTimeout = setTimeout(() => { showIntro.value = false }, 3000)
 
-  // Wait for the ClientOnly wrapper to render the container
+  // Wait for the ClientOnly wrapper to render the container.
   await nextTick()
   if (!mapContainer.value) return
 
-  const { $L } = useNuxtApp()
-  const L = $L as typeof import('leaflet')
+  const L = useLeaflet()
 
   map = L.map(mapContainer.value, {
     center: MAP_CENTER,
@@ -131,17 +116,16 @@ onMounted(async () => {
     maxZoom: 20,
   }).addTo(map)
 
-  // Tour route polylines
   for (const route of tourRoutes) {
     const latlngs = route.galleryIds
       .map((gid) => {
-        const g = galleries.find(x => x.id === gid)
+        const g = galleriesById.get(gid)
         return g ? [g.coordinates.lat, g.coordinates.lng] as [number, number] : null
       })
       .filter((v): v is [number, number] => v !== null)
 
     if (latlngs.length >= 2) {
-      const pl = L.polyline(latlngs, {
+      L.polyline(latlngs, {
         color: route.color,
         weight: 4,
         opacity: 0.75,
@@ -149,11 +133,9 @@ onMounted(async () => {
         lineCap: 'round',
         lineJoin: 'round',
       }).addTo(map)
-      polylines.push(pl)
     }
   }
 
-  // Marker cluster group
   // @ts-expect-error markerClusterGroup is added by leaflet.markercluster
   const cluster = L.markerClusterGroup({
     showCoverageOnHover: false,
@@ -161,17 +143,14 @@ onMounted(async () => {
     maxClusterRadius: 40,
   })
 
-  // Gallery markers
   for (const gallery of galleries) {
-    const color = getGalleryColor(gallery.id)
+    const color = colorByGalleryId.get(gallery.id) ?? '#FFFFFF'
     const marker = L.marker(
       [gallery.coordinates.lat, gallery.coordinates.lng],
       { icon: createGalleryMarker(gallery.name, color) },
     )
     marker.bindPopup(buildPopupHtml(gallery.id))
-    marker.on('click', () => {
-      selectedGallery.value = gallery.id
-    })
+    marker.on('click', () => { selectedGallery.value = gallery.id })
     markersByGalleryId.set(gallery.id, marker)
     cluster.addLayer(marker)
   }
@@ -180,12 +159,12 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+  if (introTimeout) clearTimeout(introTimeout)
   if (map) {
     map.remove()
     map = null
   }
   markersByGalleryId.clear()
-  polylines.length = 0
   userMarker = null
 })
 </script>
@@ -207,10 +186,7 @@ onBeforeUnmount(() => {
         :aria-label="t('common.close')"
         @click="mobileSheetOpen = false"
       >
-        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <line x1="18" y1="6" x2="6" y2="18" />
-          <line x1="6" y1="6" x2="18" y2="18" />
-        </svg>
+        <Icon name="lucide:x" class="w-6 h-6" aria-hidden="true" />
       </button>
 
       <div class="p-6">
@@ -240,7 +216,7 @@ onBeforeUnmount(() => {
             >
               <span
                 class="w-2.5 h-2.5 rounded-full shrink-0 mt-1.5"
-                :style="{ backgroundColor: getGalleryColor(gallery.id) }"
+                :style="{ backgroundColor: colorByGalleryId.get(gallery.id) }"
               />
               <span class="flex-1">
                 <span class="block font-medium">{{ gallery.name }}</span>
@@ -279,14 +255,7 @@ onBeforeUnmount(() => {
         :disabled="isLocating"
         @click="locateMe"
       >
-        <svg v-if="!isLocating" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <circle cx="12" cy="12" r="3" />
-          <circle cx="12" cy="12" r="8" />
-          <line x1="12" y1="2" x2="12" y2="4" />
-          <line x1="12" y1="20" x2="12" y2="22" />
-          <line x1="2" y1="12" x2="4" y2="12" />
-          <line x1="20" y1="12" x2="22" y2="12" />
-        </svg>
+        <Icon v-if="!isLocating" name="lucide:locate-fixed" class="w-5 h-5" aria-hidden="true" />
         <span v-else class="inline-block w-4 h-4 border-2 border-white/70 border-t-transparent rounded-full animate-spin" aria-hidden="true" />
       </button>
 
@@ -311,53 +280,41 @@ onBeforeUnmount(() => {
         :aria-label="t('nav.galleries')"
         @click="mobileSheetOpen = true"
       >
-        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <line x1="8" y1="6" x2="21" y2="6" />
-          <line x1="8" y1="12" x2="21" y2="12" />
-          <line x1="8" y1="18" x2="21" y2="18" />
-          <line x1="3" y1="6" x2="3.01" y2="6" />
-          <line x1="3" y1="12" x2="3.01" y2="12" />
-          <line x1="3" y1="18" x2="3.01" y2="18" />
-        </svg>
+        <Icon name="lucide:list" class="w-6 h-6" aria-hidden="true" />
       </button>
 
       <!-- Gallery info panel (when selected) -->
       <Transition name="slide">
         <div
-          v-if="selectedGallery"
+          v-if="selectedGalleryData"
           class="absolute bottom-6 left-6 right-6 md:left-auto md:right-6 md:w-80 z-[1000]
                  bg-[var(--color-edition)]/95 backdrop-blur-sm border border-white/15 rounded-sm p-5"
         >
-          <template v-for="gallery in galleries" :key="gallery.id">
-            <div v-if="gallery.id === selectedGallery">
-              <div class="flex justify-between items-start mb-3">
-                <h3 class="text-lg font-bold text-white">{{ gallery.name }}</h3>
-                <button class="text-white/40 hover:text-white text-lg" @click="selectedGallery = null">&times;</button>
-              </div>
-              <p class="text-sm text-white/60 mb-2">{{ gallery.address }}</p>
-              <p class="text-sm text-white/60 mb-4">{{ tr(gallery.openingHours) }}</p>
-              <div class="flex flex-wrap items-center gap-x-5 gap-y-2">
-                <NuxtLink
-                  :to="localePath(`/galleries/${gallery.slug}`)"
-                  class="text-sm text-white hover:text-white/80 transition-colors"
-                >
-                  {{ t('common.learnMore') }} &rarr;
-                </NuxtLink>
-                <a
-                  :href="directionsHref(gallery.coordinates.lat, gallery.coordinates.lng)"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="text-sm text-sky-300 hover:text-sky-200 transition-colors inline-flex items-center gap-1.5"
-                >
-                  {{ t('map.directions') }}
-                  <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M7 17L17 7" />
-                    <path d="M7 7h10v10" />
-                  </svg>
-                </a>
-              </div>
-            </div>
-          </template>
+          <div class="flex justify-between items-start mb-3">
+            <h3 class="text-lg font-bold text-white">{{ selectedGalleryData.name }}</h3>
+            <button :aria-label="t('common.close')" class="text-white/40 hover:text-white p-1 -m-1" @click="selectedGallery = null">
+              <Icon name="lucide:x" class="w-4 h-4" aria-hidden="true" />
+            </button>
+          </div>
+          <p class="text-sm text-white/60 mb-2">{{ selectedGalleryData.address }}</p>
+          <p class="text-sm text-white/60 mb-4">{{ tr(selectedGalleryData.openingHours) }}</p>
+          <div class="flex flex-wrap items-center gap-x-5 gap-y-2">
+            <NuxtLink
+              :to="localePath(`/galleries/${selectedGalleryData.slug}`)"
+              class="text-sm text-white hover:text-white/80 transition-colors"
+            >
+              {{ t('common.learnMore') }} &rarr;
+            </NuxtLink>
+            <a
+              :href="googleDirectionsUrl(selectedGalleryData.coordinates.lat, selectedGalleryData.coordinates.lng)"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-sm text-sky-300 hover:text-sky-200 transition-colors inline-flex items-center gap-1.5"
+            >
+              {{ t('map.directions') }}
+              <Icon name="lucide:arrow-up-right" class="w-3.5 h-3.5" aria-hidden="true" />
+            </a>
+          </div>
         </div>
       </Transition>
     </div>
@@ -424,28 +381,6 @@ onBeforeUnmount(() => {
   border-bottom-color: rgba(255, 255, 255, 0.1);
 }
 
-/* GeoSearch bar */
-.leaflet-control-geosearch form {
-  background-color: #003153;
-  border-color: rgba(255, 255, 255, 0.15);
-}
-.leaflet-control-geosearch form input {
-  color: #ffffff;
-  background-color: #003153;
-}
-.leaflet-control-geosearch form input::placeholder {
-  color: rgba(255, 255, 255, 0.5);
-}
-.leaflet-control-geosearch .results > * {
-  background-color: #003153;
-  color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.1);
-}
-.leaflet-control-geosearch .results > *:hover,
-.leaflet-control-geosearch .results > .active {
-  background-color: rgba(255, 255, 255, 0.15);
-}
-
 /* Marker cluster (violet tint) */
 .marker-cluster-small,
 .marker-cluster-medium,
@@ -460,10 +395,4 @@ onBeforeUnmount(() => {
   font-weight: 600;
 }
 
-/* Gesture handling message overlay */
-.leaflet-gesture-handling-touch-warning,
-.leaflet-gesture-handling-scroll-warning {
-  background-color: rgba(78, 0, 65, 0.85) !important;
-  color: #ffffff !important;
-}
 </style>

@@ -537,7 +537,7 @@
     "fieldExternalUrl": "Lien vers votre site",
     "fieldExternalUrlHelp": "Laissez vide pour utiliser l'adresse par défaut de la galerie.",
     "fieldImage": "Image de couverture",
-    "fieldImageHelp": "JPG, PNG ou WebP · 5 Mo max · le format d'origine est préservé (pas de recadrage).",
+    "fieldImageHelp": "JPG, PNG ou WebP · 5 Mo max · affichage en 4:5 sur le site (cadrage centré).",
     "dropzoneHint": "Glissez une image ici ou cliquez pour choisir.",
     "tabs": {
       "eu": "Euskara",

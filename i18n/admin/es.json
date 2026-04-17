@@ -537,7 +537,7 @@
     "fieldExternalUrl": "Enlace a su sitio",
     "fieldExternalUrlHelp": "Deje vacío para usar la web de la galería por defecto.",
     "fieldImage": "Imagen de portada",
-    "fieldImageHelp": "JPG, PNG o WebP · 5 MB máx · se conserva el formato original (sin recorte).",
+    "fieldImageHelp": "JPG, PNG o WebP · 5 MB máx · se muestra en 4:5 en el sitio (encuadre centrado).",
     "dropzoneHint": "Arrastre una imagen aquí o haga clic para elegir.",
     "tabs": {
       "eu": "Euskara",

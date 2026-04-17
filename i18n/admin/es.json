@@ -65,7 +65,8 @@
     "audit": "Auditoría",
     "admin": "Admin",
     "mobileMenu": "Menú",
-    "mobileClose": "Cerrar"
+    "mobileClose": "Cerrar",
+    "exhibitions": "Exposiciones"
   },
   "dashboard": {
     "title": "Panel",
@@ -474,7 +475,8 @@
     "search": "Foco búsqueda",
     "help": "Esta ayuda",
     "blur": "Salir de un campo",
-    "commandPalette": "Paleta de comandos"
+    "commandPalette": "Paleta de comandos",
+    "exhibitions": "Exposiciones"
   },
   "commandPalette": {
     "placeholder": "Buscar una página o acción…",
@@ -515,5 +517,50 @@
     "outOf": "de",
     "lowFill": "Baja ocupación",
     "full": "Completo"
+  },
+  "exhibitions": {
+    "title": "Exposiciones",
+    "eyebrow": "Contenido",
+    "heroSubtitle": "Cada galería inaugura una exposición. Edite libremente el texto y la imagen.",
+    "loadFailed": "No se pudieron cargar las exposiciones.",
+    "saveFailed": "No se pudo guardar la actualización.",
+    "badgeOverridden": "Modificado",
+    "badgeDefault": "Por defecto",
+    "cardEyebrow": "{num}. {gallery}",
+    "editTitle": "Editar exposición",
+    "editSubtitle": "Los cambios se guardan sin asistencia técnica.",
+    "fieldArtist": "Artista",
+    "fieldArtistHelp": "Nombre del artista (o dúo) — aparece en negrita bajo el título.",
+    "fieldTitle": "Título",
+    "fieldDescription": "Descripción",
+    "fieldDescriptionHelp": "Un párrafo por bloque (deje una línea en blanco para separar).",
+    "fieldExternalUrl": "Enlace a su sitio",
+    "fieldExternalUrlHelp": "Deje vacío para usar la web de la galería por defecto.",
+    "fieldImage": "Imagen de portada",
+    "fieldImageHelp": "JPG, PNG o WebP · 5 MB máx · recorte automático 4:5.",
+    "dropzoneHint": "Arrastre una imagen aquí o haga clic para elegir.",
+    "tabs": {
+      "eu": "Euskara",
+      "es": "Español",
+      "fr": "Français",
+      "en": "English"
+    },
+    "actions": {
+      "save": "Guardar",
+      "saving": "Guardando…",
+      "saved": "Guardado",
+      "upload": "Subir",
+      "uploading": "Enviando…",
+      "removeImage": "Quitar imagen",
+      "restoreDefault": "Restaurar por defecto",
+      "backToList": "Volver a exposiciones"
+    },
+    "feedback": {
+      "saved": "Cambios guardados.",
+      "imageUploaded": "Imagen actualizada.",
+      "imageRemoved": "Imagen retirada.",
+      "imageFailed": "No se pudo guardar la imagen."
+    },
+    "preview": "Vista pública"
   }
 }

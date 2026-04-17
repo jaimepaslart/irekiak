@@ -12,7 +12,10 @@
   "home": {
     "galleries": "Galerías",
     "galleriesComingSoon": "Próximamente se mostrarán las galerías aquí.",
-    "programmeComingSoon": "Próximamente se mostrará el programa aquí."
+    "programmeComingSoon": "Próximamente se mostrará el programa aquí.",
+    "exhibitionsTitle": "Exposiciones",
+    "exhibitionsSubtitle": "Cada galería inaugura una exposición para el Gallery Weekend Irekiak.",
+    "exhibitionsVisitSite": "Visitar galería"
   },
   "seo": {
     "home": {

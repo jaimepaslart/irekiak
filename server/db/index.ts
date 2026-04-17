@@ -99,6 +99,23 @@ sqlite.exec(`
     updated_by TEXT NOT NULL
   );
 
+  CREATE TABLE IF NOT EXISTS exhibition_overrides (
+    exhibition_id TEXT PRIMARY KEY,
+    artist_name TEXT,
+    title_eu TEXT,
+    title_es TEXT,
+    title_fr TEXT,
+    title_en TEXT,
+    description_eu TEXT,
+    description_es TEXT,
+    description_fr TEXT,
+    description_en TEXT,
+    external_url TEXT,
+    image_filename TEXT,
+    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_by TEXT NOT NULL
+  );
+
   CREATE TABLE IF NOT EXISTS email_events (
     id TEXT PRIMARY KEY,
     booking_id TEXT,

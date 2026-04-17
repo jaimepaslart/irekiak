@@ -65,7 +65,8 @@
     "audit": "Audit",
     "admin": "Admin",
     "mobileMenu": "Menu",
-    "mobileClose": "Fermer"
+    "mobileClose": "Fermer",
+    "exhibitions": "Expositions"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -474,7 +475,8 @@
     "search": "Focus recherche",
     "help": "Cette aide",
     "blur": "Sortir d'un champ",
-    "commandPalette": "Command palette"
+    "commandPalette": "Command palette",
+    "exhibitions": "Expositions"
   },
   "commandPalette": {
     "placeholder": "Rechercher une page ou une action…",
@@ -515,5 +517,50 @@
     "outOf": "sur",
     "lowFill": "Faible remplissage",
     "full": "Complet"
+  },
+  "exhibitions": {
+    "title": "Expositions",
+    "eyebrow": "Contenu",
+    "heroSubtitle": "Chaque galerie inaugure une exposition. Modifiez librement le texte et la visuelle.",
+    "loadFailed": "Impossible de charger les expositions.",
+    "saveFailed": "La mise à jour n'a pas pu être enregistrée.",
+    "badgeOverridden": "Modifié",
+    "badgeDefault": "Défaut",
+    "cardEyebrow": "{num}. {gallery}",
+    "editTitle": "Modifier l'exposition",
+    "editSubtitle": "Les modifications sont enregistrées sans intervention technique.",
+    "fieldArtist": "Artiste",
+    "fieldArtistHelp": "Nom de l'artiste (ou duo) — affiché en gras sous le titre.",
+    "fieldTitle": "Titre",
+    "fieldDescription": "Description",
+    "fieldDescriptionHelp": "Un paragraphe par bloc de lignes (laissez une ligne vide pour séparer).",
+    "fieldExternalUrl": "Lien vers votre site",
+    "fieldExternalUrlHelp": "Laissez vide pour utiliser l'adresse par défaut de la galerie.",
+    "fieldImage": "Image de couverture",
+    "fieldImageHelp": "JPG, PNG ou WebP · 5 Mo max · recadrage automatique 4:5.",
+    "dropzoneHint": "Glissez une image ici ou cliquez pour choisir.",
+    "tabs": {
+      "eu": "Euskara",
+      "es": "Español",
+      "fr": "Français",
+      "en": "English"
+    },
+    "actions": {
+      "save": "Enregistrer",
+      "saving": "Enregistrement…",
+      "saved": "Enregistré",
+      "upload": "Téléverser",
+      "uploading": "Envoi…",
+      "removeImage": "Retirer l'image",
+      "restoreDefault": "Rétablir le défaut",
+      "backToList": "Retour aux expositions"
+    },
+    "feedback": {
+      "saved": "Modifications enregistrées.",
+      "imageUploaded": "Image mise à jour.",
+      "imageRemoved": "Image retirée.",
+      "imageFailed": "L'image n'a pas pu être enregistrée."
+    },
+    "preview": "Aperçu public"
   }
 }

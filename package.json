@@ -38,6 +38,7 @@
     "nuxt-leaflet": "^0.0.27",
     "qrcode": "^1.5.4",
     "resend": "^6.10.0",
+    "sharp": "^0.34.5",
     "svix": "^1.90.0",
     "vue": "^3.5.32",
     "vue-email": "^0.8.11",
@@ -48,7 +49,8 @@
     "onlyBuiltDependencies": [
       "@parcel/watcher",
       "esbuild",
-      "better-sqlite3"
+      "better-sqlite3",
+      "sharp"
     ]
   },
   "devDependencies": {

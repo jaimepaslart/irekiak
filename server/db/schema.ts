@@ -81,6 +81,23 @@ export const galleryContactOverrides = sqliteTable('gallery_contact_overrides', 
   updatedBy: text('updated_by').notNull(),
 })
 
+export const exhibitionOverrides = sqliteTable('exhibition_overrides', {
+  exhibitionId: text('exhibition_id').primaryKey(),
+  artistName: text('artist_name'),
+  titleEu: text('title_eu'),
+  titleEs: text('title_es'),
+  titleFr: text('title_fr'),
+  titleEn: text('title_en'),
+  descriptionEu: text('description_eu'),
+  descriptionEs: text('description_es'),
+  descriptionFr: text('description_fr'),
+  descriptionEn: text('description_en'),
+  externalUrl: text('external_url'),
+  imageFilename: text('image_filename'),
+  updatedAt: text('updated_at').notNull().default(sql`(datetime('now'))`),
+  updatedBy: text('updated_by').notNull(),
+})
+
 export const emailEvents = sqliteTable('email_events', {
   id: text('id').primaryKey(),
   bookingId: text('booking_id'),
@@ -99,4 +116,5 @@ export type AuditLogRow = typeof auditLog.$inferSelect
 export type AttendanceRow = typeof attendance.$inferSelect
 export type AppSettingRow = typeof appSettings.$inferSelect
 export type GalleryContactOverrideRow = typeof galleryContactOverrides.$inferSelect
+export type ExhibitionOverrideRow = typeof exhibitionOverrides.$inferSelect
 export type EmailEventRow = typeof emailEvents.$inferSelect

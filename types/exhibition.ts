@@ -20,3 +20,21 @@ export interface Exhibition {
   startDate: string
   endDate: string
 }
+
+/**
+ * Flat projection used on the public homepage and in the admin editor.
+ * Fields reflect what a gallerist can override via /admin/exhibitions;
+ * the static Exhibition above remains the source of truth for defaults.
+ */
+export interface ExhibitionCard {
+  id: string
+  galleryId: string
+  galleryName: string
+  number: number
+  artist: string
+  title: TranslatedText
+  description: TranslatedText
+  imageUrl: string
+  externalUrl: string | null
+  overridden: boolean
+}

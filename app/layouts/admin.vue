@@ -66,6 +66,7 @@ const desktopNavItems = computed(() => [
   { to: '/admin/bookings', label: t('nav.bookings') },
   { to: '/admin/parcours', label: t('nav.parcours') },
   { to: '/admin/galleries', label: t('nav.galleries') },
+  { to: '/admin/exhibitions', label: t('nav.exhibitions') },
   { to: '/admin/blast', label: t('nav.blast') },
 ])
 
@@ -75,6 +76,7 @@ const mobileNavItems = computed(() => [
   { to: '/admin/bookings/new', label: t('nav.newBooking') },
   { to: '/admin/parcours', label: t('nav.parcours') },
   { to: '/admin/galleries', label: t('nav.galleries') },
+  { to: '/admin/exhibitions', label: t('nav.exhibitions') },
   { to: '/admin/blast', label: t('nav.blast') },
   { to: '/admin/emails', label: t('nav.emails') },
   { to: '/admin/settings', label: t('nav.settings') },
@@ -104,6 +106,7 @@ function handleKeyDown(e: KeyboardEvent) {
     case 'b': navigateTo('/admin/bookings'); break
     case 'c': navigateTo('/admin/bookings/new'); break
     case 'k': navigateTo('/admin/parcours'); break
+    case 'e': navigateTo('/admin/exhibitions'); break
     case 's': navigateTo('/admin/settings'); break
     case 'a': navigateTo('/admin/audit'); break
     case '?': helpOpen.value = true; break
@@ -246,6 +249,7 @@ onBeforeUnmount(() => {
               <div class="flex justify-between"><dt><kbd class="kbd">b</kbd></dt><dd>{{ t('shortcuts.bookings') }}</dd></div>
               <div class="flex justify-between"><dt><kbd class="kbd">c</kbd></dt><dd>{{ t('shortcuts.newBooking') }}</dd></div>
               <div class="flex justify-between"><dt><kbd class="kbd">k</kbd></dt><dd>{{ t('shortcuts.parcours') }}</dd></div>
+              <div class="flex justify-between"><dt><kbd class="kbd">e</kbd></dt><dd>{{ t('shortcuts.exhibitions') }}</dd></div>
               <div class="flex justify-between"><dt><kbd class="kbd">s</kbd></dt><dd>{{ t('shortcuts.settings') }}</dd></div>
               <div class="flex justify-between"><dt><kbd class="kbd">a</kbd></dt><dd>{{ t('shortcuts.audit') }}</dd></div>
               <div class="flex justify-between"><dt><kbd class="kbd">/</kbd></dt><dd>{{ t('shortcuts.search') }}</dd></div>

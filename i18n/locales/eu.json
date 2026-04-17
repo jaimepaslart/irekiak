@@ -12,7 +12,10 @@
   "home": {
     "galleries": "Galeriak",
     "galleriesComingSoon": "Laster galeriak hemen agertuko dira.",
-    "programmeComingSoon": "Laster programa hemen agertuko da."
+    "programmeComingSoon": "Laster programa hemen agertuko da.",
+    "exhibitionsTitle": "Erakusketak",
+    "exhibitionsSubtitle": "Galeria bakoitzak erakusketa berri bat inauguratzen du Gallery Weekend Irekiak astebururako.",
+    "exhibitionsVisitSite": "Galeria bisitatu"
   },
   "seo": {
     "home": {

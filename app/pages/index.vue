@@ -71,7 +71,10 @@ usePageSeo('home')
       </div>
     </section>
 
-    <!-- Expositions -->
+    <!-- Expositions (éditoriales) -->
+    <GalleryExhibitionsSection />
+
+    <!-- Galeries (cartes compactes) -->
     <section class="py-24 md:py-32 px-6 md:px-12">
       <div class="max-w-[1200px] mx-auto">
         <div class="reveal-on-scroll mb-16">

@@ -2,15 +2,15 @@ import { createError, defineEventHandler, getRouterParam, readMultipartFormData 
 import { eq } from 'drizzle-orm'
 import { db } from '../../../../db'
 import { exhibitionOverrides } from '../../../../db/schema'
-import { exhibitions } from '@data/exhibitions'
 import { requireAdminToken } from '../../../../utils/require-admin'
 import { logAudit } from '../../../../utils/audit'
 import { deleteExhibitionImage, saveExhibitionImage } from '../../../../utils/image-upload'
+import { isValidExhibitionId } from '../../../../utils/exhibition-overrides'
 
 export default defineEventHandler(async (event) => {
   requireAdminToken(event)
   const id = getRouterParam(event, 'id') ?? ''
-  if (!exhibitions.some(e => e.id === id)) {
+  if (!isValidExhibitionId(id)) {
     throw createError({ statusCode: 404, statusMessage: 'Exhibition not found' })
   }
   const parts = await readMultipartFormData(event)
@@ -21,36 +21,42 @@ export default defineEventHandler(async (event) => {
 
   const { filename } = await saveExhibitionImage(filePart.data, filePart.type, id)
 
-  const existing = db.select().from(exhibitionOverrides).where(eq(exhibitionOverrides.exhibitionId, id)).get() ?? null
-  const oldFilename = existing?.imageFilename ?? null
+  try {
+    const existing = db.select().from(exhibitionOverrides).where(eq(exhibitionOverrides.exhibitionId, id)).get() ?? null
+    const oldFilename = existing?.imageFilename ?? null
+    const now = new Date().toISOString()
 
-  const base = {
-    exhibitionId: id,
-    imageFilename: filename,
-    updatedAt: new Date().toISOString(),
-    updatedBy: 'admin',
+    if (existing) {
+      await db.update(exhibitionOverrides)
+        .set({ imageFilename: filename, updatedAt: now, updatedBy: 'admin' })
+        .where(eq(exhibitionOverrides.exhibitionId, id))
+    }
+    else {
+      await db.insert(exhibitionOverrides).values({
+        exhibitionId: id,
+        imageFilename: filename,
+        updatedAt: now,
+        updatedBy: 'admin',
+      })
+    }
+
+    if (oldFilename && oldFilename !== filename) {
+      await deleteExhibitionImage(oldFilename)
+    }
+
+    await logAudit({
+      actor: 'admin',
+      action: 'exhibition.image.upload',
+      targetType: 'exhibition',
+      targetId: id,
+      metadata: { filename, replaced: oldFilename },
+    })
+
+    return { filename, url: `/api/images/exhibitions/${filename}` }
   }
-
-  if (existing) {
-    await db.update(exhibitionOverrides)
-      .set({ imageFilename: filename, updatedAt: base.updatedAt, updatedBy: base.updatedBy })
-      .where(eq(exhibitionOverrides.exhibitionId, id))
+  catch (err) {
+    // DB write failed — clean up the orphan file we just saved
+    await deleteExhibitionImage(filename)
+    throw err
   }
-  else {
-    await db.insert(exhibitionOverrides).values(base)
-  }
-
-  if (oldFilename && oldFilename !== filename) {
-    await deleteExhibitionImage(oldFilename)
-  }
-
-  await logAudit({
-    actor: 'admin',
-    action: 'exhibition.image.upload',
-    targetType: 'exhibition',
-    targetId: id,
-    metadata: { filename, replaced: oldFilename },
-  })
-
-  return { filename, url: `/api/images/exhibitions/${filename}` }
 })

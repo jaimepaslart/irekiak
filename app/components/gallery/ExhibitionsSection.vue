@@ -30,10 +30,14 @@ const jsonLd = computed(() => {
   }))
 })
 
+function safeJsonLd(obj: unknown): string {
+  return JSON.stringify(obj).replace(/</g, '\\u003c')
+}
+
 useHead(() => ({
   script: jsonLd.value.map(obj => ({
     type: 'application/ld+json',
-    innerHTML: JSON.stringify(obj),
+    innerHTML: safeJsonLd(obj),
   })),
 }))
 </script>

@@ -8,34 +8,22 @@ import { exhibitionOverrides, type ExhibitionOverrideRow } from '../db/schema'
 
 const galleriesById = new Map(galleries.map(g => [g.id, g]))
 const galleryOrder = new Map(galleries.map((g, i) => [g.id, i + 1]))
+const exhibitionsById = new Map(exhibitions.map(e => [e.id, e]))
+const sortedExhibitions = exhibitions.slice().sort(
+  (a, b) => (galleryOrder.get(a.galleryId) ?? 0) - (galleryOrder.get(b.galleryId) ?? 0),
+)
 
-function defaultArtist(exh: Exhibition): string {
-  return exh.artists.map(a => a.name).join(' & ')
-}
-
-function mergedTranslated(
-  override: Pick<ExhibitionOverrideRow, 'titleEu' | 'titleEs' | 'titleFr' | 'titleEn'> | null,
+function mergeTranslated(
+  override: ExhibitionOverrideRow | null,
   base: TranslatedText,
+  prefix: 'title' | 'description',
 ): TranslatedText {
   if (!override) return base
   return {
-    eu: override.titleEu ?? base.eu,
-    es: override.titleEs ?? base.es,
-    fr: override.titleFr ?? base.fr,
-    en: override.titleEn ?? base.en,
-  }
-}
-
-function mergedDescription(
-  override: Pick<ExhibitionOverrideRow, 'descriptionEu' | 'descriptionEs' | 'descriptionFr' | 'descriptionEn'> | null,
-  base: TranslatedText,
-): TranslatedText {
-  if (!override) return base
-  return {
-    eu: override.descriptionEu ?? base.eu,
-    es: override.descriptionEs ?? base.es,
-    fr: override.descriptionFr ?? base.fr,
-    en: override.descriptionEn ?? base.en,
+    eu: override[`${prefix}Eu`] ?? base.eu,
+    es: override[`${prefix}Es`] ?? base.es,
+    fr: override[`${prefix}Fr`] ?? base.fr,
+    en: override[`${prefix}En`] ?? base.en,
   }
 }
 
@@ -65,31 +53,35 @@ function buildCard(exh: Exhibition, override: ExhibitionOverrideRow | null): Exh
     galleryId: exh.galleryId,
     galleryName: gallery?.name ?? exh.galleryId,
     number: galleryOrder.get(exh.galleryId) ?? 0,
-    artist: override?.artistName ?? defaultArtist(exh),
-    title: mergedTranslated(override, exh.title),
-    description: mergedDescription(override, exh.description),
+    artist: override?.artistName ?? exh.artists.map(a => a.name).join(' & '),
+    title: mergeTranslated(override, exh.title, 'title'),
+    description: mergeTranslated(override, exh.description, 'description'),
     imageUrl: resolveImageUrl(override, exh),
     externalUrl: override?.externalUrl ?? gallery?.website ?? null,
     overridden: isOverridden(override),
   }
 }
 
+export function isValidExhibitionId(id: string): boolean {
+  return exhibitionsById.has(id)
+}
+
 export function getExhibitionCard(id: string): ExhibitionCard | null {
-  const exh = exhibitions.find(e => e.id === id)
+  const exh = exhibitionsById.get(id)
   if (!exh) return null
   const override = db.select().from(exhibitionOverrides).where(eq(exhibitionOverrides.exhibitionId, id)).get() ?? null
   return buildCard(exh, override)
 }
 
+export function getExhibitionWithOverride(id: string): { card: ExhibitionCard, override: ExhibitionOverrideRow | null } | null {
+  const exh = exhibitionsById.get(id)
+  if (!exh) return null
+  const override = db.select().from(exhibitionOverrides).where(eq(exhibitionOverrides.exhibitionId, id)).get() ?? null
+  return { card: buildCard(exh, override), override }
+}
+
 export function listExhibitionCards(): ExhibitionCard[] {
   const overrides = db.select().from(exhibitionOverrides).all()
   const byId = new Map(overrides.map(o => [o.exhibitionId, o]))
-  return exhibitions
-    .slice()
-    .sort((a, b) => (galleryOrder.get(a.galleryId) ?? 0) - (galleryOrder.get(b.galleryId) ?? 0))
-    .map(exh => buildCard(exh, byId.get(exh.id) ?? null))
-}
-
-export function getOverrideRow(id: string): ExhibitionOverrideRow | null {
-  return db.select().from(exhibitionOverrides).where(eq(exhibitionOverrides.exhibitionId, id)).get() ?? null
+  return sortedExhibitions.map(exh => buildCard(exh, byId.get(exh.id) ?? null))
 }

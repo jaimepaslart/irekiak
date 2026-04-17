@@ -3,9 +3,9 @@ import { z } from 'zod'
 import { eq } from 'drizzle-orm'
 import { db } from '../../../db'
 import { exhibitionOverrides } from '../../../db/schema'
-import { exhibitions } from '@data/exhibitions'
 import { requireAdminToken } from '../../../utils/require-admin'
 import { logAudit } from '../../../utils/audit'
+import { isValidExhibitionId } from '../../../utils/exhibition-overrides'
 
 const nullableString = z.string().trim().max(5000).nullable().optional()
 const nullableShort = z.string().trim().max(500).nullable().optional()
@@ -20,7 +20,10 @@ const bodySchema = z.object({
   descriptionEs: nullableString,
   descriptionFr: nullableString,
   descriptionEn: nullableString,
-  externalUrl: z.string().trim().url().max(500).nullable().optional().or(z.literal('').transform(() => null)),
+  externalUrl: z.preprocess(
+    v => (v === '' || v === undefined ? null : v),
+    z.string().url().max(500).nullable(),
+  ),
 })
 
 function normalise(v: string | null | undefined): string | null {
@@ -29,10 +32,12 @@ function normalise(v: string | null | undefined): string | null {
   return trimmed === '' ? null : trimmed
 }
 
+const TEXT_FIELDS = ['artistName', 'titleEu', 'titleEs', 'titleFr', 'titleEn', 'descriptionEu', 'descriptionEs', 'descriptionFr', 'descriptionEn', 'externalUrl'] as const
+
 export default defineEventHandler(async (event) => {
   requireAdminToken(event)
   const id = getRouterParam(event, 'id') ?? ''
-  if (!exhibitions.some(e => e.id === id)) {
+  if (!isValidExhibitionId(id)) {
     throw createError({ statusCode: 404, statusMessage: 'Exhibition not found' })
   }
   const raw = await readBody(event)
@@ -43,8 +48,7 @@ export default defineEventHandler(async (event) => {
 
   const existing = db.select().from(exhibitionOverrides).where(eq(exhibitionOverrides.exhibitionId, id)).get() ?? null
 
-  const values = {
-    exhibitionId: id,
+  const textValues = {
     artistName: normalise(parsed.data.artistName),
     titleEu: normalise(parsed.data.titleEu),
     titleEs: normalise(parsed.data.titleEs),
@@ -55,42 +59,35 @@ export default defineEventHandler(async (event) => {
     descriptionFr: normalise(parsed.data.descriptionFr),
     descriptionEn: normalise(parsed.data.descriptionEn),
     externalUrl: normalise(parsed.data.externalUrl),
-    imageFilename: existing?.imageFilename ?? null,
     updatedAt: new Date().toISOString(),
     updatedBy: 'admin',
   }
 
-  await db.insert(exhibitionOverrides)
-    .values(values)
-    .onConflictDoUpdate({
-      target: exhibitionOverrides.exhibitionId,
-      set: {
-        artistName: values.artistName,
-        titleEu: values.titleEu,
-        titleEs: values.titleEs,
-        titleFr: values.titleFr,
-        titleEn: values.titleEn,
-        descriptionEu: values.descriptionEu,
-        descriptionEs: values.descriptionEs,
-        descriptionFr: values.descriptionFr,
-        descriptionEn: values.descriptionEn,
-        externalUrl: values.externalUrl,
-        updatedAt: values.updatedAt,
-        updatedBy: values.updatedBy,
-      },
+  // Split insert/update so a text save never clobbers imageFilename written
+  // concurrently by the image upload endpoint.
+  if (existing) {
+    await db.update(exhibitionOverrides)
+      .set(textValues)
+      .where(eq(exhibitionOverrides.exhibitionId, id))
+  }
+  else {
+    await db.insert(exhibitionOverrides).values({
+      exhibitionId: id,
+      imageFilename: null,
+      ...textValues,
     })
+  }
 
   const diff: Record<string, { from: string | null, to: string | null }> = {}
-  const fields = ['artistName', 'titleEu', 'titleEs', 'titleFr', 'titleEn', 'descriptionEu', 'descriptionEs', 'descriptionFr', 'descriptionEn', 'externalUrl'] as const
-  for (const f of fields) {
+  for (const f of TEXT_FIELDS) {
     const from = existing?.[f] ?? null
-    const to = values[f]
+    const to = textValues[f]
     if (from !== to) diff[f] = { from, to }
   }
 
   await logAudit({
     actor: 'admin',
-    action: 'exhibition.update',
+    action: existing ? 'exhibition.update' : 'exhibition.create',
     targetType: 'exhibition',
     targetId: id,
     metadata: { diff },

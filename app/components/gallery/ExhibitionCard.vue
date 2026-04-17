@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ExhibitionCard } from '#types/exhibition'
+import { splitParagraphs } from '~/utils/text'
 
 interface Props {
   card: ExhibitionCard
@@ -9,22 +10,19 @@ const props = defineProps<Props>()
 const tr = useTranslated()
 const { t } = useI18n()
 
-const paragraphs = computed(() => {
-  const raw = tr(props.card.description) || ''
-  return raw.split(/\n\n+/).map(p => p.trim()).filter(Boolean)
-})
-
+const paragraphs = computed(() => splitParagraphs(tr(props.card.description)))
 const title = computed(() => tr(props.card.title))
 const alt = computed(() => `${props.card.artist} — ${title.value}`)
-const isRemote = computed(() => props.card.imageUrl.startsWith('http') || props.card.imageUrl.startsWith('/api/'))
+// Upload endpoint serves images already resized / webp-encoded; skip NuxtImg's
+// ipx optimisation pass for those (static /images/* still benefit from it).
+const isUploaded = computed(() => props.card.imageUrl.startsWith('/api/'))
 </script>
 
 <template>
   <article class="group flex flex-col">
     <div class="relative w-full aspect-[4/5] overflow-hidden bg-white/5 rounded-sm mb-5">
-      <!-- NuxtImg for static /images/* paths (optimised), plain img for /api/* (already pre-processed) -->
       <NuxtImg
-        v-if="!isRemote"
+        v-if="!isUploaded"
         :src="card.imageUrl"
         :alt="alt"
         format="webp"

@@ -28,8 +28,6 @@ async function load() {
 }
 
 onMounted(() => { void load() })
-
-const adminLocale = computed<'fr' | 'es'>(() => locale.value)
 </script>
 
 <template>
@@ -87,7 +85,7 @@ const adminLocale = computed<'fr' | 'es'>(() => locale.value)
           </h2>
           <p class="text-sm text-gold font-medium">{{ c.artist }}</p>
           <p class="mt-auto pt-3 text-[11px] uppercase tracking-[0.18em] font-mono text-white/40 arrow-nudge-parent">
-            {{ adminLocale === 'fr' ? 'Modifier' : 'Editar' }}
+            {{ locale === 'fr' ? 'Modifier' : 'Editar' }}
             <span class="arrow-nudge" aria-hidden="true">→</span>
           </p>
         </div>

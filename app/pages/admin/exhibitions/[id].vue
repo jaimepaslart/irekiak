@@ -1,23 +1,18 @@
 <script setup lang="ts">
 import type { Ref } from 'vue'
 import type { ExhibitionCard } from '#types/exhibition'
+import type { SupportedLocale } from '#types/common'
+import type { ExhibitionOverrideRow } from '~~/server/db/schema'
+import { splitParagraphs } from '~/utils/text'
 
-interface OverrideRow {
-  exhibitionId: string
-  artistName: string | null
-  titleEu: string | null
-  titleEs: string | null
-  titleFr: string | null
-  titleEn: string | null
-  descriptionEu: string | null
-  descriptionEs: string | null
-  descriptionFr: string | null
-  descriptionEn: string | null
-  externalUrl: string | null
-  imageFilename: string | null
+const LOCALES = ['eu', 'es', 'fr', 'en'] as const satisfies readonly SupportedLocale[]
+
+const TITLE_KEY: Record<SupportedLocale, 'titleEu' | 'titleEs' | 'titleFr' | 'titleEn'> = {
+  eu: 'titleEu', es: 'titleEs', fr: 'titleFr', en: 'titleEn',
 }
-
-type Locale = 'eu' | 'es' | 'fr' | 'en'
+const DESCRIPTION_KEY: Record<SupportedLocale, 'descriptionEu' | 'descriptionEs' | 'descriptionFr' | 'descriptionEn'> = {
+  eu: 'descriptionEu', es: 'descriptionEs', fr: 'descriptionFr', en: 'descriptionEn',
+}
 
 definePageMeta({ layout: 'admin', i18n: false })
 useSeoMeta({ title: 'Admin · Exhibition editor', robots: 'noindex, nofollow' })
@@ -29,12 +24,12 @@ const token = inject<Ref<string>>('adminToken')!
 
 const id = computed(() => String(route.params.id ?? ''))
 const card = ref<ExhibitionCard | null>(null)
-const override = ref<OverrideRow | null>(null)
+const override = ref<ExhibitionOverrideRow | null>(null)
 const loading = ref(true)
 const errorMessage = ref<string | null>(null)
 const saving = ref(false)
 const uploading = ref(false)
-const activeLocale = ref<Locale>('fr')
+const activeLocale = ref<SupportedLocale>('fr')
 const feedback = ref<string | null>(null)
 const fileInput = ref<HTMLInputElement | null>(null)
 const dragActive = ref(false)
@@ -69,22 +64,24 @@ async function load() {
   loading.value = true
   errorMessage.value = null
   try {
-    const res = await $fetch<{ card: ExhibitionCard, override: OverrideRow | null }>(
+    const res = await $fetch<{ card: ExhibitionCard, override: ExhibitionOverrideRow | null }>(
       `/api/admin/exhibitions/${id.value}`,
       { headers: { 'x-admin-token': token.value } },
     )
     card.value = res.card
     override.value = res.override
-    form.artistName = res.override?.artistName ?? res.card.artist
-    form.titleEu = res.override?.titleEu ?? res.card.title.eu
-    form.titleEs = res.override?.titleEs ?? res.card.title.es
-    form.titleFr = res.override?.titleFr ?? res.card.title.fr
-    form.titleEn = res.override?.titleEn ?? res.card.title.en
-    form.descriptionEu = res.override?.descriptionEu ?? res.card.description.eu
-    form.descriptionEs = res.override?.descriptionEs ?? res.card.description.es
-    form.descriptionFr = res.override?.descriptionFr ?? res.card.description.fr
-    form.descriptionEn = res.override?.descriptionEn ?? res.card.description.en
-    form.externalUrl = res.override?.externalUrl ?? res.card.externalUrl ?? ''
+    // Pre-fill from the override only: otherwise pressing Save without editing
+    // would persist the merged defaults as overrides.
+    form.artistName = res.override?.artistName ?? ''
+    form.titleEu = res.override?.titleEu ?? ''
+    form.titleEs = res.override?.titleEs ?? ''
+    form.titleFr = res.override?.titleFr ?? ''
+    form.titleEn = res.override?.titleEn ?? ''
+    form.descriptionEu = res.override?.descriptionEu ?? ''
+    form.descriptionEs = res.override?.descriptionEs ?? ''
+    form.descriptionFr = res.override?.descriptionFr ?? ''
+    form.descriptionEn = res.override?.descriptionEn ?? ''
+    form.externalUrl = res.override?.externalUrl ?? ''
   }
   catch (err: unknown) {
     errorMessage.value = (err as { statusMessage?: string })?.statusMessage ?? t('exhibitions.loadFailed')
@@ -185,23 +182,19 @@ function onDrop(e: DragEvent) {
   if (file) void uploadFile(file)
 }
 
-function restoreTitle() { if (card.value) form[`title${capitalise(activeLocale.value)}` as keyof Form] = card.value.title[activeLocale.value] }
-function restoreDescription() { if (card.value) form[`description${capitalise(activeLocale.value)}` as keyof Form] = card.value.description[activeLocale.value] }
-function restoreArtist() { if (card.value) form.artistName = card.value.artist }
-function restoreUrl() { if (card.value) form.externalUrl = card.value.externalUrl ?? '' }
+const titleKey = computed(() => TITLE_KEY[activeLocale.value])
+const descriptionKey = computed(() => DESCRIPTION_KEY[activeLocale.value])
 
-function capitalise<T extends string>(s: T): Capitalize<T> {
-  return (s.charAt(0).toUpperCase() + s.slice(1)) as Capitalize<T>
-}
+// Clearing a field to an empty string = "no override" = fallback to default.
+function restoreTitle() { form[titleKey.value] = '' }
+function restoreDescription() { form[descriptionKey.value] = '' }
+function restoreArtist() { form.artistName = '' }
+function restoreUrl() { form.externalUrl = '' }
 
-const titleKey = computed(() => `title${capitalise(activeLocale.value)}` as keyof Form)
-const descriptionKey = computed(() => `description${capitalise(activeLocale.value)}` as keyof Form)
-
-const previewParagraphs = computed(() => {
-  const raw = form[descriptionKey.value] || ''
-  return raw.split(/\n\n+/).map(p => p.trim()).filter(Boolean)
-})
-const previewTitle = computed(() => form[titleKey.value] || '')
+const previewTitle = computed(() => form[titleKey.value] || card.value?.title[activeLocale.value] || '')
+const previewArtist = computed(() => form.artistName || card.value?.artist || '')
+const previewUrl = computed(() => form.externalUrl || card.value?.externalUrl || '')
+const previewParagraphs = computed(() => splitParagraphs(form[descriptionKey.value] || card.value?.description[activeLocale.value]))
 </script>
 
 <template>
@@ -276,7 +269,7 @@ const previewTitle = computed(() => form[titleKey.value] || '')
           <div class="flex items-center justify-between mb-3">
             <div class="eyebrow">{{ t('exhibitions.fieldArtist') }}</div>
             <button
-              v-if="override?.artistName && override.artistName !== card.artist"
+              v-if="form.artistName"
               type="button"
               class="text-[10px] text-white/40 hover:text-gold font-mono uppercase tracking-[0.18em] transition-colors"
               @click="restoreArtist"
@@ -287,7 +280,8 @@ const previewTitle = computed(() => form[titleKey.value] || '')
           <input
             v-model="form.artistName"
             type="text"
-            class="w-full px-4 py-3 bg-white/[0.02] border border-white/10 rounded-sm text-white text-sm transition-colors focus:outline-none focus:border-[var(--color-accent-gold)] focus:bg-white/[0.04]"
+            :placeholder="card.artist"
+            class="w-full px-4 py-3 bg-white/[0.02] border border-white/10 rounded-sm text-white text-sm transition-colors focus:outline-none focus:border-[var(--color-accent-gold)] focus:bg-white/[0.04] placeholder:text-white/25"
           >
           <p class="text-[11px] text-white/35 mt-2 italic">{{ t('exhibitions.fieldArtistHelp') }}</p>
         </section>
@@ -296,7 +290,7 @@ const previewTitle = computed(() => form[titleKey.value] || '')
         <section>
           <div class="flex flex-wrap items-center gap-1 mb-5 border-b border-white/10">
             <button
-              v-for="loc in ['eu', 'es', 'fr', 'en'] as const"
+              v-for="loc in LOCALES"
               :key="loc"
               type="button"
               class="px-3 py-2 text-xs font-mono uppercase tracking-[0.18em] transition-colors border-b-2 -mb-px"
@@ -312,6 +306,7 @@ const previewTitle = computed(() => form[titleKey.value] || '')
               <div class="flex items-center justify-between mb-2">
                 <span class="eyebrow">{{ t('exhibitions.fieldTitle') }}</span>
                 <button
+                  v-if="form[titleKey]"
                   type="button"
                   class="text-[10px] text-white/40 hover:text-gold font-mono uppercase tracking-[0.18em] transition-colors"
                   @click="restoreTitle"
@@ -322,13 +317,15 @@ const previewTitle = computed(() => form[titleKey.value] || '')
               <input
                 v-model="form[titleKey]"
                 type="text"
-                class="w-full px-4 py-3 bg-white/[0.02] border border-white/10 rounded-sm text-white text-sm transition-colors focus:outline-none focus:border-[var(--color-accent-gold)] focus:bg-white/[0.04]"
+                :placeholder="card.title[activeLocale]"
+                class="w-full px-4 py-3 bg-white/[0.02] border border-white/10 rounded-sm text-white text-sm transition-colors focus:outline-none focus:border-[var(--color-accent-gold)] focus:bg-white/[0.04] placeholder:text-white/25"
               >
             </div>
             <div>
               <div class="flex items-center justify-between mb-2">
                 <span class="eyebrow">{{ t('exhibitions.fieldDescription') }}</span>
                 <button
+                  v-if="form[descriptionKey]"
                   type="button"
                   class="text-[10px] text-white/40 hover:text-gold font-mono uppercase tracking-[0.18em] transition-colors"
                   @click="restoreDescription"
@@ -339,7 +336,8 @@ const previewTitle = computed(() => form[titleKey.value] || '')
               <textarea
                 v-model="form[descriptionKey]"
                 rows="10"
-                class="w-full px-4 py-3 bg-white/[0.02] border border-white/10 rounded-sm text-white text-sm leading-relaxed transition-colors focus:outline-none focus:border-[var(--color-accent-gold)] focus:bg-white/[0.04] resize-y"
+                :placeholder="card.description[activeLocale]"
+                class="w-full px-4 py-3 bg-white/[0.02] border border-white/10 rounded-sm text-white text-sm leading-relaxed transition-colors focus:outline-none focus:border-[var(--color-accent-gold)] focus:bg-white/[0.04] resize-y placeholder:text-white/25"
               />
               <p class="text-[11px] text-white/35 mt-2 italic">{{ t('exhibitions.fieldDescriptionHelp') }}</p>
             </div>
@@ -351,7 +349,7 @@ const previewTitle = computed(() => form[titleKey.value] || '')
           <div class="flex items-center justify-between mb-2">
             <span class="eyebrow">{{ t('exhibitions.fieldExternalUrl') }}</span>
             <button
-              v-if="override?.externalUrl"
+              v-if="form.externalUrl"
               type="button"
               class="text-[10px] text-white/40 hover:text-gold font-mono uppercase tracking-[0.18em] transition-colors"
               @click="restoreUrl"
@@ -362,8 +360,8 @@ const previewTitle = computed(() => form[titleKey.value] || '')
           <input
             v-model="form.externalUrl"
             type="url"
-            placeholder="https://"
-            class="w-full px-4 py-3 bg-white/[0.02] border border-white/10 rounded-sm text-white text-sm transition-colors focus:outline-none focus:border-[var(--color-accent-gold)] focus:bg-white/[0.04]"
+            :placeholder="card.externalUrl || 'https://'"
+            class="w-full px-4 py-3 bg-white/[0.02] border border-white/10 rounded-sm text-white text-sm transition-colors focus:outline-none focus:border-[var(--color-accent-gold)] focus:bg-white/[0.04] placeholder:text-white/25"
           >
           <p class="text-[11px] text-white/35 mt-2 italic">{{ t('exhibitions.fieldExternalUrlHelp') }}</p>
         </section>
@@ -404,13 +402,13 @@ const previewTitle = computed(() => form[titleKey.value] || '')
               <h3 class="font-serif text-xl text-white mb-2" style="font-weight: 500;">
                 {{ previewTitle }}
               </h3>
-              <p class="text-gold font-medium text-sm mb-3">{{ form.artistName || card.artist }}</p>
+              <p class="text-gold font-medium text-sm mb-3">{{ previewArtist }}</p>
               <div class="space-y-2 text-sm text-white/70 leading-relaxed">
                 <p v-for="(p, i) in previewParagraphs" :key="i">{{ p }}</p>
                 <p v-if="previewParagraphs.length === 0" class="italic text-white/30">—</p>
               </div>
-              <p v-if="form.externalUrl" class="mt-4 text-xs text-gold font-mono uppercase tracking-[0.18em] truncate">
-                {{ form.externalUrl }}
+              <p v-if="previewUrl" class="mt-4 text-xs text-gold font-mono uppercase tracking-[0.18em] truncate">
+                {{ previewUrl }}
               </p>
             </div>
           </article>

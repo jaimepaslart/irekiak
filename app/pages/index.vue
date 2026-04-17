@@ -37,7 +37,7 @@ usePageSeo('home')
           {{ currentEdition.dateRangeLabel }}
         </p>
 
-        <div class="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up" style="animation-delay: 400ms">
+        <div class="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center animate-fade-in-up" style="animation-delay: 400ms">
           <NuxtLink
             :to="localePath('/galleries')"
             class="px-8 py-3 text-sm font-medium bg-white text-[var(--color-edition)]

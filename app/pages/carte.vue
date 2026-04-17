@@ -235,8 +235,9 @@ onBeforeUnmount(() => {
       </div>
     </aside>
 
-    <!-- Map area -->
-    <div class="flex-1 relative bg-edition-dark min-h-[60vh]">
+    <!-- Map area — isolate confines Leaflet pane z-indices (200-700) so they
+         don't punch through the site header's mobile nav overlay. -->
+    <div class="flex-1 relative isolate bg-edition-dark min-h-[60vh]">
       <ClientOnly>
         <div ref="mapContainer" class="absolute inset-0" />
         <template #fallback>

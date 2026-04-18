@@ -101,7 +101,13 @@
     "availableSlots": "Available time slots",
     "spots": "spots",
     "bookingComingSoon": "Booking will be available soon.",
-    "notFound": "Route not found."
+    "notFound": "Route not found.",
+    "heroEyebrow": "Tours",
+    "heroTitle": "Three walks",
+    "heroSubtitle": "Commented tours through the galleries. Free, up to 12 people per tour.",
+    "galleriesLabel": "Galleries visited",
+    "slotsLabel": "Slots",
+    "bookCta": "Book this tour"
   },
   "booking": {
     "title": "Guided tour registration",

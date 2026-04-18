@@ -101,7 +101,13 @@
     "availableSlots": "Créneaux disponibles",
     "spots": "places",
     "bookingComingSoon": "La réservation sera bientôt disponible.",
-    "notFound": "Itinéraire introuvable."
+    "notFound": "Itinéraire introuvable.",
+    "heroEyebrow": "Parcours",
+    "heroTitle": "Trois promenades",
+    "heroSubtitle": "Visites commentées à travers les galeries. Gratuit, max 12 personnes par parcours.",
+    "galleriesLabel": "Galeries visitées",
+    "slotsLabel": "Créneaux",
+    "bookCta": "Réserver ce parcours"
   },
   "booking": {
     "title": "Inscription à la visite guidée",

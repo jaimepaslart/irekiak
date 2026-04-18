@@ -101,7 +101,13 @@
     "availableSlots": "Franjas disponibles",
     "spots": "plazas",
     "bookingComingSoon": "La reserva estará disponible pronto.",
-    "notFound": "Recorrido no encontrado."
+    "notFound": "Recorrido no encontrado.",
+    "heroEyebrow": "Recorridos",
+    "heroTitle": "Tres paseos",
+    "heroSubtitle": "Visitas comentadas a través de las galerías. Gratuito, máximo 12 personas por recorrido.",
+    "galleriesLabel": "Galerías visitadas",
+    "slotsLabel": "Franjas",
+    "bookCta": "Reservar este recorrido"
   },
   "booking": {
     "title": "Inscripción a visita guiada",

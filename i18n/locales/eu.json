@@ -101,7 +101,13 @@
     "availableSlots": "Ordu tarte eskuragarriak",
     "spots": "leku",
     "bookingComingSoon": "Erreserba laster egongo da eskuragarri.",
-    "notFound": "Ibilbidea ez da aurkitu."
+    "notFound": "Ibilbidea ez da aurkitu.",
+    "heroEyebrow": "Ibilbideak",
+    "heroTitle": "Hiru ibilaldi",
+    "heroSubtitle": "Bisita komentatuak galerietan zehar. Dohainik, gehienez 12 pertsona ibilbideko.",
+    "galleriesLabel": "Bisitatutako galeriak",
+    "slotsLabel": "Ordu tarteak",
+    "bookCta": "Ibilbide hau erreserbatu"
   },
   "booking": {
     "title": "Bisita gidaturako erregistroa",

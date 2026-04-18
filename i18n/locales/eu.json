@@ -41,6 +41,25 @@
     "routesLabel": "Ibilbideak",
     "noEvents": "Egun honetan ez dago ekitaldirik."
   },
+  "about": {
+    "hero": {
+      "eyebrow": "Irekiaki buruz",
+      "title": "Irekiak",
+      "subtitle": "Arte garaikidearen ateak irekitzea Donostian."
+    },
+    "intro": {
+      "eyebrow": "2010etik",
+      "p1": "Irekiak Gallery Weekend arte garaikidearen ateak publiko zabalagoari irekitzeko helburuarekin jaio zen. 2010ean sortua, urteroko ekitaldi honek Donostiako galeria onenak biltzen ditu esperientzia artistiko berezi bat eskaintzeko. Gure helburua artista, galerista eta publikoaren arteko elkarrizketa sustatzea da, arte garaikidea bere alderdi guztietan estimatu eta uler daitekeen espazio bat sortuz.",
+      "p2": "Urteetan zehar, Irekiak Donostiako kultur egutegian erreferentziazko ekitaldi bihurtu da. Erakusketak, bisita gidatuak, lantegiak eta jarduera interaktiboak biltzen dituen egitarauarekin, arte garaikidea hiriko txoko guztietara eta haratago eramatea dugu helburu. Berrikuntza, hezkuntza eta irisgarritasuna dira gure konpromisoak, Irekiak edizio bakoitzean artearen eta sormenaren ospakizun bihurtuz."
+    },
+    "dagge": {
+      "eyebrow": "Antolatzailea",
+      "title": "DAGGE",
+      "subtitle": "Donostiako Arte Galerien Elkartea",
+      "p1": "Donostiako Arte Galerien Elkartea (DAGGE) 2021ean sortu zen, hirian arte garaikidea eta artistak galeria profesionalen bidez ezagutzera emango dituzten hainbat ekitaldi eta egintza bultzatzeko bokazioarekin.",
+      "membersLabel": "Kide diren galeriak"
+    }
+  },
   "seo": {
     "home": {
       "title": "Irekiak - Gallery Weekend Donostia / San Sebastián",

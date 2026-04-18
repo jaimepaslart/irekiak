@@ -41,6 +41,25 @@
     "routesLabel": "Recorridos",
     "noEvents": "No hay eventos este día."
   },
+  "about": {
+    "hero": {
+      "eyebrow": "Sobre Irekiak",
+      "title": "Irekiak",
+      "subtitle": "Abrir las puertas del arte contemporáneo en Donostia / San Sebastián."
+    },
+    "intro": {
+      "eyebrow": "Desde 2010",
+      "p1": "Irekiak Gallery Weekend nació con el objetivo de abrir las puertas del arte contemporáneo a un público más amplio. Fundado en 2010, este evento anual reúne a las mejores galerías de San Sebastián para ofrecer una experiencia artística única. Nuestro propósito es fomentar el diálogo entre artistas, galeristas y el público, creando un espacio donde el arte contemporáneo pueda ser apreciado y entendido en todas sus facetas.",
+      "p2": "A lo largo de los años, Irekiak ha crecido hasta convertirse en un evento de referencia en el calendario cultural de San Sebastián. Con una programación que incluye exposiciones, visitas guiadas, talleres y actividades interactivas, buscamos acercar el arte contemporáneo a todos los rincones de la ciudad y más allá. Nuestro compromiso es con la innovación, la educación y la accesibilidad, asegurando que cada edición de Irekiak sea una celebración del arte y la creatividad."
+    },
+    "dagge": {
+      "eyebrow": "Entidad organizadora",
+      "title": "DAGGE",
+      "subtitle": "Donostiako Arte Galerien Elkartea",
+      "p1": "La Asociación de Galerías de Arte de Donostia / San Sebastián (DAGGE) nace en 2021 con la vocación de impulsar distintos eventos y actos en la ciudad que den a conocer el arte contemporáneo y los artistas a través de galerías profesionales.",
+      "membersLabel": "Galerías asociadas"
+    }
+  },
   "seo": {
     "home": {
       "title": "Irekiak - Gallery Weekend Donostia / San Sebastián",

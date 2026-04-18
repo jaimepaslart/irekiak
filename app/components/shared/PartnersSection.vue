@@ -46,7 +46,7 @@ function byTier(tier: PartnerTier): Partner[] {
             v-if="p.logo"
             :src="p.logo"
             :alt="p.name"
-            class="h-9 md:h-12 w-auto object-contain grayscale brightness-0 invert opacity-40 hover:opacity-70 transition-opacity duration-300"
+            class="h-12 md:h-16 w-auto object-contain grayscale brightness-0 invert opacity-40 hover:opacity-70 transition-opacity duration-300"
           >
           <span
             v-else
@@ -84,7 +84,7 @@ function byTier(tier: PartnerTier): Partner[] {
             v-if="p.logo"
             :src="p.logo"
             :alt="p.name"
-            class="h-7 md:h-9 w-auto object-contain grayscale brightness-0 invert opacity-40 hover:opacity-70 transition-opacity duration-300"
+            class="h-10 md:h-12 w-auto object-contain grayscale brightness-0 invert opacity-40 hover:opacity-70 transition-opacity duration-300"
           >
           <span
             v-else

@@ -280,10 +280,10 @@ onBeforeUnmount(() => {
       </div>
     </section>
 
-    <!-- Colophon : About + Contact + Partners -->
+    <!-- Colophon : About + Contact -->
     <div class="py-20 md:py-24 px-6 md:px-12 border-t border-white/10">
       <div class="max-w-[1400px] mx-auto grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-16">
-        <div class="md:col-span-5 reveal-on-scroll">
+        <div class="md:col-span-6 reveal-on-scroll">
           <p class="eyebrow mb-3">Irekiak</p>
           <p class="font-serif text-lg text-white/85 leading-relaxed">
             {{ t('home.aboutShort') }}
@@ -295,7 +295,7 @@ onBeforeUnmount(() => {
             {{ t('common.learnMore') }} <span class="arrow-nudge">→</span>
           </NuxtLink>
         </div>
-        <div class="md:col-span-4 md:col-start-7 reveal-on-scroll">
+        <div class="md:col-span-5 md:col-start-8 reveal-on-scroll">
           <p class="eyebrow mb-3">Contact</p>
           <dl class="space-y-3 text-sm">
             <div class="flex flex-col">
@@ -320,9 +320,10 @@ onBeforeUnmount(() => {
             </div>
           </dl>
         </div>
-        <div class="md:col-span-3 reveal-on-scroll">
-          <SharedPartnersSection layout="stack" />
-        </div>
+      </div>
+
+      <div class="max-w-[1200px] mx-auto mt-20 md:mt-28 reveal-on-scroll">
+        <SharedPartnersSection layout="row" />
       </div>
     </div>
   </div>

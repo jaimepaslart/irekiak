@@ -321,7 +321,6 @@ onBeforeUnmount(() => {
           </dl>
         </div>
         <div class="md:col-span-3 reveal-on-scroll">
-          <p class="eyebrow mb-3">{{ t('home.partners') }}</p>
           <SharedPartnersSection layout="stack" />
         </div>
       </div>

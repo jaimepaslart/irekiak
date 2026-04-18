@@ -20,7 +20,9 @@
     "exhibitionsEyebrow": "Aurtengo erakusketak",
     "toursSubtitle": "Hiru ibilbide komisariatuak, doakoak eta itzulpen banakakoak, galerietatik zehar gidatzen zaituztenak. Aurrez erreserbatzea gomendagarria da.",
     "aboutShort": "Irekiak Gallery Weekend Donostiako arte galeria astebururaren ekitaldi ofiziala da. 2010ean sortua, DAGGE, Tabakalera eta DonostiKultura-k antolatua.",
-    "partners": "Antolatzaileak"
+    "partners": "Antolatzaileak",
+    "heroCarouselLabel": "2026 edizioko erakusketak",
+    "heroCarouselGoTo": "Erakusketa {n} erakutsi — {name}"
   },
   "seo": {
     "home": {

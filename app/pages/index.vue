@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { tourRoutes } from '@data/tours'
 import { currentEdition } from '@data/editions'
+import type { ExhibitionCard } from '#types/exhibition'
 
 const { t } = useI18n()
 const localePath = useLocalePath()
@@ -8,6 +9,55 @@ const tr = useTranslated()
 
 useScrollReveal()
 usePageSeo('home')
+
+const { data: heroCards } = await useAsyncData('exhibitions-hero', () =>
+  $fetch<ExhibitionCard[]>('/api/exhibitions'),
+{ default: () => [] as ExhibitionCard[] },
+)
+
+const currentIndex = ref(0)
+const currentCard = computed(() => heroCards.value?.[currentIndex.value] ?? null)
+
+let timer: ReturnType<typeof setInterval> | null = null
+const CYCLE_MS = 6000
+
+function next() {
+  if (!heroCards.value?.length) return
+  currentIndex.value = (currentIndex.value + 1) % heroCards.value.length
+}
+
+function startTimer() {
+  if (timer) return
+  if (!heroCards.value?.length) return
+  timer = setInterval(next, CYCLE_MS)
+}
+
+function stopTimer() {
+  if (timer) { clearInterval(timer); timer = null }
+}
+
+function goTo(i: number) {
+  currentIndex.value = i
+  stopTimer()
+  startTimer()
+}
+
+let visibilityHandler: (() => void) | null = null
+
+onMounted(() => {
+  if (typeof window === 'undefined') return
+  const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+  // No autoplay when the user prefers reduced motion; dots stay clickable.
+  if (mq.matches) return
+  startTimer()
+  visibilityHandler = () => { document.hidden ? stopTimer() : startTimer() }
+  document.addEventListener('visibilitychange', visibilityHandler)
+})
+
+onBeforeUnmount(() => {
+  stopTimer()
+  if (visibilityHandler) document.removeEventListener('visibilitychange', visibilityHandler)
+})
 </script>
 
 <template>
@@ -54,8 +104,18 @@ usePageSeo('home')
         </div>
       </div>
 
-      <div class="lg:col-span-7 order-1 lg:order-2 relative overflow-hidden bg-edition-dark">
+      <div
+        class="lg:col-span-7 order-1 lg:order-2 relative overflow-hidden bg-edition-dark isolate min-h-[50vh] lg:min-h-0"
+        role="region"
+        :aria-label="t('home.heroCarouselLabel')"
+        @mouseenter="stopTimer"
+        @mouseleave="startTimer"
+        @focusin="stopTimer"
+        @focusout="startTimer"
+      >
+        <!-- Fallback static image if API returned nothing (zero-regression guarantee) -->
         <NuxtImg
+          v-if="heroCards.length === 0"
           src="/images/exhibitions/sugerencias-prusianas-monologo-prusiano-i.jpg"
           alt="Rafa Satrústegui — Sugerencias prusianas"
           format="webp"
@@ -63,10 +123,51 @@ usePageSeo('home')
           loading="eager"
           class="absolute inset-0 w-full h-full object-cover img-fade-in"
         />
-        <div class="absolute inset-0 bg-gradient-to-t from-[var(--color-edition)]/40 via-transparent to-transparent" aria-hidden="true" />
-        <p class="absolute bottom-6 left-6 right-6 text-[10px] font-mono uppercase tracking-[0.22em] text-white/70 max-w-md">
-          Rafa Satrústegui · <span class="italic normal-case tracking-normal font-serif text-white/85">Sugerencias prusianas</span> · Arteko
+
+        <!-- Cross-faded stack: all 6 mount, switch via opacity only (no CLS) -->
+        <div
+          v-for="(card, i) in heroCards"
+          :key="card.id"
+          class="absolute inset-0 transition-opacity duration-[1200ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
+          :class="i === currentIndex ? 'opacity-100' : 'opacity-0'"
+          aria-hidden="i === currentIndex ? 'false' : 'true'"
+        >
+          <NuxtImg
+            :src="card.imageUrl"
+            :alt="`${card.artist} — ${tr(card.title)}`"
+            format="webp"
+            sizes="sm:100vw md:100vw lg:58vw"
+            :loading="i === 0 ? 'eager' : 'lazy'"
+            class="absolute inset-0 w-full h-full object-cover"
+          />
+        </div>
+
+        <div class="absolute inset-0 bg-gradient-to-t from-[var(--color-edition)]/60 via-transparent to-transparent pointer-events-none" aria-hidden="true" />
+
+        <p
+          class="absolute bottom-6 left-6 right-28 md:right-36 text-[10px] font-mono uppercase tracking-[0.22em] text-white/85 max-w-md transition-opacity duration-500"
+          aria-live="polite"
+        >
+          <template v-if="currentCard">
+            {{ currentCard.artist }} · <span class="normal-case tracking-normal text-white">{{ tr(currentCard.title) }}</span> · {{ currentCard.galleryName }}
+          </template>
         </p>
+
+        <div
+          v-if="heroCards.length > 1"
+          class="absolute bottom-6 right-6 flex items-center gap-2.5"
+        >
+          <button
+            v-for="(card, i) in heroCards"
+            :key="card.id"
+            type="button"
+            :aria-label="t('home.heroCarouselGoTo', { n: i + 1, name: card.galleryName })"
+            :aria-current="i === currentIndex"
+            class="block w-2 h-2 rounded-full transition-all duration-300 focus-gold"
+            :class="i === currentIndex ? 'bg-[var(--color-accent-gold)] scale-150' : 'bg-white/30 hover:bg-white/60'"
+            @click="goTo(i)"
+          />
+        </div>
       </div>
     </section>
 

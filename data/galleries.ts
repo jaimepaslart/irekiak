@@ -21,7 +21,7 @@ export const galleries: Gallery[] = [
       fr: 'Vendredi : 17h30-21h00 | Samedi-Dimanche : 11h00-19h00',
       en: 'Friday: 5:30 PM - 9:00 PM | Saturday-Sunday: 11:00 AM - 7:00 PM',
     },
-    image: '/images/exhibitions/zatixak.jpg',
+    image: '/images/exhibitions/sugerencias-prusianas-monologo-prusiano-i.jpg',
     contact: {
       // TODO: remplacer par le vrai email de la galerie quand communiqué
       email: 'bihrpaul@gmail.com',
@@ -79,7 +79,7 @@ export const galleries: Gallery[] = [
       fr: 'Vendredi : 17h30-21h00 | Samedi-Dimanche : 11h00-19h00',
       en: 'Friday: 5:30 PM - 9:00 PM | Saturday-Sunday: 11:00 AM - 7:00 PM',
     },
-    image: '/images/exhibitions/cibrian.jpg',
+    image: '/images/exhibitions/ruoxi-jin-telepathic-sneeze.jpg',
     contact: {
       // TODO: remplacer par le vrai email de la galerie quand communiqué
       email: 'bihrpaul@gmail.com',
@@ -108,7 +108,7 @@ export const galleries: Gallery[] = [
       fr: 'Vendredi : 17h30-21h00 | Samedi-Dimanche : 11h00-19h00',
       en: 'Friday: 5:30 PM - 9:00 PM | Saturday-Sunday: 11:00 AM - 7:00 PM',
     },
-    image: '/images/exhibitions/barne-begirada.jpg',
+    image: '/images/exhibitions/mikel-lertxundi-natura-harmonia-poesia.jpg',
     contact: {
       // TODO: remplacer par le vrai email de la galerie quand communiqué
       email: 'bihrpaul@gmail.com',

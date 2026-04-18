@@ -7,8 +7,13 @@ const localePath = useLocalePath()
 usePageSeo('about')
 useScrollReveal()
 
-const daggeMembers = ['Arteko', 'Arteztu', 'Cibrián', 'Ekain', 'Villa Magdalena']
-  .map(name => ({ name, slug: galleries.find(g => g.name === name)?.slug }))
+const daggeMembers = [
+  { name: 'Arteko' },
+  { name: 'Arteztu' },
+  { name: 'Cibrián' },
+  { name: 'Ekain' },
+  { name: 'Villa Magdalena', website: 'https://www.villamagdalena33.com/' },
+].map(m => ({ ...m, slug: galleries.find(g => g.name === m.name)?.slug }))
 </script>
 
 <template>
@@ -90,6 +95,22 @@ const daggeMembers = ['Arteko', 'Arteztu', 'Cibrián', 'Ekain', 'Villa Magdalena
                       aria-hidden="true"
                     />
                   </NuxtLink>
+                  <a
+                    v-else-if="member.website"
+                    :href="member.website"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="group inline-flex items-center gap-1.5 px-3 py-2 min-h-[44px] text-sm text-white/80
+                           border border-white/15 rounded-full transition-colors
+                           hover:border-gold hover:text-white scale-press focus-gold"
+                  >
+                    {{ member.name }}
+                    <Icon
+                      name="lucide:arrow-up-right"
+                      class="w-3 h-3 text-white/40 group-hover:text-white transition-colors"
+                      aria-hidden="true"
+                    />
+                  </a>
                   <span
                     v-else
                     class="inline-flex items-center px-3 py-2 min-h-[44px] text-sm text-white/50

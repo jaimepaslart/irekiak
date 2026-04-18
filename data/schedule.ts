@@ -38,8 +38,8 @@ export const schedule: ScheduleEvent[] = [
   {
     id: 'evt-sat-tour-morning',
     day: 'saturday',
-    startTime: '11:00',
-    endTime: '12:30',
+    startTime: '11:30',
+    endTime: '13:00',
     type: 'guided-tour',
     title: {
       eu: 'Bisita gidatuak (goizekoak)',
@@ -48,10 +48,10 @@ export const schedule: ScheduleEvent[] = [
       en: 'Guided tours (morning)',
     },
     description: {
-      eu: 'Bisita gidatuak hiru ibilbidetan: Gros, Parte Zaharra / Antigua, eta Egia.',
-      es: 'Visitas guiadas en tres rutas: Gros, Parte Vieja / Antigua y Egia.',
-      fr: 'Visites guidées sur trois itinéraires : Gros, Vieille Ville / Antigua et Egia.',
-      en: 'Guided tours on three routes: Gros, Old Town / Antigua and Egia.',
+      eu: 'Bi ibilbide aukeran, bata euskaraz, bestea gaztelaniaz.',
+      es: 'Dos recorridos a elegir, uno en euskera, otro en castellano.',
+      fr: 'Deux parcours au choix, un en basque, un en espagnol.',
+      en: 'Two walks to choose from — one in Basque, one in Spanish.',
     },
     location: {
       eu: 'Ibilbide desberdinak',
@@ -78,10 +78,10 @@ export const schedule: ScheduleEvent[] = [
       en: 'Guided tours (afternoon)',
     },
     description: {
-      eu: 'Arratsaldeko bisita gidatuak hiru ibilbidetan.',
-      es: 'Visitas guiadas vespertinas en tres rutas.',
-      fr: 'Visites guidées de l\'après-midi sur trois itinéraires.',
-      en: 'Afternoon guided tours on three routes.',
+      eu: 'Bi ibilbide aukeran, bata euskaraz, bestea gaztelaniaz.',
+      es: 'Dos recorridos a elegir, uno en euskera, otro en castellano.',
+      fr: 'Deux parcours au choix, un en basque, un en espagnol.',
+      en: 'Two walks to choose from — one in Basque, one in Spanish.',
     },
     location: {
       eu: 'Ibilbide desberdinak',
@@ -98,8 +98,8 @@ export const schedule: ScheduleEvent[] = [
   {
     id: 'evt-sun-tour-morning',
     day: 'sunday',
-    startTime: '11:00',
-    endTime: '12:30',
+    startTime: '11:30',
+    endTime: '13:00',
     type: 'guided-tour',
     title: {
       eu: 'Bisita gidatuak (igandea)',
@@ -108,10 +108,10 @@ export const schedule: ScheduleEvent[] = [
       en: 'Guided tours (Sunday)',
     },
     description: {
-      eu: 'Igandeko bisita gidatuak hiru ibilbidetan.',
-      es: 'Visitas guiadas dominicales en tres rutas.',
-      fr: 'Visites guidées du dimanche sur trois itinéraires.',
-      en: 'Sunday guided tours on three routes.',
+      eu: 'Asteburuko azken bisitak. Bi ibilbide aukeran.',
+      es: 'Las últimas visitas del fin de semana. Dos recorridos a elegir.',
+      fr: 'Les dernières visites du weekend. Deux parcours au choix.',
+      en: 'The last tours of the weekend. Two walks to choose from.',
     },
     location: {
       eu: 'Ibilbide desberdinak',

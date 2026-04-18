@@ -24,6 +24,23 @@
     "heroCarouselLabel": "2026 edizioko erakusketak",
     "heroCarouselGoTo": "Erakusketa {n} erakutsi — {name}"
   },
+  "programme": {
+    "title": "Asteburua",
+    "subtitle": "3 egun, 4 une, sarrera librea.",
+    "days": {
+      "friday":   { "eyebrow": "OST 29 MAI", "title": "Inaugurazioa",   "subtitle": "Galeria guztiak aldi berean zabaltzen dira." },
+      "saturday": { "eyebrow": "LAR 30 MAI", "title": "Ibilaldi handia", "subtitle": "Bisita gidatu bi aukeran." },
+      "sunday":   { "eyebrow": "IGA 31 MAI", "title": "Azken arnasa",    "subtitle": "Goiz bat ibilbidea ixteko." }
+    },
+    "badges": { "free": "Dohainik", "booking": "Izen-ematea" },
+    "cta": {
+      "viewGalleries": "Galeriak ikusi",
+      "chooseVisite":  "Bisita bat aukeratu"
+    },
+    "routesLabel": "Ibilbideak",
+    "language": { "eu": "Euskaraz", "es": "Gaztelaniaz" },
+    "noEvents": "Egun honetan ez dago ekitaldirik."
+  },
   "seo": {
     "home": {
       "title": "Irekiak - Gallery Weekend Donostia / San Sebastián",

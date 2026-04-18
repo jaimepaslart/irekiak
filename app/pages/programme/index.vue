@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import type { ScheduleEvent, EventDay } from '#types/schedule'
+import type { TourRoute, TourSlot } from '#types/tour'
 import { schedule } from '@data/schedule'
 import { currentEdition } from '@data/editions'
+import { tourRoutes, tourSlots } from '@data/tours'
 
 const { t } = useI18n()
 const localePath = useLocalePath()
@@ -10,15 +12,6 @@ const tr = useTranslated()
 usePageSeo('programme')
 useScrollReveal()
 
-// Derive tabs from the current edition (only days present in the edition).
-const dayLabels = computed(() =>
-  currentEdition.days.map(d => ({
-    day: d.id as EventDay,
-    label: tr(d.label),
-    date: d.dateShort,
-  })),
-)
-
 const eventsByDay = computed(() => {
   const grouped: Record<EventDay, ScheduleEvent[]> = {
     thursday: [],
@@ -26,7 +19,7 @@ const eventsByDay = computed(() => {
     saturday: [],
     sunday: [],
   }
-  for (const event of schedule) {
+  for (const event of schedule as ScheduleEvent[]) {
     grouped[event.day].push(event)
   }
   for (const day of Object.keys(grouped) as EventDay[]) {
@@ -35,108 +28,198 @@ const eventsByDay = computed(() => {
   return grouped
 })
 
-const activeDay = ref<EventDay>(
-  dayLabels.value.find(d => eventsByDay.value[d.day].length > 0)?.day ?? currentEdition.days[0]!.id as EventDay,
+const visibleDays = computed(() =>
+  currentEdition.days.filter(d => eventsByDay.value[d.id as EventDay].length > 0),
 )
 
-const activeEvents = computed(() => eventsByDay.value[activeDay.value])
+function dayNumber(dateShort: string): string {
+  return dateShort.split('.')[0] ?? ''
+}
 
 function eventIcon(type: string): string {
   switch (type) {
-    case 'opening': return '\u2605'
-    case 'guided-tour': return '\u25CE'
-    case 'special': return '\u25B6'
-    default: return '\u25CF'
+    case 'opening': return 'lucide:sparkles'
+    case 'guided-tour': return 'lucide:route'
+    case 'special': return 'lucide:star'
+    default: return 'lucide:circle'
   }
+}
+
+interface EventSlot {
+  id: string
+  route: TourRoute
+  language: TourSlot['language']
+}
+
+function slotsForEvent(event: ScheduleEvent): EventSlot[] {
+  const day = currentEdition.days.find(d => d.id === event.day)
+  if (!day) return []
+  const routes = tourRoutes as TourRoute[]
+  return (tourSlots as TourSlot[])
+    .filter(s => s.date === day.date && s.startTime === event.startTime)
+    .map((s) => {
+      const route = routes.find(r => r.id === s.routeId)
+      return route ? { id: s.id, route, language: s.language } : null
+    })
+    .filter((x): x is EventSlot => x !== null)
+}
+
+function ctaFor(event: ScheduleEvent): { label: string, to: string } {
+  if (event.type === 'guided-tour') {
+    return { label: t('programme.cta.chooseVisite'), to: localePath('/visites') }
+  }
+  return { label: t('programme.cta.viewGalleries'), to: localePath('/galleries') }
 }
 </script>
 
 <template>
-  <div class="max-w-[1200px] mx-auto px-6 md:px-12 py-24 pt-28">
-    <!-- Title -->
-    <div class="reveal-on-scroll mb-16 text-center">
-      <p class="text-xs uppercase tracking-[0.2em] text-white/40 font-mono mb-3">
-        {{ currentEdition.dateRangeLabelShort }}
+  <div class="max-w-[1100px] mx-auto px-6 md:px-12 py-24 pt-28">
+    <!-- Hero -->
+    <header class="reveal-on-scroll text-center mb-20 md:mb-28">
+      <p class="eyebrow mb-4">{{ currentEdition.dateRangeLabelShort }}</p>
+      <h1 class="display-headline text-4xl md:text-6xl lg:text-7xl text-white mb-5">
+        {{ t('programme.title') }}
+      </h1>
+      <p class="display-title text-lg md:text-xl text-white/60 font-light">
+        {{ t('programme.subtitle') }}
       </p>
-      <h1>{{ t('nav.programme') }}</h1>
-    </div>
+    </header>
 
-    <!-- Day tabs -->
-    <div class="reveal-on-scroll stagger-1 flex flex-wrap gap-2 mb-12">
-      <button
-        v-for="d in dayLabels"
-        :key="d.day"
-        :class="[
-          'px-5 py-2.5 text-sm font-medium transition-all duration-200 rounded-sm cursor-pointer',
-          activeDay === d.day
-            ? 'bg-white text-[var(--color-edition)]'
-            : 'border border-white/15 text-white/60 hover:text-white hover:border-white/30',
-        ]"
-        @click="activeDay = d.day"
+    <!-- Day blocks -->
+    <div class="space-y-16 md:space-y-24">
+      <section
+        v-for="(day, dayIdx) in visibleDays"
+        :key="day.id"
+        class="reveal-on-scroll pt-12 md:pt-16 border-t border-gold-soft first:border-t-0 first:pt-0"
+        :class="`stagger-${Math.min(dayIdx + 1, 3)}`"
       >
-        <span class="font-mono font-bold">{{ d.label }}</span>
-        <span class="ml-2 text-xs opacity-60">({{ d.date }})</span>
-      </button>
-    </div>
+        <p class="eyebrow mb-8 md:mb-12">
+          {{ t(`programme.days.${day.id}.eyebrow`) }}
+        </p>
 
-    <!-- Timeline -->
-    <div class="reveal-on-scroll stagger-2 space-y-4">
-      <div
-        v-for="event in activeEvents"
-        :key="event.id"
-        class="group flex gap-6 md:gap-10 p-6 border border-white/15 rounded-sm
-               transition-all duration-300 hover:bg-white/5 hover:border-white/25"
-      >
-        <!-- Time (left) -->
-        <div class="shrink-0 w-20 md:w-24 pt-0.5">
-          <p class="font-mono font-bold text-white text-lg">{{ event.startTime }}</p>
-          <p class="font-mono text-white/40 text-xs">{{ event.endTime }}</p>
-        </div>
-
-        <!-- Content (right) -->
-        <div class="flex-1 min-w-0">
-          <div class="flex flex-wrap items-start gap-3 mb-2">
-            <!-- Type icon -->
-            <span class="text-white/50 text-sm mt-0.5">{{ eventIcon(event.type) }}</span>
-
-            <h3 class="text-lg font-semibold text-white flex-1">
-              {{ tr(event.title) }}
-            </h3>
-
-            <!-- Badges -->
-            <div class="flex flex-wrap gap-2 shrink-0">
-              <span
-                v-if="event.isFree"
-                class="text-xs font-medium px-2.5 py-1 rounded-sm bg-emerald-500/20 text-emerald-300"
-              >
-                Gratuito
-              </span>
-              <span
-                v-if="event.requiresBooking"
-                class="text-xs font-medium px-2.5 py-1 rounded-sm bg-white/10 text-white/70"
-              >
-                {{ t('programme.booking') || 'Inscripci\u00F3n' }}
-              </span>
-            </div>
+        <div class="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-6 md:gap-12">
+          <!-- Ghost numeral — desktop only -->
+          <div
+            aria-hidden="true"
+            class="hidden md:block font-extralight text-[140px] leading-none text-white/10 tabular-nums select-none pointer-events-none -mt-4"
+          >
+            {{ dayNumber(day.dateShort) }}
           </div>
 
-          <p class="text-sm text-white/50 mb-3 font-mono">
-            {{ tr(event.location) }}
-            <span v-if="event.address" class="text-white/30"> &middot; {{ event.address }}</span>
-          </p>
+          <div>
+            <h2 class="display-headline text-3xl md:text-5xl text-white mb-3">
+              {{ t(`programme.days.${day.id}.title`) }}
+            </h2>
+            <p class="display-title text-base md:text-lg text-white/60 font-light mb-8 md:mb-10 max-w-[560px]">
+              {{ t(`programme.days.${day.id}.subtitle`) }}
+            </p>
 
-          <p class="text-white/70 text-sm leading-relaxed">
-            {{ tr(event.description) }}
-          </p>
+            <div class="space-y-4 md:space-y-5">
+              <article
+                v-for="event in eventsByDay[day.id as EventDay]"
+                :key="event.id"
+                class="p-5 md:p-7 border border-white/15 rounded-sm bg-white/[0.015]
+                       transition-all duration-300 hover:border-gold hover:-translate-y-0.5"
+              >
+                <!-- Time range header + badges -->
+                <div class="flex flex-wrap items-start justify-between gap-4 mb-5">
+                  <div class="flex items-baseline gap-3">
+                    <Icon
+                      :name="eventIcon(event.type)"
+                      class="w-5 h-5 text-gold shrink-0 translate-y-0.5"
+                      aria-hidden="true"
+                    />
+                    <span class="font-mono font-bold text-xl md:text-2xl text-white tabular-nums">
+                      {{ event.startTime }}
+                      <span class="text-white/40 mx-0.5">—</span>
+                      {{ event.endTime }}
+                    </span>
+                  </div>
+
+                  <div class="flex flex-wrap gap-2 shrink-0 justify-end">
+                    <span
+                      v-if="event.isFree"
+                      class="text-[11px] font-medium uppercase tracking-[0.15em] px-2.5 py-1 rounded-sm bg-gold-soft text-gold"
+                    >
+                      {{ t('programme.badges.free') }}
+                    </span>
+                    <span
+                      v-if="event.requiresBooking"
+                      class="text-[11px] font-medium uppercase tracking-[0.15em] px-2.5 py-1 rounded-sm bg-white/10 text-white/80"
+                    >
+                      {{ t('programme.badges.booking') }}
+                    </span>
+                  </div>
+                </div>
+
+                <h3 class="text-lg md:text-xl font-medium text-white mb-2">
+                  {{ tr(event.title) }}
+                </h3>
+
+                <p
+                  v-if="event.type !== 'guided-tour'"
+                  class="text-sm text-white/50 mb-3"
+                >
+                  {{ tr(event.location) }}
+                </p>
+
+                <p class="text-white/70 text-sm md:text-base leading-relaxed font-light mb-6 max-w-[560px]">
+                  {{ tr(event.description) }}
+                </p>
+
+                <!-- Routes chips (guided-tour only) -->
+                <div v-if="event.type === 'guided-tour' && slotsForEvent(event).length">
+                  <p class="eyebrow mb-3">{{ t('programme.routesLabel') }}</p>
+                  <div class="space-y-2">
+                    <NuxtLink
+                      v-for="slot in slotsForEvent(event)"
+                      :key="slot.id"
+                      :to="localePath(`/visites/${slot.route.slug}`)"
+                      class="group flex items-start gap-3 md:gap-4 p-3 md:p-4 border border-white/15 rounded-sm
+                             transition-all hover:border-gold hover:bg-white/[0.025] scale-press focus-gold"
+                    >
+                      <span
+                        class="w-2.5 h-2.5 rounded-full shrink-0 mt-1.5"
+                        :style="{ backgroundColor: slot.route.color }"
+                        aria-hidden="true"
+                      />
+                      <div class="flex-1 min-w-0">
+                        <div class="text-white text-sm md:text-base font-medium">
+                          {{ tr(slot.route.name) }}
+                        </div>
+                        <div class="text-white/50 text-[11px] md:text-xs font-mono uppercase tracking-[0.12em] mt-1 tabular-nums">
+                          {{ t(`programme.language.${slot.language}`) }}
+                          <span class="mx-1.5 opacity-60">·</span>
+                          {{ tr(slot.route.duration) }}
+                        </div>
+                      </div>
+                      <Icon
+                        name="lucide:arrow-right"
+                        class="w-4 h-4 text-white/40 group-hover:text-white shrink-0 mt-1 arrow-nudge transition-colors"
+                        aria-hidden="true"
+                      />
+                    </NuxtLink>
+                  </div>
+                </div>
+
+                <!-- Fallback CTA: opening events, or guided-tour with no matching routes -->
+                <NuxtLink
+                  v-else
+                  :to="ctaFor(event).to"
+                  class="inline-flex items-center gap-2 text-sm font-medium text-white border-b border-white/30 pb-0.5
+                         transition-colors hover:border-white scale-press focus-gold min-h-[44px] py-2"
+                >
+                  {{ ctaFor(event).label }}
+                  <Icon name="lucide:arrow-right" class="w-4 h-4 arrow-nudge" aria-hidden="true" />
+                </NuxtLink>
+              </article>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
 
-      <!-- Empty state -->
-      <div
-        v-if="activeEvents.length === 0"
-        class="text-center py-16"
-      >
-        <p class="text-white/40 text-sm">{{ t('programme.noEvents') || 'Ez dago ekitaldirik egun honetan' }}</p>
+      <div v-if="visibleDays.length === 0" class="reveal-on-scroll text-center py-20">
+        <p class="text-white/40 text-sm">{{ t('programme.noEvents') }}</p>
       </div>
     </div>
   </div>

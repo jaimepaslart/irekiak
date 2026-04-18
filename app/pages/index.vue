@@ -46,9 +46,10 @@ let visibilityHandler: (() => void) | null = null
 
 onMounted(() => {
   if (typeof window === 'undefined') return
-  const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
-  // No autoplay when the user prefers reduced motion; dots stay clickable.
-  if (mq.matches) return
+  // Carousel is hidden below lg (≥1024px), so nothing to animate there.
+  if (!window.matchMedia('(min-width: 1024px)').matches) return
+  // Honour prefers-reduced-motion: dots stay clickable but no autoplay.
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
   startTimer()
   visibilityHandler = () => { document.hidden ? stopTimer() : startTimer() }
   document.addEventListener('visibilitychange', visibilityHandler)
@@ -105,7 +106,7 @@ onBeforeUnmount(() => {
       </div>
 
       <div
-        class="lg:col-span-7 relative overflow-hidden bg-edition-dark isolate min-h-[50vh] lg:min-h-0"
+        class="hidden lg:block lg:col-span-7 relative overflow-hidden bg-edition-dark isolate"
         role="region"
         :aria-label="t('home.heroCarouselLabel')"
         @mouseenter="stopTimer"

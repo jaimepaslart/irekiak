@@ -69,7 +69,6 @@ const items = computed<PaletteItem[]>(() => {
     { id: 'nav-settings', label: t('nav.settings'), sublabel: nav, icon: '⚙', shortcut: 's', action: () => go('/admin/settings') },
     { id: 'nav-audit', label: t('nav.audit'), sublabel: nav, icon: '📜', shortcut: 'a', action: () => go('/admin/audit') },
     { id: 'nav-new-booking', label: t('nav.newBooking'), sublabel: nav, icon: '➕', shortcut: 'c', action: () => go('/admin/bookings/new') },
-    { id: 'action-new-booking', label: t('bookings.newTitle'), sublabel: action, icon: '➕', action: () => go('/admin/bookings/new') },
     { id: 'action-toggle-locale', label: locale.value === 'fr' ? 'Español' : 'Français', sublabel: action, icon: '🌐', action: () => { setLocale(locale.value === 'fr' ? 'es' : 'fr'); close() } },
     { id: 'action-help', label: t('shortcuts.title'), sublabel: action, icon: '?', shortcut: '?', action: () => { close(); window.dispatchEvent(new CustomEvent('admin:open-help')) } },
     { id: 'action-logout', label: t('auth.logout'), sublabel: action, icon: '⎋', action: () => { close(); adminLogout?.() } },

@@ -162,5 +162,12 @@
     "locating": "Recherche…",
     "locateError": "Localisation impossible.",
     "directions": "Y aller"
+  },
+  "ticker": {
+    "ariaLabel": "Horaires et informations Irekiak 2026",
+    "friday": "VEN 29 MAI · 17h30 → 21h00 INAUGURATION",
+    "saturday": "SAM 30 MAI · 11h00 → 19h00",
+    "sunday": "DIM 31 MAI · 11h00 → 14h00",
+    "tagline": "6 GALERIES · 3 PARCOURS · ENTRÉE LIBRE"
   }
 }

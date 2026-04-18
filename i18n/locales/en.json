@@ -162,5 +162,12 @@
     "locating": "Locating…",
     "locateError": "Unable to locate you.",
     "directions": "Directions"
+  },
+  "ticker": {
+    "ariaLabel": "Irekiak 2026 opening hours and info",
+    "friday": "FRI 29 MAY · 17:30 → 21:00 OPENING",
+    "saturday": "SAT 30 MAY · 11:00 → 19:00",
+    "sunday": "SUN 31 MAY · 11:00 → 14:00",
+    "tagline": "6 GALLERIES · 3 TOURS · FREE ENTRY"
   }
 }

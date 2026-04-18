@@ -162,5 +162,12 @@
     "locating": "Bilatzen…",
     "locateError": "Kokapena eskuratu ezin izan da.",
     "directions": "Joan"
+  },
+  "ticker": {
+    "ariaLabel": "Irekiak 2026 ordutegiak eta informazioa",
+    "friday": "OSTIRAL 29 MAI · 17:30 → 21:00 INAUGURAZIOA",
+    "saturday": "LARUNBAT 30 MAI · 11:00 → 19:00",
+    "sunday": "IGANDE 31 MAI · 11:00 → 14:00",
+    "tagline": "6 GALERIA · 3 IBILBIDE · DOAKO SARRERA"
   }
 }

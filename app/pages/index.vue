@@ -69,7 +69,7 @@ onBeforeUnmount(() => {
 
     <!-- Hero : split asymétrique 5/7 -->
     <section class="relative grid grid-cols-1 lg:grid-cols-12 lg:min-h-[calc(100vh-4rem)] pt-28 lg:pt-0">
-      <div class="lg:col-span-5 order-2 lg:order-1 flex flex-col justify-center items-center lg:items-start text-center lg:text-left px-6 md:px-12 lg:pl-16 py-12 lg:py-24">
+      <div class="lg:col-span-5 flex flex-col justify-center items-center lg:items-start text-center lg:text-left px-6 md:px-12 lg:pl-16 py-12 lg:py-24">
         <p class="eyebrow mb-6 animate-fade-in-up" style="animation-delay: 80ms">
           {{ t('home.heroEyebrow') }}
         </p>
@@ -105,7 +105,7 @@ onBeforeUnmount(() => {
       </div>
 
       <div
-        class="lg:col-span-7 order-1 lg:order-2 relative overflow-hidden bg-edition-dark isolate min-h-[50vh] lg:min-h-0"
+        class="lg:col-span-7 relative overflow-hidden bg-edition-dark isolate min-h-[50vh] lg:min-h-0"
         role="region"
         :aria-label="t('home.heroCarouselLabel')"
         @mouseenter="stopTimer"

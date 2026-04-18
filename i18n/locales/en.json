@@ -28,9 +28,9 @@
     "title": "The weekend",
     "subtitle": "3 days, 4 moments, free entry.",
     "days": {
-      "friday":   { "eyebrow": "FRI 29 MAY", "title": "Opening night",  "subtitle": "All galleries open their doors at once." },
-      "saturday": { "eyebrow": "SAT 30 MAY", "title": "The grand tour", "subtitle": "Two guided walks to choose from." },
-      "sunday":   { "eyebrow": "SUN 31 MAY", "title": "Last breath",    "subtitle": "One morning to wrap the tour." }
+      "friday":   { "title": "Opening night",  "subtitle": "All galleries open their doors at once." },
+      "saturday": { "title": "The grand tour", "subtitle": "Two guided walks to choose from." },
+      "sunday":   { "title": "Last breath",    "subtitle": "One morning to wrap the tour." }
     },
     "badges": { "free": "Free", "booking": "Registration" },
     "cta": {
@@ -38,7 +38,6 @@
       "chooseVisite":  "Pick a tour"
     },
     "routesLabel": "Tours",
-    "language": { "eu": "In Basque", "es": "In Spanish" },
     "noEvents": "No events scheduled today."
   },
   "seo": {
@@ -94,7 +93,13 @@
     "spotsLeft": "{count} spots left",
     "full": "Full",
     "privacyPolicy": "Privacy policy",
-    "close": "Close"
+    "close": "Close",
+    "days": {
+      "friday":   { "eyebrow": "FRI 29 MAY" },
+      "saturday": { "eyebrow": "SAT 30 MAY" },
+      "sunday":   { "eyebrow": "SUN 31 MAY" }
+    },
+    "language": { "eu": "In Basque", "es": "In Spanish" }
   },
   "tours": {
     "galleries": "Galleries on this route",

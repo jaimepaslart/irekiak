@@ -1,4 +1,4 @@
-import type { Exhibition } from '~/types/exhibition'
+import type { Exhibition } from '#types/exhibition'
 
 export const exhibitions: Exhibition[] = [
   {

@@ -28,9 +28,9 @@
     "title": "Le weekend",
     "subtitle": "3 jours, 4 moments, entrée libre.",
     "days": {
-      "friday":   { "eyebrow": "VEN 29 MAI", "title": "Ouverture",       "subtitle": "Toutes les galeries ouvrent leurs portes en même temps." },
-      "saturday": { "eyebrow": "SAM 30 MAI", "title": "La grande virée",  "subtitle": "Deux visites guidées au choix." },
-      "sunday":   { "eyebrow": "DIM 31 MAI", "title": "Dernier souffle", "subtitle": "Une matinée pour boucler la tournée." }
+      "friday":   { "title": "Ouverture",       "subtitle": "Toutes les galeries ouvrent leurs portes en même temps." },
+      "saturday": { "title": "La grande virée",  "subtitle": "Deux visites guidées au choix." },
+      "sunday":   { "title": "Dernier souffle", "subtitle": "Une matinée pour boucler la tournée." }
     },
     "badges": { "free": "Gratuit", "booking": "Inscription" },
     "cta": {
@@ -38,7 +38,6 @@
       "chooseVisite":  "Choisir une visite"
     },
     "routesLabel": "Parcours",
-    "language": { "eu": "Euskera", "es": "Castellano" },
     "noEvents": "Aucun événement prévu ce jour-là."
   },
   "seo": {
@@ -94,7 +93,13 @@
     "spotsLeft": "{count} places disponibles",
     "full": "Complet",
     "privacyPolicy": "Politique de confidentialité",
-    "close": "Fermer"
+    "close": "Fermer",
+    "days": {
+      "friday":   { "eyebrow": "VEN 29 MAI" },
+      "saturday": { "eyebrow": "SAM 30 MAI" },
+      "sunday":   { "eyebrow": "DIM 31 MAI" }
+    },
+    "language": { "eu": "Euskera", "es": "Castellano" }
   },
   "tours": {
     "galleries": "Galeries sur cet itinéraire",

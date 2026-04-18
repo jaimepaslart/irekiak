@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { TourRoute, TourSlot } from '#types/tour'
+import type { TourSlot } from '#types/tour'
 import { tourRoutes, tourSlots } from '@data/tours'
 import { galleries } from '@data/galleries'
 import { currentEdition } from '@data/editions'
@@ -13,7 +13,7 @@ useScrollReveal()
 
 const slotsByRoute = computed(() => {
   const grouped: Record<string, TourSlot[]> = {}
-  for (const slot of tourSlots as TourSlot[]) {
+  for (const slot of tourSlots) {
     (grouped[slot.routeId] ??= []).push(slot)
   }
   for (const rid in grouped) {
@@ -31,13 +31,12 @@ function galleriesForRoute(galleryIds: string[]) {
 function dayEyebrowForDate(date: string): string {
   const day = currentEdition.days.find(d => d.date === date)
   if (!day) return ''
-  return t(`programme.days.${day.id}.eyebrow`)
+  return t(`common.days.${day.id}.eyebrow`)
 }
 </script>
 
 <template>
   <div class="max-w-[1100px] mx-auto px-6 md:px-12 py-24 pt-28">
-    <!-- Hero -->
     <header class="reveal-on-scroll text-center mb-20 md:mb-28">
       <p class="eyebrow mb-4">{{ t('tours.heroEyebrow') }}</p>
       <h1 class="display-headline text-4xl md:text-6xl lg:text-7xl text-white mb-5">
@@ -48,15 +47,13 @@ function dayEyebrowForDate(date: string): string {
       </p>
     </header>
 
-    <!-- Routes -->
-    <div class="space-y-16 md:space-y-24">
+    <div>
       <section
-        v-for="(route, idx) in (tourRoutes as TourRoute[])"
+        v-for="(route, idx) in tourRoutes"
         :key="route.id"
-        class="reveal-on-scroll pt-12 md:pt-16 border-t border-gold-soft first:border-t-0 first:pt-0"
+        class="reveal-on-scroll pt-16 md:pt-24 border-t border-gold-soft first:border-t-0 first:pt-0"
         :class="`stagger-${Math.min(idx + 1, 3)}`"
       >
-        <!-- Route name + color dot -->
         <div class="flex items-center gap-4 mb-4 md:mb-5">
           <span
             class="w-3.5 h-3.5 md:w-4 md:h-4 rounded-full shrink-0"
@@ -68,12 +65,10 @@ function dayEyebrowForDate(date: string): string {
           </h2>
         </div>
 
-        <!-- Description -->
         <p class="text-white/70 text-base md:text-lg leading-relaxed font-light mb-6 md:mb-8 max-w-[640px]">
           {{ tr(route.description) }}
         </p>
 
-        <!-- Meta: meeting point + duration + distance -->
         <p class="text-[11px] md:text-xs font-mono text-white/50 mb-8 md:mb-10 uppercase tracking-[0.12em]">
           <span class="text-white/80">{{ tr(route.meetingPoint.name) }}</span>
           <span class="mx-2 opacity-60">·</span>
@@ -83,7 +78,6 @@ function dayEyebrowForDate(date: string): string {
         </p>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 mb-8 md:mb-10">
-          <!-- Galleries -->
           <div>
             <p class="eyebrow mb-3">{{ t('tours.galleriesLabel') }}</p>
             <div class="flex flex-wrap gap-2">
@@ -105,7 +99,6 @@ function dayEyebrowForDate(date: string): string {
             </div>
           </div>
 
-          <!-- Slots -->
           <div>
             <p class="eyebrow mb-3">{{ t('tours.slotsLabel') }}</p>
             <div class="space-y-2">
@@ -126,14 +119,13 @@ function dayEyebrowForDate(date: string): string {
                   {{ slot.startTime }} — {{ slot.endTime }}
                 </span>
                 <span class="text-white/60 text-[11px] md:text-xs font-mono uppercase tracking-[0.12em] shrink-0">
-                  {{ t(`programme.language.${slot.language}`) }}
+                  {{ t(`common.language.${slot.language}`) }}
                 </span>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- CTA -->
         <NuxtLink
           :to="localePath(`/visites/${route.slug}`)"
           class="inline-flex items-center gap-2 text-sm font-medium text-white border-b border-white/30 pb-0.5

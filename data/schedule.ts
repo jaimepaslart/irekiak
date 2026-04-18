@@ -1,4 +1,4 @@
-import type { ScheduleEvent } from '~/types/schedule'
+import type { ScheduleEvent } from '#types/schedule'
 
 // Irekiak Gallery Weekend 2026 — 29-31 May
 // Friday: Opening. Saturday + Sunday: galleries open + guided tours.

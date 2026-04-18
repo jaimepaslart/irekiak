@@ -28,9 +28,9 @@
     "title": "El fin de semana",
     "subtitle": "3 días, 4 momentos, entrada libre.",
     "days": {
-      "friday":   { "eyebrow": "VIE 29 MAY", "title": "Apertura",         "subtitle": "Todas las galerías abren sus puertas a la vez." },
-      "saturday": { "eyebrow": "SÁB 30 MAY", "title": "La gran vuelta",    "subtitle": "Dos visitas guiadas a elegir." },
-      "sunday":   { "eyebrow": "DOM 31 MAY", "title": "Último aliento",    "subtitle": "Una mañana para cerrar el recorrido." }
+      "friday":   { "title": "Apertura",         "subtitle": "Todas las galerías abren sus puertas a la vez." },
+      "saturday": { "title": "La gran vuelta",    "subtitle": "Dos visitas guiadas a elegir." },
+      "sunday":   { "title": "Último aliento",    "subtitle": "Una mañana para cerrar el recorrido." }
     },
     "badges": { "free": "Gratuito", "booking": "Inscripción" },
     "cta": {
@@ -38,7 +38,6 @@
       "chooseVisite":  "Elegir una visita"
     },
     "routesLabel": "Recorridos",
-    "language": { "eu": "Euskera", "es": "Castellano" },
     "noEvents": "No hay eventos este día."
   },
   "seo": {
@@ -94,7 +93,13 @@
     "spotsLeft": "{count} plazas libres",
     "full": "Completo",
     "privacyPolicy": "Política de privacidad",
-    "close": "Cerrar"
+    "close": "Cerrar",
+    "days": {
+      "friday":   { "eyebrow": "VIE 29 MAY" },
+      "saturday": { "eyebrow": "SÁB 30 MAY" },
+      "sunday":   { "eyebrow": "DOM 31 MAY" }
+    },
+    "language": { "eu": "Euskera", "es": "Castellano" }
   },
   "tours": {
     "galleries": "Galerías en este recorrido",

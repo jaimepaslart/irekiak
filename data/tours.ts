@@ -1,4 +1,4 @@
-import type { TourRoute, TourSlot } from '~/types/tour'
+import type { TourRoute, TourSlot } from '#types/tour'
 
 // Irekiak 2026 — 3 itinéraires de 2 galeries, guidés par Rita (Paolita + Nora)
 // Samedi 30 mai : 11h30 + 17h00

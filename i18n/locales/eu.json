@@ -28,9 +28,9 @@
     "title": "Asteburua",
     "subtitle": "3 egun, 4 une, sarrera librea.",
     "days": {
-      "friday":   { "eyebrow": "OST 29 MAI", "title": "Inaugurazioa",   "subtitle": "Galeria guztiak aldi berean zabaltzen dira." },
-      "saturday": { "eyebrow": "LAR 30 MAI", "title": "Ibilaldi handia", "subtitle": "Bisita gidatu bi aukeran." },
-      "sunday":   { "eyebrow": "IGA 31 MAI", "title": "Azken arnasa",    "subtitle": "Goiz bat ibilbidea ixteko." }
+      "friday":   { "title": "Inaugurazioa",   "subtitle": "Galeria guztiak aldi berean zabaltzen dira." },
+      "saturday": { "title": "Ibilaldi handia", "subtitle": "Bisita gidatu bi aukeran." },
+      "sunday":   { "title": "Azken arnasa",    "subtitle": "Goiz bat ibilbidea ixteko." }
     },
     "badges": { "free": "Dohainik", "booking": "Izen-ematea" },
     "cta": {
@@ -38,7 +38,6 @@
       "chooseVisite":  "Bisita bat aukeratu"
     },
     "routesLabel": "Ibilbideak",
-    "language": { "eu": "Euskaraz", "es": "Gaztelaniaz" },
     "noEvents": "Egun honetan ez dago ekitaldirik."
   },
   "seo": {
@@ -94,7 +93,13 @@
     "spotsLeft": "{count} leku libre",
     "full": "Beteta",
     "privacyPolicy": "Pribatutasun politika",
-    "close": "Itxi"
+    "close": "Itxi",
+    "days": {
+      "friday":   { "eyebrow": "OST 29 MAI" },
+      "saturday": { "eyebrow": "LAR 30 MAI" },
+      "sunday":   { "eyebrow": "IGA 31 MAI" }
+    },
+    "language": { "eu": "Euskaraz", "es": "Gaztelaniaz" }
   },
   "tours": {
     "galleries": "Ibilbide honetako galeriak",

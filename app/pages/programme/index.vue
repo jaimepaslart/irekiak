@@ -19,7 +19,7 @@ const eventsByDay = computed(() => {
     saturday: [],
     sunday: [],
   }
-  for (const event of schedule as ScheduleEvent[]) {
+  for (const event of schedule) {
     grouped[event.day].push(event)
   }
   for (const day of Object.keys(grouped) as EventDay[]) {
@@ -32,6 +32,29 @@ const visibleDays = computed(() =>
   currentEdition.days.filter(d => eventsByDay.value[d.id as EventDay].length > 0),
 )
 
+interface EventSlot {
+  id: string
+  route: TourRoute
+  language: TourSlot['language']
+}
+
+const slotsByEventId = computed(() => {
+  const map = new Map<string, EventSlot[]>()
+  for (const event of schedule) {
+    if (event.type !== 'guided-tour') continue
+    const day = currentEdition.days.find(d => d.id === event.day)
+    if (!day) continue
+    const matched: EventSlot[] = []
+    for (const s of tourSlots) {
+      if (s.date !== day.date || s.startTime !== event.startTime) continue
+      const route = tourRoutes.find(r => r.id === s.routeId)
+      if (route) matched.push({ id: s.id, route, language: s.language })
+    }
+    map.set(event.id, matched)
+  }
+  return map
+})
+
 function dayNumber(dateShort: string): string {
   return dateShort.split('.')[0] ?? ''
 }
@@ -40,28 +63,8 @@ function eventIcon(type: string): string {
   switch (type) {
     case 'opening': return 'lucide:sparkles'
     case 'guided-tour': return 'lucide:route'
-    case 'special': return 'lucide:star'
     default: return 'lucide:circle'
   }
-}
-
-interface EventSlot {
-  id: string
-  route: TourRoute
-  language: TourSlot['language']
-}
-
-function slotsForEvent(event: ScheduleEvent): EventSlot[] {
-  const day = currentEdition.days.find(d => d.id === event.day)
-  if (!day) return []
-  const routes = tourRoutes as TourRoute[]
-  return (tourSlots as TourSlot[])
-    .filter(s => s.date === day.date && s.startTime === event.startTime)
-    .map((s) => {
-      const route = routes.find(r => r.id === s.routeId)
-      return route ? { id: s.id, route, language: s.language } : null
-    })
-    .filter((x): x is EventSlot => x !== null)
 }
 
 function ctaFor(event: ScheduleEvent): { label: string, to: string } {
@@ -74,7 +77,6 @@ function ctaFor(event: ScheduleEvent): { label: string, to: string } {
 
 <template>
   <div class="max-w-[1100px] mx-auto px-6 md:px-12 py-24 pt-28">
-    <!-- Hero -->
     <header class="reveal-on-scroll text-center mb-20 md:mb-28">
       <p class="eyebrow mb-4">{{ currentEdition.dateRangeLabelShort }}</p>
       <h1 class="display-headline text-4xl md:text-6xl lg:text-7xl text-white mb-5">
@@ -85,20 +87,18 @@ function ctaFor(event: ScheduleEvent): { label: string, to: string } {
       </p>
     </header>
 
-    <!-- Day blocks -->
-    <div class="space-y-16 md:space-y-24">
+    <div>
       <section
         v-for="(day, dayIdx) in visibleDays"
         :key="day.id"
-        class="reveal-on-scroll pt-12 md:pt-16 border-t border-gold-soft first:border-t-0 first:pt-0"
+        class="reveal-on-scroll pt-16 md:pt-24 border-t border-gold-soft first:border-t-0 first:pt-0"
         :class="`stagger-${Math.min(dayIdx + 1, 3)}`"
       >
         <p class="eyebrow mb-8 md:mb-12">
-          {{ t(`programme.days.${day.id}.eyebrow`) }}
+          {{ t(`common.days.${day.id}.eyebrow`) }}
         </p>
 
         <div class="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-6 md:gap-12">
-          <!-- Ghost numeral — desktop only -->
           <div
             aria-hidden="true"
             class="hidden md:block font-extralight text-[140px] leading-none text-white/10 tabular-nums select-none pointer-events-none -mt-4"
@@ -121,7 +121,6 @@ function ctaFor(event: ScheduleEvent): { label: string, to: string } {
                 class="p-5 md:p-7 border border-white/15 rounded-sm bg-white/[0.015]
                        transition-all duration-300 hover:border-gold hover:-translate-y-0.5"
               >
-                <!-- Time range header + badges -->
                 <div class="flex flex-wrap items-start justify-between gap-4 mb-5">
                   <div class="flex items-baseline gap-3">
                     <Icon
@@ -167,12 +166,11 @@ function ctaFor(event: ScheduleEvent): { label: string, to: string } {
                   {{ tr(event.description) }}
                 </p>
 
-                <!-- Routes chips (guided-tour only) -->
-                <div v-if="event.type === 'guided-tour' && slotsForEvent(event).length">
+                <template v-if="event.type === 'guided-tour' && (slotsByEventId.get(event.id)?.length ?? 0) > 0">
                   <p class="eyebrow mb-3">{{ t('programme.routesLabel') }}</p>
                   <div class="space-y-2">
                     <NuxtLink
-                      v-for="slot in slotsForEvent(event)"
+                      v-for="slot in slotsByEventId.get(event.id)"
                       :key="slot.id"
                       :to="localePath(`/visites/${slot.route.slug}`)"
                       class="group flex items-start gap-3 md:gap-4 p-3 md:p-4 border border-white/15 rounded-sm
@@ -188,7 +186,7 @@ function ctaFor(event: ScheduleEvent): { label: string, to: string } {
                           {{ tr(slot.route.name) }}
                         </div>
                         <div class="text-white/50 text-[11px] md:text-xs font-mono uppercase tracking-[0.12em] mt-1 tabular-nums">
-                          {{ t(`programme.language.${slot.language}`) }}
+                          {{ t(`common.language.${slot.language}`) }}
                           <span class="mx-1.5 opacity-60">·</span>
                           {{ tr(slot.route.duration) }}
                         </div>
@@ -200,9 +198,8 @@ function ctaFor(event: ScheduleEvent): { label: string, to: string } {
                       />
                     </NuxtLink>
                   </div>
-                </div>
+                </template>
 
-                <!-- Fallback CTA: opening events, or guided-tour with no matching routes -->
                 <NuxtLink
                   v-else
                   :to="ctaFor(event).to"

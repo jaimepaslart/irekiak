@@ -78,10 +78,10 @@ onBeforeUnmount(() => {
           src="/logo-big.webp"
           alt=""
           aria-hidden="true"
-          class="h-auto w-full max-w-[220px] lg:max-w-[160px] mb-10 animate-fade-in-up"
+          class="h-auto w-full max-w-[220px] lg:max-w-[220px] mb-10 animate-fade-in-up"
           style="animation-delay: 150ms"
         >
-        <h1 class="display-headline text-white mb-6 text-4xl md:text-5xl lg:text-6xl animate-fade-in-up" style="animation-delay: 220ms">
+        <h1 class="display-headline text-white mb-6 text-4xl md:text-5xl animate-fade-in-up" style="animation-delay: 220ms">
           Gallery Weekend<br>
           <span class="text-white/75">Donostia · San Sebastián</span>
         </h1>

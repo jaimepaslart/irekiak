@@ -97,6 +97,8 @@ export default defineNuxtConfig({
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         { name: 'theme-color', content: '#003153' },
+        // Pré-lancement : noindex global tant qu'on est sur irekiak.art. Retirer au basculement vers irekiak.eus.
+        { name: 'robots', content: 'noindex, nofollow' },
       ],
       link: [
         { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32x32.png' },

@@ -15,7 +15,7 @@ import {
   tokens,
   type DataRow,
 } from './email-templates'
-import { getSiteUrl } from './site-url'
+import { absoluteUrl, getSiteUrl } from './site-url'
 
 type BookingLanguage = 'eu' | 'es' | 'fr' | 'en'
 
@@ -278,7 +278,7 @@ export function buildConfirmationEmail(
       cta({ href: confirmUrl, label: s.ctaLabel, variant: 'primary' }),
       meetingSection,
       paragraph({ text: s.icsNote, muted: true }),
-      footer({ locale: lang }),
+      footer({ locale: lang, lookupUrl: absoluteUrl("/retrouver") }),
     ].join('\n'),
   })
 
@@ -390,7 +390,7 @@ export function buildCancellationEmail(
       divider(),
       paragraph({ text: s.changeMindLead, muted: true }),
       cta({ href: rebookUrl, label: s.ctaLabel, variant: 'secondary' }),
-      footer({ locale: lang }),
+      footer({ locale: lang, lookupUrl: absoluteUrl("/retrouver") }),
     ].join('\n'),
   })
 
@@ -614,7 +614,7 @@ export function buildLookupEmail(
       singleLead,
       divider(),
       paragraph({ text: `<strong style="color:${tokens.colors.text};font-weight:600;">${escapeHtml(s.notYouTitle)}</strong> ${escapeHtml(s.notYouLead)}`, muted: true, html: true }),
-      footer({ locale: lang }),
+      footer({ locale: lang, lookupUrl: absoluteUrl("/retrouver") }),
     ].join('\n'),
   })
 

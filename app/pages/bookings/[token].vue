@@ -136,10 +136,15 @@ function distanceLabel(meters: number) {
     </div>
 
     <div v-else-if="error || !data" class="text-center py-20">
-      <p class="text-white/70 mb-4">{{ t('booking.notFound') || 'Réservation introuvable.' }}</p>
-      <NuxtLink :to="localePath('/visites')" class="inline-block px-6 py-2.5 text-sm bg-white text-[var(--color-edition)] hover:bg-white/90 transition-colors">
-        {{ t('nav.tours') || 'Visites guidées' }}
-      </NuxtLink>
+      <p class="text-white/70 mb-8">{{ t('booking.notFound') || 'Réservation introuvable.' }}</p>
+      <div class="flex flex-wrap gap-3 justify-center">
+        <NuxtLink :to="localePath('/retrouver')" class="inline-block px-6 py-2.5 text-sm bg-white text-[var(--color-edition)] hover:bg-white/90 transition-colors">
+          {{ t('nav.findBooking') }}
+        </NuxtLink>
+        <NuxtLink :to="localePath('/visites')" class="inline-block px-6 py-2.5 text-sm border border-white/30 text-white hover:bg-white/10 transition-colors">
+          {{ t('nav.tours') || 'Visites guidées' }}
+        </NuxtLink>
+      </div>
     </div>
 
     <template v-else>

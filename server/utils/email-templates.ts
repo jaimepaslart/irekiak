@@ -282,30 +282,34 @@ export function paragraph(opts: ParagraphOpts): string {
 
 // ---------- FOOTER ----------
 
-const footerStrings: Record<'eu' | 'es' | 'fr' | 'en', { event: string, location: string, unsubscribe: string, privacyLabel: string }> = {
+const footerStrings: Record<'eu' | 'es' | 'fr' | 'en', { event: string, location: string, unsubscribe: string, privacyLabel: string, lookupLabel: string }> = {
   eu: {
     event: 'Irekiak Gallery Weekend',
     location: '8 galeria · Donostia · San Sebastián',
     unsubscribe: 'Harpidetza utzi',
     privacyLabel: 'Pribatutasun politika',
+    lookupLabel: 'Nire erreserba aurkitu',
   },
   es: {
     event: 'Irekiak Gallery Weekend',
     location: '8 galerías · Donostia · San Sebastián',
     unsubscribe: 'Darse de baja',
     privacyLabel: 'Política de privacidad',
+    lookupLabel: 'Recuperar mi reserva',
   },
   fr: {
     event: 'Irekiak Gallery Weekend',
     location: '8 galeries · Donostia · San Sebastián',
     unsubscribe: 'Se désabonner',
     privacyLabel: 'Politique de confidentialité',
+    lookupLabel: 'Retrouver ma réservation',
   },
   en: {
     event: 'Irekiak Gallery Weekend',
     location: '8 galleries · Donostia · San Sebastián',
     unsubscribe: 'Unsubscribe',
     privacyLabel: 'Privacy policy',
+    lookupLabel: 'Find my booking',
   },
 }
 
@@ -313,6 +317,7 @@ interface FooterOpts {
   unsubscribeUrl?: string
   locale: 'eu' | 'es' | 'fr' | 'en'
   dates?: string
+  lookupUrl?: string
 }
 
 export function footer(opts: FooterOpts): string {
@@ -321,6 +326,9 @@ export function footer(opts: FooterOpts): string {
   const dates = opts.dates ?? EVENT_DATES
   const unsubscribeLink = opts.unsubscribeUrl
     ? `&nbsp;&middot;&nbsp;<a href="${escapeHtml(opts.unsubscribeUrl)}" style="color:${t.colors.textDim};text-decoration:underline;">${escapeHtml(s.unsubscribe)}</a>`
+    : ''
+  const lookupLink = opts.lookupUrl
+    ? `&nbsp;&middot;&nbsp;<a href="${escapeHtml(opts.lookupUrl)}" style="color:${t.colors.textDim};text-decoration:underline;">${escapeHtml(s.lookupLabel)}</a>`
     : ''
   return `<tr>
   <td class="px" style="padding:8px ${t.layout.padding}px 40px ${t.layout.padding}px;border-top:1px solid ${t.colors.border};padding-top:32px;">
@@ -331,7 +339,7 @@ export function footer(opts: FooterOpts): string {
       ${escapeHtml(dates)} &middot; ${escapeHtml(s.location)}
     </p>
     <p style="margin:14px 0 0 0;font-family:${t.fonts.sans};font-size:11px;color:${t.colors.textDim};">
-      <a href="${SITE_URL}" style="color:${t.colors.textDim};text-decoration:none;">irekiak.eus</a>${unsubscribeLink}
+      <a href="${SITE_URL}" style="color:${t.colors.textDim};text-decoration:none;">irekiak.eus</a>${lookupLink}${unsubscribeLink}
     </p>
   </td>
 </tr>`

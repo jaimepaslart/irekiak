@@ -7,7 +7,8 @@
     "about": "About",
     "contact": "Contact",
     "accessibility": "Accessibility",
-    "home": "Home"
+    "home": "Home",
+    "findBooking": "Find my booking"
   },
   "home": {
     "galleries": "Galleries",
@@ -92,6 +93,10 @@
     "accessibility": {
       "title": "Accessibility - Irekiak Gallery Weekend",
       "description": "Accessibility statement for the Irekiak website."
+    },
+    "lookup": {
+      "title": "Find my booking - Irekiak Gallery Weekend",
+      "description": "Retrieve the links to your bookings from your email address."
     }
   },
   "footer": {
@@ -197,6 +202,23 @@
     "purgeConfirm": "Are you sure? This action is irreversible.",
     "purgeDone": "Your data has been erased.",
     "privacyTitle": "Your data, your control"
+  },
+  "lookup": {
+    "eyebrow": "Find my booking",
+    "title": "Find your booking",
+    "description": "Enter the email address you used to register. We will send you the links to your bookings.",
+    "emailLabel": "Email address",
+    "emailPlaceholder": "you@email.com",
+    "submit": "Send me the links",
+    "submitting": "Sending...",
+    "sentEyebrow": "Check your inbox",
+    "sent": "If this address matches a booking, you will receive an email with the links to your bookings in a few moments.",
+    "privacyNote": "We never reveal whether an address exists in our systems.",
+    "errors": {
+      "invalidEmail": "Invalid email address.",
+      "tooMany": "Too many attempts. Please try again in a few minutes.",
+      "generic": "An error occurred. Please try again."
+    }
   },
   "contact": {
     "title": "Contact",

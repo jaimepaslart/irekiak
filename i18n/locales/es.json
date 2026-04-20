@@ -7,7 +7,8 @@
     "about": "Sobre Irekiak",
     "contact": "Contacto",
     "accessibility": "Accesibilidad",
-    "home": "Inicio"
+    "home": "Inicio",
+    "findBooking": "Recuperar mi reserva"
   },
   "home": {
     "galleries": "Galerías",
@@ -92,6 +93,10 @@
     "accessibility": {
       "title": "Accesibilidad - Irekiak Gallery Weekend",
       "description": "Declaración de accesibilidad del sitio web de Irekiak."
+    },
+    "lookup": {
+      "title": "Recuperar mi reserva - Irekiak Gallery Weekend",
+      "description": "Recupere los enlaces a sus reservas a partir de su dirección de correo electrónico."
     }
   },
   "footer": {
@@ -197,6 +202,23 @@
     "purgeConfirm": "¿Estás seguro? Esta acción es irreversible.",
     "purgeDone": "Tus datos han sido eliminados.",
     "privacyTitle": "Tus datos, tu control"
+  },
+  "lookup": {
+    "eyebrow": "Recuperar mi reserva",
+    "title": "Recupere su reserva",
+    "description": "Introduzca la dirección de correo electrónico utilizada al inscribirse. Le enviaremos los enlaces a sus reservas.",
+    "emailLabel": "Dirección de correo electrónico",
+    "emailPlaceholder": "usted@email.com",
+    "submit": "Recibir mis enlaces",
+    "submitting": "Enviando...",
+    "sentEyebrow": "Revise su correo",
+    "sent": "Si esta dirección corresponde a una reserva, recibirá un correo con los enlaces a sus reservas en unos instantes.",
+    "privacyNote": "Nunca indicamos si una dirección existe o no en nuestros sistemas.",
+    "errors": {
+      "invalidEmail": "Dirección de correo electrónico no válida.",
+      "tooMany": "Demasiados intentos. Vuelva a probar en unos minutos.",
+      "generic": "Se ha producido un error. Inténtelo de nuevo."
+    }
   },
   "contact": {
     "title": "Contacto",

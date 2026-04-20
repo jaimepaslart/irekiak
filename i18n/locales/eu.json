@@ -7,7 +7,8 @@
     "about": "Irekiaki buruz",
     "contact": "Kontaktua",
     "accessibility": "Irisgarritasuna",
-    "home": "Hasiera"
+    "home": "Hasiera",
+    "findBooking": "Nire erreserba aurkitu"
   },
   "home": {
     "galleries": "Galeriak",
@@ -92,6 +93,10 @@
     "accessibility": {
       "title": "Irisgarritasuna - Irekiak Gallery Weekend",
       "description": "Irekiak webgunearen irisgarritasun adierazpena."
+    },
+    "lookup": {
+      "title": "Nire erreserba aurkitu - Irekiak Gallery Weekend",
+      "description": "Zure helbide elektronikoari lotutako erreserben estekak aurkitu."
     }
   },
   "footer": {
@@ -197,6 +202,23 @@
     "purgeConfirm": "Ziur zaude? Ekintza hau itzulezina da.",
     "purgeDone": "Zure datuak ezabatu dira.",
     "privacyTitle": "Zure datuak, zure kontrola"
+  },
+  "lookup": {
+    "eyebrow": "Nire erreserba aurkitu",
+    "title": "Zure erreserba berreskuratu",
+    "description": "Sarrera egin zenuenean erabilitako helbide elektronikoa sartu. Zure erreserben estekak bidaliko dizkizugu.",
+    "emailLabel": "Helbide elektronikoa",
+    "emailPlaceholder": "zure@email.com",
+    "submit": "Nire estekak jaso",
+    "submitting": "Bidaltzen...",
+    "sentEyebrow": "Begiratu zure postontzia",
+    "sent": "Helbide honek erreserba bati badagokio, estekak jasoko dituzu segituan zure postontzian.",
+    "privacyNote": "Ez dugu inoiz esaten helbide bat gure sistemetan dagoen ala ez.",
+    "errors": {
+      "invalidEmail": "Helbide elektroniko baliogabea.",
+      "tooMany": "Saiakera gehiegi. Saiatu berriro minutu batzuk barru.",
+      "generic": "Errore bat gertatu da. Saiatu berriro."
+    }
   },
   "contact": {
     "title": "Kontaktua",

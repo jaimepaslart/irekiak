@@ -30,6 +30,7 @@ const currentYear = new Date().getFullYear()
           <li><NuxtLink :to="localePath('/visites')" class="text-sm text-white/60 hover:text-white transition-colors">{{ t('nav.tours') }}</NuxtLink></li>
           <li><NuxtLink :to="localePath('/a-propos')" class="text-sm text-white/60 hover:text-white transition-colors">{{ t('nav.about') }}</NuxtLink></li>
           <li><NuxtLink :to="localePath('/accessibilite')" class="text-sm text-white/60 hover:text-white transition-colors">{{ t('nav.accessibility') }}</NuxtLink></li>
+          <li><NuxtLink :to="localePath('/retrouver')" class="text-sm text-white/60 hover:text-white transition-colors">{{ t('nav.findBooking') }}</NuxtLink></li>
         </ul>
       </div>
 

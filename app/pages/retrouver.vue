@@ -64,7 +64,7 @@ async function onSubmit() {
       </p>
     </div>
 
-    <div v-if="sent" class="reveal-on-scroll">
+    <div v-if="sent">
       <div
         ref="successRef"
         class="border border-white/15 bg-white/[0.03] p-8 rounded-sm outline-none"
@@ -87,7 +87,7 @@ async function onSubmit() {
       </NuxtLink>
     </div>
 
-    <form v-else class="reveal-on-scroll space-y-6" novalidate @submit.prevent="onSubmit">
+    <form v-else class="space-y-6" novalidate @submit.prevent="onSubmit">
       <div>
         <label for="lookup-email" class="block text-xs uppercase tracking-wider text-white/40 font-mono mb-2">
           {{ t('lookup.emailLabel') }}

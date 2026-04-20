@@ -208,7 +208,6 @@
     "title": "Find your booking",
     "description": "Enter the email address you used to register. We will send you the links to your bookings.",
     "emailLabel": "Email address",
-    "emailPlaceholder": "you@email.com",
     "submit": "Send me the links",
     "submitting": "Sending...",
     "sentEyebrow": "Check your inbox",

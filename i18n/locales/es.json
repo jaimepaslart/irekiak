@@ -208,7 +208,6 @@
     "title": "Recupere su reserva",
     "description": "Introduzca la dirección de correo electrónico utilizada al inscribirse. Le enviaremos los enlaces a sus reservas.",
     "emailLabel": "Dirección de correo electrónico",
-    "emailPlaceholder": "usted@email.com",
     "submit": "Recibir mis enlaces",
     "submitting": "Enviando...",
     "sentEyebrow": "Revise su correo",

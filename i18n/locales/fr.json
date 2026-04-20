@@ -208,7 +208,6 @@
     "title": "Retrouvez votre réservation",
     "description": "Saisissez l'adresse e-mail utilisée lors de votre inscription. Nous vous renverrons les liens vers vos réservations.",
     "emailLabel": "Adresse e-mail",
-    "emailPlaceholder": "votre@email.com",
     "submit": "Recevoir mes liens",
     "submitting": "Envoi en cours...",
     "sentEyebrow": "Vérifiez vos e-mails",

@@ -104,7 +104,6 @@ async function onSubmit() {
                  focus:outline-none focus:border-white/40 transition-colors"
           :aria-invalid="!!emailError"
           aria-describedby="lookup-privacy-note"
-          :placeholder="t('lookup.emailPlaceholder')"
           @blur="touched = true"
         >
         <p v-if="emailError" class="mt-2 text-xs text-red-300/80">{{ emailError }}</p>

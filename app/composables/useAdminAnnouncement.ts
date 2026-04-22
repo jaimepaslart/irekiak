@@ -1,4 +1,8 @@
 import type { AnnouncementConfig } from '~~/types/announcement'
+import { SETTING_KEYS } from '~~/types/settings'
+import { extractErrorMessage } from '~/utils/error-message'
+
+const SAVE_SUCCESS_DISPLAY_MS = 4000
 
 const emptyLang = { eu: '', es: '', fr: '', en: '' }
 
@@ -26,14 +30,20 @@ export function useAdminAnnouncement() {
   const saveError = ref<string | null>(null)
   const loadError = ref<string | null>(null)
 
+  let successTimer: ReturnType<typeof setTimeout> | null = null
+
+  onBeforeUnmount(() => {
+    if (successTimer) clearTimeout(successTimer)
+  })
+
   async function load() {
     loading.value = true
     loadError.value = null
     try {
-      const res = await $fetch<{ 'announcement.config': string }>('/api/admin/settings', {
+      const res = await $fetch<Record<string, string>>('/api/admin/settings', {
         headers: { 'x-admin-token': token.value },
       })
-      const raw = res['announcement.config']
+      const raw = res[SETTING_KEYS.ANNOUNCEMENT_CONFIG]
       let parsed: AnnouncementConfig | null = null
       if (raw) {
         try {
@@ -47,13 +57,14 @@ export function useAdminAnnouncement() {
         announcement.value = parsed
       }
       else {
-        // Fall back to the server-seeded defaults (DAGGE text in 4 languages).
+        // Galeristes who have never opened the editor need the DAGGE text pre-populated
+        // — the public endpoint embeds the server-seeded defaults for that purpose.
         const pub = await $fetch<{ announcement: AnnouncementConfig | null }>('/api/settings/public')
         if (pub.announcement) announcement.value = pub.announcement
       }
     }
     catch (err: unknown) {
-      loadError.value = (err as { statusMessage?: string })?.statusMessage ?? 'Load failed'
+      loadError.value = extractErrorMessage(err, 'Load failed')
     }
     finally {
       loading.value = false
@@ -64,17 +75,18 @@ export function useAdminAnnouncement() {
     saveError.value = null
     saveSuccess.value = false
     saving.value = true
+    if (successTimer) clearTimeout(successTimer)
     try {
       await $fetch('/api/admin/settings', {
         method: 'POST',
         headers: { 'x-admin-token': token.value, 'Content-Type': 'application/json' },
-        body: { key: 'announcement.config', value: JSON.stringify(announcement.value) },
+        body: { key: SETTING_KEYS.ANNOUNCEMENT_CONFIG, value: JSON.stringify(announcement.value) },
       })
       saveSuccess.value = true
-      setTimeout(() => { saveSuccess.value = false }, 4000)
+      successTimer = setTimeout(() => { saveSuccess.value = false }, SAVE_SUCCESS_DISPLAY_MS)
     }
     catch (err: unknown) {
-      saveError.value = (err as { statusMessage?: string })?.statusMessage ?? 'Save failed'
+      saveError.value = extractErrorMessage(err, 'Save failed')
     }
     finally {
       saving.value = false

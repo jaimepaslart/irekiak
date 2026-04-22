@@ -36,13 +36,6 @@ export const partners: Partner[] = [
     tier: 'support',
   },
   {
-    id: 'kursaal',
-    name: 'Kursaal',
-    logo: '/images/partners/kursaal.png',
-    website: 'https://www.kursaal.eus',
-    tier: 'support',
-  },
-  {
     id: 'kutxa',
     name: 'Kutxa Fundazioa',
     logo: '/images/partners/kutxa.png',

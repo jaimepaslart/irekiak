@@ -5,8 +5,8 @@ import { setSetting } from '../../utils/admin-settings'
 import { requireAdminToken } from '../../utils/require-admin'
 
 const schema = z.object({
-  key: z.enum(['bookings.accept', 'emergency.message', 'notifications.enabled']),
-  value: z.string().max(2000),
+  key: z.enum(['bookings.accept', 'emergency.message', 'notifications.enabled', 'announcement.config']),
+  value: z.string().max(10000),
 })
 
 export default defineEventHandler(async (event) => {

@@ -68,6 +68,8 @@ const desktopNavItems = computed(() => [
   { to: '/admin/galleries', label: t('nav.galleries') },
   { to: '/admin/exhibitions', label: t('nav.exhibitions') },
   { to: '/admin/blast', label: t('nav.blast') },
+  { to: '/admin/announcement', label: t('nav.announcement') },
+  { to: '/admin/settings', label: t('nav.settings') },
 ])
 
 const mobileNavItems = computed(() => [
@@ -78,6 +80,7 @@ const mobileNavItems = computed(() => [
   { to: '/admin/galleries', label: t('nav.galleries') },
   { to: '/admin/exhibitions', label: t('nav.exhibitions') },
   { to: '/admin/blast', label: t('nav.blast') },
+  { to: '/admin/announcement', label: t('nav.announcement') },
   { to: '/admin/emails', label: t('nav.emails') },
   { to: '/admin/settings', label: t('nav.settings') },
   { to: '/admin/audit', label: t('nav.audit') },
@@ -101,12 +104,14 @@ function handleKeyDown(e: KeyboardEvent) {
     return
   }
   if (e.metaKey || e.ctrlKey || e.altKey) return
+  // Reserved single-letter shortcuts: d, b, c, k, e, n, s, a, ?, / — document here before adding more.
   switch (e.key) {
     case 'd': navigateTo('/admin'); break
     case 'b': navigateTo('/admin/bookings'); break
     case 'c': navigateTo('/admin/bookings/new'); break
     case 'k': navigateTo('/admin/parcours'); break
     case 'e': navigateTo('/admin/exhibitions'); break
+    case 'n': navigateTo('/admin/announcement'); break
     case 's': navigateTo('/admin/settings'); break
     case 'a': navigateTo('/admin/audit'); break
     case '?': helpOpen.value = true; break
@@ -250,6 +255,7 @@ onBeforeUnmount(() => {
               <div class="flex justify-between"><dt><kbd class="kbd">c</kbd></dt><dd>{{ t('shortcuts.newBooking') }}</dd></div>
               <div class="flex justify-between"><dt><kbd class="kbd">k</kbd></dt><dd>{{ t('shortcuts.parcours') }}</dd></div>
               <div class="flex justify-between"><dt><kbd class="kbd">e</kbd></dt><dd>{{ t('shortcuts.exhibitions') }}</dd></div>
+              <div class="flex justify-between"><dt><kbd class="kbd">n</kbd></dt><dd>{{ t('shortcuts.announcement') }}</dd></div>
               <div class="flex justify-between"><dt><kbd class="kbd">s</kbd></dt><dd>{{ t('shortcuts.settings') }}</dd></div>
               <div class="flex justify-between"><dt><kbd class="kbd">a</kbd></dt><dd>{{ t('shortcuts.audit') }}</dd></div>
               <div class="flex justify-between"><dt><kbd class="kbd">/</kbd></dt><dd>{{ t('shortcuts.search') }}</dd></div>

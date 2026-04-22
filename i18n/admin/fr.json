@@ -66,7 +66,8 @@
     "admin": "Admin",
     "mobileMenu": "Menu",
     "mobileClose": "Fermer",
-    "exhibitions": "Expositions"
+    "exhibitions": "Expositions",
+    "announcement": "Annonce"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -387,6 +388,18 @@
     "sectionEmergency": "Message d'urgence",
     "settingEmergencyMessage": "Message affiché sur la page réservation",
     "settingEmergencyPlaceholder": "Ex: Visites guidées reportées au 06.06 en raison des intempéries.",
+    "sectionAnnouncement": "Annonce",
+    "announcementEnabled": "Afficher l'annonce sur la home",
+    "announcementEnabledDesc": "Se retire automatiquement après le 1er juin 2026.",
+    "announcementEyebrow": "Sur-titre (4 langues)",
+    "announcementTitle": "Titre (4 langues)",
+    "announcementParagraph1": "Paragraphe 1 (4 langues)",
+    "announcementParagraph2": "Paragraphe 2 (4 langues)",
+    "announcementParagraph3": "Paragraphe 3 (4 langues)",
+    "announcementHelp": "Entourer un mot de ** pour le mettre en gras : **DAGGE**.",
+    "announcementPreviewEyebrow": "Aperçu",
+    "announcementSaveSuccess": "Annonce enregistrée.",
+    "announcementSaveFailure": "L'enregistrement de l'annonce a échoué.",
     "sectionExport": "Export",
     "exportContactsCsv": "↓ Export contacts CSV",
     "sectionLinks": "Liens rapides",
@@ -476,7 +489,8 @@
     "help": "Cette aide",
     "blur": "Sortir d'un champ",
     "commandPalette": "Command palette",
-    "exhibitions": "Expositions"
+    "exhibitions": "Expositions",
+    "announcement": "Annonce"
   },
   "commandPalette": {
     "placeholder": "Rechercher une page ou une action…",
@@ -562,5 +576,13 @@
       "imageFailed": "L'image n'a pas pu être enregistrée."
     },
     "preview": "Aperçu public"
+  },
+  "announcement": {
+    "eyebrow": "Contenu · Communiqué",
+    "title": "Annonce",
+    "subtitle": "Modifiez le message visible sur la home. Se retire automatiquement après le 1er juin 2026.",
+    "statusVisible": "Visible sur la home",
+    "statusHidden": "Masquée",
+    "autoHideNote": "Se masque automatiquement le 1er juin 2026."
   }
 }

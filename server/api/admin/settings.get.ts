@@ -9,5 +9,6 @@ export default defineEventHandler((event) => {
     'bookings.accept': settings['bookings.accept'] ?? '1',
     'emergency.message': settings['emergency.message'] ?? '',
     'notifications.enabled': settings['notifications.enabled'] ?? '1',
+    'announcement.config': settings['announcement.config'] ?? '',
   }
 })

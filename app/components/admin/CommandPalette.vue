@@ -65,6 +65,7 @@ const items = computed<PaletteItem[]>(() => {
     })),
     { id: 'nav-galleries', label: t('nav.galleries'), sublabel: nav, icon: '🏛️', action: () => go('/admin/galleries') },
     { id: 'nav-blast', label: t('nav.blast'), sublabel: nav, icon: '✉', action: () => go('/admin/blast') },
+    { id: 'nav-announcement', label: t('nav.announcement'), sublabel: nav, icon: '📣', shortcut: 'n', action: () => go('/admin/announcement'), aliases: ['annonce', 'comunicado', 'communiqué', 'statement'] },
     { id: 'nav-emails', label: t('nav.emails'), sublabel: nav, icon: '✉', action: () => go('/admin/emails') },
     { id: 'nav-settings', label: t('nav.settings'), sublabel: nav, icon: '⚙', shortcut: 's', action: () => go('/admin/settings') },
     { id: 'nav-audit', label: t('nav.audit'), sublabel: nav, icon: '📜', shortcut: 'a', action: () => go('/admin/audit') },

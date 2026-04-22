@@ -10,6 +10,8 @@ const tr = useTranslated()
 useScrollReveal()
 usePageSeo('home')
 
+const { announcement } = await useAnnouncement()
+
 const { data: heroCards } = await useAsyncData('exhibitions-hero', () =>
   $fetch<ExhibitionCard[]>('/api/exhibitions'),
 { default: () => [] as ExhibitionCard[] },
@@ -171,6 +173,9 @@ onBeforeUnmount(() => {
         </div>
       </div>
     </section>
+
+    <!-- Communiqué DAGGE (auto-hidden after 2026-06-01) -->
+    <LazyHomeAnnouncementSection v-if="announcement" :announcement="announcement" />
 
     <!-- Expositions (éditorial, wrapper + GalleryExhibitionsSection embedded) -->
     <section class="py-24 md:py-40 px-6 md:px-12 bg-edition-dark">

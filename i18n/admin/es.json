@@ -66,7 +66,8 @@
     "admin": "Admin",
     "mobileMenu": "Menú",
     "mobileClose": "Cerrar",
-    "exhibitions": "Exposiciones"
+    "exhibitions": "Exposiciones",
+    "announcement": "Comunicado"
   },
   "dashboard": {
     "title": "Panel",
@@ -387,6 +388,18 @@
     "sectionEmergency": "Mensaje de emergencia",
     "settingEmergencyMessage": "Mensaje mostrado en la página de reserva",
     "settingEmergencyPlaceholder": "Ej.: Visitas guiadas aplazadas al 06/06 debido a las inclemencias meteorológicas.",
+    "sectionAnnouncement": "Comunicado",
+    "announcementEnabled": "Mostrar el comunicado en la home",
+    "announcementEnabledDesc": "Se oculta automáticamente después del 1 de junio de 2026.",
+    "announcementEyebrow": "Sobretítulo (4 idiomas)",
+    "announcementTitle": "Título (4 idiomas)",
+    "announcementParagraph1": "Párrafo 1 (4 idiomas)",
+    "announcementParagraph2": "Párrafo 2 (4 idiomas)",
+    "announcementParagraph3": "Párrafo 3 (4 idiomas)",
+    "announcementHelp": "Rodee una palabra con ** para ponerla en negrita: **DAGGE**.",
+    "announcementPreviewEyebrow": "Vista previa",
+    "announcementSaveSuccess": "Comunicado guardado.",
+    "announcementSaveFailure": "Ha fallado el guardado del comunicado.",
     "sectionExport": "Exportación",
     "exportContactsCsv": "↓ Exportar contactos CSV",
     "sectionLinks": "Enlaces rápidos",
@@ -476,7 +489,8 @@
     "help": "Esta ayuda",
     "blur": "Salir de un campo",
     "commandPalette": "Paleta de comandos",
-    "exhibitions": "Exposiciones"
+    "exhibitions": "Exposiciones",
+    "announcement": "Comunicado"
   },
   "commandPalette": {
     "placeholder": "Buscar una página o acción…",
@@ -562,5 +576,13 @@
       "imageFailed": "No se pudo guardar la imagen."
     },
     "preview": "Vista pública"
+  },
+  "announcement": {
+    "eyebrow": "Contenido · Comunicado",
+    "title": "Comunicado",
+    "subtitle": "Modifique el mensaje visible en la home. Se oculta automáticamente después del 1 de junio de 2026.",
+    "statusVisible": "Visible en la home",
+    "statusHidden": "Oculta",
+    "autoHideNote": "Se oculta automáticamente el 1 de junio de 2026."
   }
 }

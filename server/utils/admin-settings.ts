@@ -24,6 +24,20 @@ export function getSettingBool(key: string, defaultValue = false): boolean {
   return v === '1' || v === 'true'
 }
 
+/**
+ * Read a setting as JSON. Returns defaultValue if key is absent or value fails to parse.
+ */
+export function getSettingJson<T>(key: string, defaultValue: T): T {
+  const raw = getSetting(key, '')
+  if (!raw) return defaultValue
+  try {
+    return JSON.parse(raw) as T
+  }
+  catch {
+    return defaultValue
+  }
+}
+
 export function setSetting(key: string, value: string, actor: string): void {
   db.insert(appSettings)
     .values({ key, value, updatedBy: actor })

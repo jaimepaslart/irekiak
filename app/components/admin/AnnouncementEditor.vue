@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { AnnouncementConfig, TranslatedText } from '~~/types/announcement'
+import { renderBodyParagraphs } from '~/utils/announcement-render'
 import { renderInlineBold } from '~/utils/markdown-inline'
-import { splitParagraphs } from '~/utils/text'
 
 interface Props {
   modelValue: AnnouncementConfig
@@ -31,7 +31,7 @@ function patch(partial: Partial<AnnouncementConfig>) {
 const previewTitle = computed(() => renderInlineBold(props.modelValue.title[previewLang.value] ?? ''))
 const previewEyebrow = computed(() => props.modelValue.eyebrow[previewLang.value] ?? '')
 const previewParagraphs = computed(() =>
-  splitParagraphs(props.modelValue.body[previewLang.value]).map(p => renderInlineBold(p)),
+  renderBodyParagraphs(props.modelValue.body, previewLang.value),
 )
 
 const enabledBinding = computed<boolean>({

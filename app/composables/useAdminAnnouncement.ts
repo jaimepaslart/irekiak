@@ -1,18 +1,16 @@
 import type { AnnouncementConfig } from '~~/types/announcement'
-import { normalizeAnnouncement } from '~~/types/announcement'
+import { EMPTY_TRANSLATED, normalizeAnnouncement } from '~~/types/announcement'
 import { SETTING_KEYS } from '~~/types/settings'
 import { extractErrorMessage } from '~/utils/error-message'
 
 const SAVE_SUCCESS_DISPLAY_MS = 4000
 
-const emptyLang = { eu: '', es: '', fr: '', en: '' }
-
 function emptyAnnouncement(): AnnouncementConfig {
   return {
     enabled: true,
-    eyebrow: { ...emptyLang },
-    title: { ...emptyLang },
-    body: { ...emptyLang },
+    eyebrow: { ...EMPTY_TRANSLATED },
+    title: { ...EMPTY_TRANSLATED },
+    body: { ...EMPTY_TRANSLATED },
   }
 }
 

@@ -17,7 +17,7 @@ export interface PublicSettings {
   announcement: AnnouncementConfig | null
 }
 
-const EMPTY_TRANSLATED: TranslatedText = { eu: '', es: '', fr: '', en: '' }
+export const EMPTY_TRANSLATED: TranslatedText = { eu: '', es: '', fr: '', en: '' }
 
 interface LegacyAnnouncement {
   enabled?: boolean
@@ -38,7 +38,7 @@ function fillTranslated(value: Partial<TranslatedText> | undefined): TranslatedT
  * locales so a half-filled DB row does not crash render.
  */
 export function normalizeAnnouncement(raw: unknown): AnnouncementConfig {
-  const input = (raw ?? {}) as LegacyAnnouncement
+  const input: LegacyAnnouncement = typeof raw === 'object' && raw !== null ? (raw as LegacyAnnouncement) : {}
 
   let body: TranslatedText
   if (input.body) {

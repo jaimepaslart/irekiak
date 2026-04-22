@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { AnnouncementConfig, TranslatedText } from '~~/types/announcement'
-import { renderInlineBold } from '~/utils/markdown-inline'
-import { splitParagraphs } from '~/utils/text'
+import { renderBodyParagraphs } from '~/utils/announcement-render'
 
 interface Props {
   announcement: AnnouncementConfig
@@ -21,7 +20,7 @@ function pick(t: TranslatedText): string {
 const eyebrowText = computed(() => pick(props.announcement.eyebrow))
 const titleText = computed(() => pick(props.announcement.title))
 const paragraphsHtml = computed(() =>
-  splitParagraphs(pick(props.announcement.body)).map(p => renderInlineBold(p)),
+  renderBodyParagraphs(props.announcement.body, locale.value as Lang),
 )
 </script>
 

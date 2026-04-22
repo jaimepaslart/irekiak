@@ -1,5 +1,5 @@
 import { defineEventHandler } from 'h3'
-import type { AnnouncementConfig, PublicSettings } from '../../../types/announcement'
+import { normalizeAnnouncement, type PublicSettings } from '../../../types/announcement'
 import { SETTING_KEYS } from '../../../types/settings'
 import { getSettingJson } from '../../utils/admin-settings'
 import { defaultAnnouncement, isAnnouncementStillRelevant } from '../../utils/announcement-defaults'
@@ -11,7 +11,8 @@ import { defaultAnnouncement, isAnnouncementStillRelevant } from '../../utils/an
  * by tampering with the response.
  */
 export default defineEventHandler((): PublicSettings => {
-  const config = getSettingJson<AnnouncementConfig>(SETTING_KEYS.ANNOUNCEMENT_CONFIG, defaultAnnouncement)
+  const raw = getSettingJson<unknown>(SETTING_KEYS.ANNOUNCEMENT_CONFIG, defaultAnnouncement)
+  const config = normalizeAnnouncement(raw)
 
   const announcement = config.enabled && isAnnouncementStillRelevant() ? config : null
 

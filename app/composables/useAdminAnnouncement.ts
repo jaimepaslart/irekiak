@@ -1,4 +1,5 @@
 import type { AnnouncementConfig } from '~~/types/announcement'
+import { normalizeAnnouncement } from '~~/types/announcement'
 import { SETTING_KEYS } from '~~/types/settings'
 import { extractErrorMessage } from '~/utils/error-message'
 
@@ -11,7 +12,7 @@ function emptyAnnouncement(): AnnouncementConfig {
     enabled: true,
     eyebrow: { ...emptyLang },
     title: { ...emptyLang },
-    paragraphs: [{ ...emptyLang }, { ...emptyLang }, { ...emptyLang }],
+    body: { ...emptyLang },
   }
 }
 
@@ -44,23 +45,23 @@ export function useAdminAnnouncement() {
         headers: { 'x-admin-token': token.value },
       })
       const raw = res[SETTING_KEYS.ANNOUNCEMENT_CONFIG]
-      let parsed: AnnouncementConfig | null = null
+      let parsed: unknown = null
       if (raw) {
         try {
-          parsed = JSON.parse(raw) as AnnouncementConfig
+          parsed = JSON.parse(raw)
         }
         catch {
           parsed = null
         }
       }
       if (parsed) {
-        announcement.value = parsed
+        announcement.value = normalizeAnnouncement(parsed)
       }
       else {
         // Galeristes who have never opened the editor need the DAGGE text pre-populated
         // — the public endpoint embeds the server-seeded defaults for that purpose.
         const pub = await $fetch<{ announcement: AnnouncementConfig | null }>('/api/settings/public')
-        if (pub.announcement) announcement.value = pub.announcement
+        if (pub.announcement) announcement.value = normalizeAnnouncement(pub.announcement)
       }
     }
     catch (err: unknown) {

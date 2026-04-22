@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { AnnouncementConfig, TranslatedText } from '~~/types/announcement'
 import { renderInlineBold } from '~/utils/markdown-inline'
+import { splitParagraphs } from '~/utils/text'
 
 interface Props {
   modelValue: AnnouncementConfig
@@ -27,18 +28,10 @@ function patch(partial: Partial<AnnouncementConfig>) {
   emit('update:modelValue', { ...props.modelValue, ...partial })
 }
 
-function updateParagraph(index: number, value: TranslatedText) {
-  const next = [...props.modelValue.paragraphs]
-  next[index] = value
-  patch({ paragraphs: next })
-}
-
 const previewTitle = computed(() => renderInlineBold(props.modelValue.title[previewLang.value] ?? ''))
 const previewEyebrow = computed(() => props.modelValue.eyebrow[previewLang.value] ?? '')
 const previewParagraphs = computed(() =>
-  props.modelValue.paragraphs
-    .map(p => renderInlineBold(p[previewLang.value] ?? ''))
-    .filter(html => html.trim().length > 0),
+  splitParagraphs(props.modelValue.body[previewLang.value]).map(p => renderInlineBold(p)),
 )
 
 const enabledBinding = computed<boolean>({
@@ -54,6 +47,11 @@ const eyebrowBinding = computed<TranslatedText>({
 const titleBinding = computed<TranslatedText>({
   get: () => props.modelValue.title,
   set: v => patch({ title: v }),
+})
+
+const bodyBinding = computed<TranslatedText>({
+  get: () => props.modelValue.body,
+  set: v => patch({ body: v }),
 })
 </script>
 
@@ -78,18 +76,14 @@ const titleBinding = computed<TranslatedText>({
         :label="t('settings.announcementTitle')"
         :rows="2"
         :maxlength="160"
-        :help="t('settings.announcementHelp')"
       />
 
       <AdminI18nTextarea
-        v-for="(paragraph, i) in modelValue.paragraphs"
-        :key="i"
-        :model-value="paragraph"
-        :label="t(`settings.announcementParagraph${i + 1}` as 'settings.announcementParagraph1')"
-        :rows="5"
-        :maxlength="1200"
-        :help="i === 0 ? t('settings.announcementHelp') : undefined"
-        @update:model-value="updateParagraph(i, $event)"
+        v-model="bodyBinding"
+        :label="t('settings.announcementBody')"
+        :rows="14"
+        :maxlength="4000"
+        :help="t('settings.announcementBodyHelp')"
       />
     </div>
 

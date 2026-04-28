@@ -49,14 +49,22 @@ useScrollReveal()
           >
             &larr; {{ t('nav.galleries') }}
           </NuxtLink>
-          <img
-            v-if="gallery.logoUrl"
-            :src="gallery.logoUrl"
-            :alt="`${gallery.name} logo`"
-            class="h-12 md:h-14 w-auto mb-3 object-contain"
-          >
           <h1>{{ gallery.name }}</h1>
         </div>
+      </div>
+    </section>
+
+    <!-- Logo banner (only when the gallery has a logo) -->
+    <section
+      v-if="gallery.logoUrl"
+      class="border-y border-white/10 bg-[var(--color-edition-dark)] py-14 md:py-20"
+    >
+      <div class="max-w-[1200px] mx-auto px-6 md:px-12 flex items-center justify-center">
+        <img
+          :src="gallery.logoUrl"
+          :alt="`${gallery.name} logo`"
+          class="h-24 md:h-36 w-auto object-contain max-w-[280px] md:max-w-[360px]"
+        >
       </div>
     </section>
 

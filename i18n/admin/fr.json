@@ -571,7 +571,12 @@
       "saved": "Modifications enregistrées.",
       "imageUploaded": "Image mise à jour.",
       "imageRemoved": "Image retirée.",
-      "imageFailed": "L'image n'a pas pu être enregistrée."
+      "imageFailed": "L'image n'a pas pu être enregistrée.",
+      "imageTooLarge": "Image trop lourde (max 5 Mo). Compressez-la avant d'uploader.",
+      "imageBadFormat": "Format non supporté. Utilisez JPG, PNG ou WebP.",
+      "imageTooLargeForServer": "Image refusée par le serveur (limite de taille). Réduisez la photo en dessous de 5 Mo.",
+      "unauthorized": "Session admin expirée. Reconnectez-vous.",
+      "serverError": "Erreur serveur (code {code}). Réessayez ou contactez l'admin."
     },
     "preview": "Aperçu public"
   },

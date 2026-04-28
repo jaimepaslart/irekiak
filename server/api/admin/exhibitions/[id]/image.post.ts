@@ -57,6 +57,7 @@ export default defineEventHandler(async (event) => {
   catch (err) {
     // DB write failed — clean up the orphan file we just saved
     await deleteExhibitionImage(filename)
-    throw err
+    console.error('[exhibition.image.upload] DB write failed', { id, filename, err })
+    throw createError({ statusCode: 500, statusMessage: 'Could not save image override' })
   }
 })

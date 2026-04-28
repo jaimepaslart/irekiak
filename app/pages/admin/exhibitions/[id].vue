@@ -7,6 +7,9 @@ import { splitParagraphs } from '~/utils/text'
 
 const LOCALES = ['eu', 'es', 'fr', 'en'] as const satisfies readonly SupportedLocale[]
 
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024
+const ACCEPTED_IMAGE_MIME = new Set(['image/jpeg', 'image/png', 'image/webp'])
+
 const TITLE_KEY: Record<SupportedLocale, 'titleEu' | 'titleEs' | 'titleFr' | 'titleEn'> = {
   eu: 'titleEu', es: 'titleEs', fr: 'titleFr', en: 'titleEn',
 }
@@ -101,6 +104,21 @@ function showFeedback(msg: string) {
   }, 3000)
 }
 
+// `??` would let an empty `statusMessage` through (alert with no body, what
+// Nginx returns on 413 and ofetch on opaque errors). Map common HTTP codes
+// to translated copy and only fall back to the raw statusMessage when it
+// actually carries text.
+function describeError(err: unknown, fallbackKey: string): string {
+  const e = err as { statusCode?: number, statusMessage?: string } | undefined
+  const code = e?.statusCode
+  const raw = e?.statusMessage?.trim()
+  if (code === 401 || code === 403) return t('exhibitions.feedback.unauthorized')
+  if (code === 413) return t('exhibitions.feedback.imageTooLargeForServer')
+  if (raw) return raw
+  if (code) return t('exhibitions.feedback.serverError', { code })
+  return t(fallbackKey)
+}
+
 // Returns the trimmed form value, or null if it matches the default (= no override).
 function diffOrNull(formValue: string, defaultValue: string | null | undefined): string | null {
   const v = formValue.trim()
@@ -135,14 +153,23 @@ async function save() {
     await load()
   }
   catch (err: unknown) {
-    const msg = (err as { statusMessage?: string })?.statusMessage ?? t('exhibitions.saveFailed')
-    alert(msg)
+    alert(describeError(err, 'exhibitions.saveFailed'))
   }
   finally { saving.value = false }
 }
 
 async function uploadFile(file: File) {
   if (!card.value) return
+  if (!ACCEPTED_IMAGE_MIME.has(file.type)) {
+    alert(t('exhibitions.feedback.imageBadFormat'))
+    if (fileInput.value) fileInput.value.value = ''
+    return
+  }
+  if (file.size > MAX_IMAGE_BYTES) {
+    alert(t('exhibitions.feedback.imageTooLarge'))
+    if (fileInput.value) fileInput.value.value = ''
+    return
+  }
   uploading.value = true
   try {
     const fd = new FormData()
@@ -156,8 +183,7 @@ async function uploadFile(file: File) {
     await load()
   }
   catch (err: unknown) {
-    const msg = (err as { statusMessage?: string })?.statusMessage ?? t('exhibitions.feedback.imageFailed')
-    alert(msg)
+    alert(describeError(err, 'exhibitions.feedback.imageFailed'))
   }
   finally {
     uploading.value = false
@@ -177,8 +203,7 @@ async function removeImage() {
     await load()
   }
   catch (err: unknown) {
-    const msg = (err as { statusMessage?: string })?.statusMessage ?? t('exhibitions.feedback.imageFailed')
-    alert(msg)
+    alert(describeError(err, 'exhibitions.feedback.imageFailed'))
   }
   finally { uploading.value = false }
 }

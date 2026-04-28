@@ -571,7 +571,12 @@
       "saved": "Cambios guardados.",
       "imageUploaded": "Imagen actualizada.",
       "imageRemoved": "Imagen retirada.",
-      "imageFailed": "No se pudo guardar la imagen."
+      "imageFailed": "No se pudo guardar la imagen.",
+      "imageTooLarge": "Imagen demasiado pesada (máx. 5 MB). Comprímela antes de subirla.",
+      "imageBadFormat": "Formato no admitido. Usa JPG, PNG o WebP.",
+      "imageTooLargeForServer": "Imagen rechazada por el servidor (límite de tamaño). Reduce la foto por debajo de 5 MB.",
+      "unauthorized": "Sesión de admin caducada. Vuelve a iniciar sesión.",
+      "serverError": "Error del servidor (código {code}). Inténtalo de nuevo o contacta con el admin."
     },
     "preview": "Vista pública"
   },

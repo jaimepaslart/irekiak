@@ -96,6 +96,7 @@ export const galleryContactOverrides = sqliteTable('gallery_contact_overrides', 
   website: text('website'),
   instagram: text('instagram'),
   imageFilename: text('image_filename'),
+  logoFilename: text('logo_filename'),
   updatedAt: text('updated_at').notNull().default(sql`(datetime('now'))`),
   updatedBy: text('updated_by').notNull(),
 })

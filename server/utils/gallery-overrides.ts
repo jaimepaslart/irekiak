@@ -11,6 +11,7 @@ import { galleryContactOverrides, type GalleryContactOverrideRow } from '../db/s
  */
 export type GalleryView = Gallery & {
   imageUrl: string
+  logoUrl: string | null
   overridden: boolean
 }
 
@@ -37,6 +38,11 @@ function resolveImageUrl(override: GalleryContactOverrideRow | null, base: Galle
   return base.image
 }
 
+function resolveLogoUrl(override: GalleryContactOverrideRow | null, base: Gallery): string | null {
+  if (override?.logoFilename) return `/api/images/galleries/${override.logoFilename}`
+  return base.logo ?? null
+}
+
 function parseCoord(raw: string | null | undefined, fallback: number, min: number, max: number): number {
   if (!raw) return fallback
   const n = Number(raw)
@@ -58,7 +64,8 @@ function isOverridden(row: GalleryContactOverrideRow | null): boolean {
     || row.openingHoursEu || row.openingHoursEs || row.openingHoursFr || row.openingHoursEn
     || row.website
     || row.instagram
-    || row.imageFilename,
+    || row.imageFilename
+    || row.logoFilename,
   )
 }
 
@@ -78,6 +85,8 @@ function buildView(base: Gallery, override: GalleryContactOverrideRow | null): G
     instagram: override?.instagram ?? base.instagram,
     image: resolveImageUrl(override, base),
     imageUrl: resolveImageUrl(override, base),
+    logo: resolveLogoUrl(override, base) ?? undefined,
+    logoUrl: resolveLogoUrl(override, base),
     overridden: isOverridden(override),
   }
 }

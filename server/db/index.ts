@@ -164,6 +164,7 @@ safeAddColumn('gallery_contact_overrides', 'opening_hours_en TEXT')
 safeAddColumn('gallery_contact_overrides', 'website TEXT')
 safeAddColumn('gallery_contact_overrides', 'instagram TEXT')
 safeAddColumn('gallery_contact_overrides', 'image_filename TEXT')
+safeAddColumn('gallery_contact_overrides', 'logo_filename TEXT')
 
 // Auto-seed if tables are empty (idempotent)
 try {

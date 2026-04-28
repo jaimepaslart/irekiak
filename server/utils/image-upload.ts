@@ -19,10 +19,18 @@ function safeFilename(name: string): boolean {
   return /^[A-Za-z0-9._-]+\.webp$/.test(name)
 }
 
+interface ProcessOptions {
+  maxDimension?: number
+  // When true, force lossless. When 'auto', uses lossless only if alpha is present.
+  lossless?: boolean | 'auto'
+  quality?: number
+}
+
 async function processAndStore(
   buffer: Buffer,
   targetDir: string,
   filenamePrefix: string,
+  opts: ProcessOptions = {},
 ): Promise<{ filename: string }> {
   if (buffer.length === 0 || buffer.length > MAX_BYTES) {
     throw createError({ statusCode: 400, statusMessage: 'Image must be 1B–5MB' })
@@ -32,10 +40,17 @@ async function processAndStore(
   if (!meta || !meta.format || !ACCEPTED_FORMATS.has(meta.format)) {
     throw createError({ statusCode: 400, statusMessage: 'Accepted formats: jpg, png, webp' })
   }
+
+  const dim = opts.maxDimension ?? 1600
+  const wantsLossless = opts.lossless === true || (opts.lossless === 'auto' && meta.hasAlpha === true)
+  const webpOpts: sharp.WebpOptions = wantsLossless
+    ? { lossless: true, alphaQuality: 100 }
+    : { quality: opts.quality ?? 82 }
+
   const webp = await pipeline
     .rotate()
-    .resize(1600, 1600, { fit: 'inside', withoutEnlargement: true })
-    .webp({ quality: 82 })
+    .resize(dim, dim, { fit: 'inside', withoutEnlargement: true })
+    .webp(webpOpts)
     .toBuffer()
 
   const hash = createHash('sha256').update(webp).digest('hex').slice(0, 10)
@@ -97,4 +112,22 @@ export function galleryImagePath(filename: string): string | null {
 
 export function isValidGalleryFilename(filename: string): boolean {
   return safeFilename(filename)
+}
+
+// Logos: smaller (600px), lossless if PNG transparent so the alpha survives the
+// webp conversion. Stored alongside hero images, distinguished by the `-logo-`
+// segment in the filename.
+export function saveGalleryLogo(
+  buffer: Buffer,
+  _mimetype: string | undefined,
+  galleryId: string,
+): Promise<{ filename: string }> {
+  return processAndStore(buffer, GALLERIES_DIR, `${galleryId}-logo`, {
+    maxDimension: 600,
+    lossless: 'auto',
+  })
+}
+
+export function deleteGalleryLogo(filename: string | null | undefined): Promise<void> {
+  return bestEffortDelete(GALLERIES_DIR, filename)
 }

@@ -1,8 +1,16 @@
 <script setup lang="ts">
-import { galleries } from '@data/galleries'
+import type { Gallery } from '#types/gallery'
+
+type GalleryView = Gallery & { imageUrl: string }
 
 const { t } = useI18n()
 const localePath = useLocalePath()
+
+const { data: galleries } = await useAsyncData<GalleryView[]>(
+  'galleries-list',
+  () => $fetch<GalleryView[]>('/api/galleries'),
+  { default: () => [] as GalleryView[] },
+)
 
 usePageSeo('galleries')
 useScrollReveal()

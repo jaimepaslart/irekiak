@@ -1,21 +1,27 @@
 <script setup lang="ts">
 import type { Gallery } from '#types/gallery'
-import type { Exhibition } from '#types/exhibition'
-import { galleries } from '@data/galleries'
 import { exhibitions } from '@data/exhibitions'
+
+type GalleryView = Gallery & { imageUrl: string }
 
 const { t } = useI18n()
 const localePath = useLocalePath()
 const tr = useTranslated()
 const route = useRoute()
 
-const gallery = computed(() =>
-  galleries.find((g) => g.slug === route.params.slug),
+const slug = computed(() => String(route.params.slug ?? ''))
+
+// Reads gallery from /api/galleries/[slug] which applies admin overrides on top of
+// data/galleries.ts. Prerendered at build (snapshot of overrides at build time).
+const { data: gallery } = await useAsyncData<GalleryView | null>(
+  () => `gallery-${slug.value}`,
+  () => $fetch<GalleryView>(`/api/galleries/${slug.value}`).catch(() => null),
+  { default: () => null },
 )
 
 const galleryExhibitions = computed(() =>
   gallery.value
-    ? exhibitions.filter((e) => e.galleryId === gallery.value!.id)
+    ? exhibitions.filter(e => e.galleryId === gallery.value!.id)
     : [],
 )
 

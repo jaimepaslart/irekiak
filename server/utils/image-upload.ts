@@ -6,6 +6,15 @@ import sharp from 'sharp'
 import { createError } from 'h3'
 import DOMPurify from 'isomorphic-dompurify'
 
+// Forbid external/javascript/data URIs on `href`/`xlink:href` only — never
+// blanket-restrict via ALLOWED_URI_REGEXP, that mistakenly strips `<path d="…">`
+// because DOMPurify treats path data as a URI candidate.
+DOMPurify.addHook('uponSanitizeAttribute', (_node, data) => {
+  if (data.attrName === 'href' || data.attrName === 'xlink:href') {
+    if (!/^#/.test(String(data.attrValue ?? ''))) data.keepAttr = false
+  }
+})
+
 const UPLOADS_ROOT = process.env.UPLOADS_DIR || '.data/uploads'
 const EXHIBITIONS_DIR = join(UPLOADS_ROOT, 'exhibitions')
 const GALLERIES_DIR = join(UPLOADS_ROOT, 'galleries')
@@ -93,12 +102,8 @@ async function sanitiseAndStoreSvg(
   if (!SVG_HEADER_RE.test(raw)) {
     throw createError({ statusCode: 400, statusMessage: 'Not a valid SVG' })
   }
-  // ALLOWED_URI_REGEXP restricts <use href>, xlink:href to same-document fragments
-  // only (`#…`). Without this restriction, the SVG could fetch external resources
-  // even though DOMPurify already blocks `javascript:` and `data:` schemes.
   const cleaned = DOMPurify.sanitize(raw, {
     USE_PROFILES: { svg: true, svgFilters: true },
-    ALLOWED_URI_REGEXP: /^#/,
   }).trim()
   if (!cleaned || !/<svg/i.test(cleaned)) {
     throw createError({ statusCode: 400, statusMessage: 'SVG rejected by sanitiser' })

@@ -29,6 +29,7 @@
     "dayjs": "^1.11.20",
     "drizzle-orm": "^0.45.2",
     "ics": "^3.11.0",
+    "isomorphic-dompurify": "^3.10.0",
     "leaflet": "^1.9.4",
     "leaflet.markercluster": "^1.5.3",
     "nuxt": "^4.4.2",

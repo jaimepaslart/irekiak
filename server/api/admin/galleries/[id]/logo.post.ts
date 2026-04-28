@@ -4,7 +4,7 @@ import { db } from '../../../../db'
 import { galleryContactOverrides } from '../../../../db/schema'
 import { requireAdminToken } from '../../../../utils/require-admin'
 import { logAudit } from '../../../../utils/audit'
-import { deleteGalleryLogo, saveGalleryLogo } from '../../../../utils/image-upload'
+import { deleteGalleryLogo, saveGalleryLogo, saveGallerySvgLogo } from '../../../../utils/image-upload'
 import { isValidGalleryId } from '../../../../utils/gallery-overrides'
 
 export default defineEventHandler(async (event) => {
@@ -19,7 +19,10 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'Missing file field' })
   }
 
-  const { filename } = await saveGalleryLogo(filePart.data, filePart.type, id)
+  const isSvg = (filePart.type ?? '').toLowerCase() === 'image/svg+xml'
+  const { filename } = isSvg
+    ? await saveGallerySvgLogo(filePart.data, id)
+    : await saveGalleryLogo(filePart.data, filePart.type, id)
 
   try {
     const existing = db.select().from(galleryContactOverrides).where(eq(galleryContactOverrides.galleryId, id)).get() ?? null

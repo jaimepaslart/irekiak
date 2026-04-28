@@ -325,7 +325,7 @@
     "fieldInstagram": "Instagram",
     "fieldImage": "Imagen",
     "fieldImageHelp": "JPG, PNG o WebP · 5 MB máx · formato hero recomendado.",
-    "fieldLogoHelp": "PNG transparente recomendado para conservar la transparencia. JPG, PNG o WebP · 5 MB máx.",
+    "fieldLogoHelp": "SVG recomendado (vectorial, transparente, nítido a cualquier tamaño). PNG transparente aceptado. JPG/PNG/WebP: 5 MB máx · SVG: 200 KB máx.",
     "dropzoneHint": "Arrastra una imagen aquí o haz clic para elegir.",
     "fieldEmail": "Email",
     "fieldContactName": "Nombre del contacto",

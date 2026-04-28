@@ -15,7 +15,16 @@ export default defineEventHandler((event) => {
     setResponseStatus(event, 304)
     return null
   }
-  setHeader(event, 'Content-Type', 'image/webp')
+  const isSvg = filename.endsWith('.svg')
+  setHeader(event, 'Content-Type', isSvg ? 'image/svg+xml; charset=utf-8' : 'image/webp')
+  // Defence-in-depth for SVGs in case any DOMPurify bypass slips through:
+  // sandbox neutralises script execution and same-origin access when the file
+  // is opened directly as a navigation target.
+  if (isSvg) {
+    setHeader(event, 'Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'; sandbox")
+    setHeader(event, 'X-Content-Type-Options', 'nosniff')
+    setHeader(event, 'Content-Disposition', `inline; filename="${filename}"`)
+  }
   const stream = createReadStream(path)
   stream.on('error', (err: NodeJS.ErrnoException) => {
     if (err.code === 'ENOENT') {

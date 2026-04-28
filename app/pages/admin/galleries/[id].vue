@@ -6,7 +6,9 @@ import type { GalleryContactOverrideRow } from '~~/server/db/schema'
 
 const LOCALES = ['eu', 'es', 'fr', 'en'] as const satisfies readonly SupportedLocale[]
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024
+const MAX_SVG_BYTES = 200 * 1024
 const ACCEPTED_IMAGE_MIME = new Set(['image/jpeg', 'image/png', 'image/webp'])
+const ACCEPTED_LOGO_MIME = new Set([...ACCEPTED_IMAGE_MIME, 'image/svg+xml'])
 
 interface GalleryView {
   id: string
@@ -285,12 +287,14 @@ function onDrop(e: DragEvent) {
 
 async function uploadLogo(file: File) {
   if (!view.value) return
-  if (!ACCEPTED_IMAGE_MIME.has(file.type)) {
+  if (!ACCEPTED_LOGO_MIME.has(file.type)) {
     alert(t('galleries.feedback.imageBadFormat'))
     if (logoFileInput.value) logoFileInput.value.value = ''
     return
   }
-  if (file.size > MAX_IMAGE_BYTES) {
+  const isSvg = file.type === 'image/svg+xml'
+  const limit = isSvg ? MAX_SVG_BYTES : MAX_IMAGE_BYTES
+  if (file.size > limit) {
     alert(t('galleries.feedback.imageTooLarge'))
     if (logoFileInput.value) logoFileInput.value.value = ''
     return
@@ -445,7 +449,7 @@ function restoreField(field: keyof Form, value: string | number | boolean) {
               <p class="text-[11px] text-white/35 mt-2">{{ t('galleries.fieldLogoHelp') }}</p>
               <div class="flex items-center gap-3 mt-4">
                 <label class="inline-flex items-center gap-2 px-4 py-2 bg-[var(--color-accent-gold)] text-[var(--color-edition)] text-xs uppercase tracking-[0.18em] font-medium rounded-sm cursor-pointer hover:bg-[var(--color-accent-gold)]/90 transition-colors">
-                  <input ref="logoFileInput" type="file" accept="image/jpeg,image/png,image/webp" class="sr-only" :disabled="uploadingLogo" @change="onLogoFileChange">
+                  <input ref="logoFileInput" type="file" accept="image/svg+xml,image/jpeg,image/png,image/webp" class="sr-only" :disabled="uploadingLogo" @change="onLogoFileChange">
                   {{ uploadingLogo ? t('galleries.actions.uploading') : t('galleries.actions.uploadLogo') }}
                 </label>
                 <button

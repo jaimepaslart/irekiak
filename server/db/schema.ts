@@ -69,14 +69,33 @@ export const appSettings = sqliteTable('app_settings', {
   updatedBy: text('updated_by').notNull(),
 })
 
+// Stores both contact-channel overrides (email/phone/notif flags) AND public-info
+// overrides (display name, address, hours, description, image). Single row per
+// gallery; columns added incrementally via safeAddColumn (see server/db/index.ts).
 export const galleryContactOverrides = sqliteTable('gallery_contact_overrides', {
   galleryId: text('gallery_id').primaryKey(),
   email: text('email'),
-  name: text('name'),
+  contactName: text('name'),
   phone: text('phone'),
   preferredLanguage: text('preferred_language'),
   notifyOnBooking: integer('notify_on_booking', { mode: 'boolean' }),
   receiveDailyDigest: integer('receive_daily_digest', { mode: 'boolean' }),
+  galleryName: text('gallery_name'),
+  address: text('address'),
+  city: text('city'),
+  lat: text('lat'),
+  lng: text('lng'),
+  descriptionEu: text('description_eu'),
+  descriptionEs: text('description_es'),
+  descriptionFr: text('description_fr'),
+  descriptionEn: text('description_en'),
+  openingHoursEu: text('opening_hours_eu'),
+  openingHoursEs: text('opening_hours_es'),
+  openingHoursFr: text('opening_hours_fr'),
+  openingHoursEn: text('opening_hours_en'),
+  website: text('website'),
+  instagram: text('instagram'),
+  imageFilename: text('image_filename'),
   updatedAt: text('updated_at').notNull().default(sql`(datetime('now'))`),
   updatedBy: text('updated_by').notNull(),
 })

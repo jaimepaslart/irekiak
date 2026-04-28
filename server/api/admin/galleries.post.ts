@@ -29,7 +29,7 @@ export default defineEventHandler(async (event) => {
     .values({
       galleryId: parsed.galleryId,
       email: parsed.email ?? null,
-      name: parsed.name ?? null,
+      contactName: parsed.name ?? null,
       phone: parsed.phone ?? null,
       preferredLanguage: parsed.preferredLanguage ?? null,
       notifyOnBooking: parsed.notifyOnBooking ?? null,
@@ -40,7 +40,7 @@ export default defineEventHandler(async (event) => {
       target: galleryContactOverrides.galleryId,
       set: {
         email: parsed.email ?? null,
-        name: parsed.name ?? null,
+        contactName: parsed.name ?? null,
         phone: parsed.phone ?? null,
         preferredLanguage: parsed.preferredLanguage ?? null,
         notifyOnBooking: parsed.notifyOnBooking ?? null,

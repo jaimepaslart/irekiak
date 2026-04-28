@@ -7,32 +7,31 @@ import { createError } from 'h3'
 
 const UPLOADS_ROOT = process.env.UPLOADS_DIR || '.data/uploads'
 const EXHIBITIONS_DIR = join(UPLOADS_ROOT, 'exhibitions')
+const GALLERIES_DIR = join(UPLOADS_ROOT, 'galleries')
 const MAX_BYTES = 5 * 1024 * 1024
 const ACCEPTED_FORMATS = new Set(['jpeg', 'png', 'webp'])
 
-if (!existsSync(EXHIBITIONS_DIR)) mkdirSync(EXHIBITIONS_DIR, { recursive: true })
+for (const dir of [EXHIBITIONS_DIR, GALLERIES_DIR]) {
+  if (!existsSync(dir)) mkdirSync(dir, { recursive: true })
+}
 
 function safeFilename(name: string): boolean {
   return /^[A-Za-z0-9._-]+\.webp$/.test(name)
 }
 
-export async function saveExhibitionImage(
+async function processAndStore(
   buffer: Buffer,
-  _mimetype: string | undefined,
-  exhibitionId: string,
+  targetDir: string,
+  filenamePrefix: string,
 ): Promise<{ filename: string }> {
   if (buffer.length === 0 || buffer.length > MAX_BYTES) {
     throw createError({ statusCode: 400, statusMessage: 'Image must be 1B–5MB' })
   }
-
   const pipeline = sharp(buffer)
   const meta = await pipeline.metadata().catch(() => null)
   if (!meta || !meta.format || !ACCEPTED_FORMATS.has(meta.format)) {
     throw createError({ statusCode: 400, statusMessage: 'Accepted formats: jpg, png, webp' })
   }
-
-  // Preserve the original aspect ratio: only downscale when the longest
-  // side exceeds 1600px. No crop, no upscale of small uploads.
   const webp = await pipeline
     .rotate()
     .resize(1600, 1600, { fit: 'inside', withoutEnlargement: true })
@@ -40,22 +39,32 @@ export async function saveExhibitionImage(
     .toBuffer()
 
   const hash = createHash('sha256').update(webp).digest('hex').slice(0, 10)
-  const filename = `${exhibitionId}-${hash}.webp`
-  const finalPath = join(EXHIBITIONS_DIR, filename)
+  const filename = `${filenamePrefix}-${hash}.webp`
+  const finalPath = join(targetDir, filename)
   const tmpPath = `${finalPath}.tmp`
   await writeFile(tmpPath, webp)
   await rename(tmpPath, finalPath)
   return { filename }
 }
 
-export async function deleteExhibitionImage(filename: string | null | undefined): Promise<void> {
+async function bestEffortDelete(targetDir: string, filename: string | null | undefined): Promise<void> {
   if (!filename || !safeFilename(filename)) return
-  try {
-    await unlink(join(EXHIBITIONS_DIR, filename))
-  }
-  catch {
-    // best effort — file may already be gone
-  }
+  try { await unlink(join(targetDir, filename)) }
+  catch { /* file may already be gone */ }
+}
+
+// --- Exhibitions ---
+
+export function saveExhibitionImage(
+  buffer: Buffer,
+  _mimetype: string | undefined,
+  exhibitionId: string,
+): Promise<{ filename: string }> {
+  return processAndStore(buffer, EXHIBITIONS_DIR, exhibitionId)
+}
+
+export function deleteExhibitionImage(filename: string | null | undefined): Promise<void> {
+  return bestEffortDelete(EXHIBITIONS_DIR, filename)
 }
 
 export function exhibitionImagePath(filename: string): string | null {
@@ -64,5 +73,28 @@ export function exhibitionImagePath(filename: string): string | null {
 }
 
 export function isValidExhibitionFilename(filename: string): boolean {
+  return safeFilename(filename)
+}
+
+// --- Galleries ---
+
+export function saveGalleryImage(
+  buffer: Buffer,
+  _mimetype: string | undefined,
+  galleryId: string,
+): Promise<{ filename: string }> {
+  return processAndStore(buffer, GALLERIES_DIR, galleryId)
+}
+
+export function deleteGalleryImage(filename: string | null | undefined): Promise<void> {
+  return bestEffortDelete(GALLERIES_DIR, filename)
+}
+
+export function galleryImagePath(filename: string): string | null {
+  if (!safeFilename(filename)) return null
+  return join(GALLERIES_DIR, filename)
+}
+
+export function isValidGalleryFilename(filename: string): boolean {
   return safeFilename(filename)
 }

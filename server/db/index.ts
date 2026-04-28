@@ -145,6 +145,26 @@ function safeAddColumn(table: string, columnDef: string): void {
 }
 safeAddColumn('bookings', 'accepts_marketing INTEGER NOT NULL DEFAULT 0')
 
+// gallery_contact_overrides — extended in 2026-04 to also carry public-info overrides
+// (display name, address, hours, description, image, etc.). All nullable; absent
+// means "use the data/galleries.ts default".
+safeAddColumn('gallery_contact_overrides', 'gallery_name TEXT')
+safeAddColumn('gallery_contact_overrides', 'address TEXT')
+safeAddColumn('gallery_contact_overrides', 'city TEXT')
+safeAddColumn('gallery_contact_overrides', 'lat TEXT')
+safeAddColumn('gallery_contact_overrides', 'lng TEXT')
+safeAddColumn('gallery_contact_overrides', 'description_eu TEXT')
+safeAddColumn('gallery_contact_overrides', 'description_es TEXT')
+safeAddColumn('gallery_contact_overrides', 'description_fr TEXT')
+safeAddColumn('gallery_contact_overrides', 'description_en TEXT')
+safeAddColumn('gallery_contact_overrides', 'opening_hours_eu TEXT')
+safeAddColumn('gallery_contact_overrides', 'opening_hours_es TEXT')
+safeAddColumn('gallery_contact_overrides', 'opening_hours_fr TEXT')
+safeAddColumn('gallery_contact_overrides', 'opening_hours_en TEXT')
+safeAddColumn('gallery_contact_overrides', 'website TEXT')
+safeAddColumn('gallery_contact_overrides', 'instagram TEXT')
+safeAddColumn('gallery_contact_overrides', 'image_filename TEXT')
+
 // Auto-seed if tables are empty (idempotent)
 try {
   const routeCount = sqlite.prepare('SELECT COUNT(*) as n FROM tour_routes').get() as { n: number }

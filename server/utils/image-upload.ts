@@ -21,8 +21,6 @@ function safeFilename(name: string): boolean {
 
 interface ProcessOptions {
   maxDimension?: number
-  // When true, force lossless. When 'auto', uses lossless only if alpha is present.
-  lossless?: boolean | 'auto'
   quality?: number
 }
 
@@ -42,8 +40,9 @@ async function processAndStore(
   }
 
   const dim = opts.maxDimension ?? 1600
-  const wantsLossless = opts.lossless === true || (opts.lossless === 'auto' && meta.hasAlpha === true)
-  const webpOpts: sharp.WebpOptions = wantsLossless
+  // Preserve PNG transparency: lossless when alpha is present (logos), lossy
+  // otherwise (photos). sharp drops the alpha channel under lossy webp.
+  const webpOpts: sharp.WebpOptions = meta.hasAlpha
     ? { lossless: true, alphaQuality: 100 }
     : { quality: opts.quality ?? 82 }
 
@@ -122,10 +121,7 @@ export function saveGalleryLogo(
   _mimetype: string | undefined,
   galleryId: string,
 ): Promise<{ filename: string }> {
-  return processAndStore(buffer, GALLERIES_DIR, `${galleryId}-logo`, {
-    maxDimension: 600,
-    lossless: 'auto',
-  })
+  return processAndStore(buffer, GALLERIES_DIR, `${galleryId}-logo`, { maxDimension: 600 })
 }
 
 export function deleteGalleryLogo(filename: string | null | undefined): Promise<void> {

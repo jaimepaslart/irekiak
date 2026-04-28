@@ -70,6 +70,8 @@ function isOverridden(row: GalleryContactOverrideRow | null): boolean {
 }
 
 function buildView(base: Gallery, override: GalleryContactOverrideRow | null): GalleryView {
+  const imageUrl = resolveImageUrl(override, base)
+  const logoUrl = resolveLogoUrl(override, base)
   return {
     ...base,
     name: override?.galleryName ?? base.name,
@@ -83,10 +85,10 @@ function buildView(base: Gallery, override: GalleryContactOverrideRow | null): G
     openingHours: mergeTranslated(override, base.openingHours, 'openingHours'),
     website: override?.website ?? base.website,
     instagram: override?.instagram ?? base.instagram,
-    image: resolveImageUrl(override, base),
-    imageUrl: resolveImageUrl(override, base),
-    logo: resolveLogoUrl(override, base) ?? undefined,
-    logoUrl: resolveLogoUrl(override, base),
+    image: imageUrl,
+    imageUrl,
+    logo: logoUrl ?? undefined,
+    logoUrl,
     overridden: isOverridden(override),
   }
 }

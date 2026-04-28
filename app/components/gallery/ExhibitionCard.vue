@@ -19,7 +19,7 @@ const isUploaded = computed(() => props.card.imageUrl.startsWith('/api/'))
 </script>
 
 <template>
-  <article class="group flex flex-col">
+  <article class="group flex flex-col h-full">
     <div class="relative w-full aspect-[4/5] overflow-hidden bg-white/5 rounded-sm mb-5">
       <NuxtImg
         v-if="!isUploaded"
@@ -58,7 +58,7 @@ const isUploaded = computed(() => props.card.imageUrl.startsWith('/api/'))
       :href="card.externalUrl"
       target="_blank"
       rel="noopener noreferrer"
-      class="mt-5 inline-flex items-center gap-2 text-xs text-white/50 hover:text-gold font-mono uppercase tracking-[0.18em] transition-colors arrow-nudge-parent focus-gold self-start"
+      class="mt-auto pt-5 inline-flex items-center gap-2 text-xs text-white/50 hover:text-gold font-mono uppercase tracking-[0.18em] transition-colors arrow-nudge-parent focus-gold self-start"
     >
       {{ t('home.exhibitionsVisitSite') }}
       <span class="arrow-nudge" aria-hidden="true">→</span>

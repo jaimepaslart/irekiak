@@ -20,6 +20,7 @@ interface GalleryView {
   website?: string
   instagram?: string
   imageUrl: string
+  logoUrl: string | null
   overridden: boolean
 }
 
@@ -48,10 +49,13 @@ const loading = ref(true)
 const errorMessage = ref<string | null>(null)
 const saving = ref(false)
 const uploading = ref(false)
+const uploadingLogo = ref(false)
 const activeLocale = ref<SupportedLocale>('fr')
 const feedback = ref<string | null>(null)
 const fileInput = ref<HTMLInputElement | null>(null)
+const logoFileInput = ref<HTMLInputElement | null>(null)
 const dragActive = ref(false)
+const dragLogoActive = ref(false)
 
 interface Form {
   galleryName: string
@@ -279,6 +283,68 @@ function onDrop(e: DragEvent) {
   if (file) void uploadFile(file)
 }
 
+async function uploadLogo(file: File) {
+  if (!view.value) return
+  if (!ACCEPTED_IMAGE_MIME.has(file.type)) {
+    alert(t('galleries.feedback.imageBadFormat'))
+    if (logoFileInput.value) logoFileInput.value.value = ''
+    return
+  }
+  if (file.size > MAX_IMAGE_BYTES) {
+    alert(t('galleries.feedback.imageTooLarge'))
+    if (logoFileInput.value) logoFileInput.value.value = ''
+    return
+  }
+  uploadingLogo.value = true
+  try {
+    const fd = new FormData()
+    fd.append('file', file)
+    await $fetch(`/api/admin/galleries/${id.value}/logo`, {
+      method: 'POST',
+      headers: { 'x-admin-token': token.value },
+      body: fd,
+    })
+    showFeedback(t('galleries.feedback.logoUploaded'))
+    await load()
+  }
+  catch (err: unknown) {
+    alert(describeError(err, 'galleries.feedback.logoFailed'))
+  }
+  finally {
+    uploadingLogo.value = false
+    if (logoFileInput.value) logoFileInput.value.value = ''
+  }
+}
+
+async function removeLogo() {
+  if (!view.value) return
+  uploadingLogo.value = true
+  try {
+    await $fetch(`/api/admin/galleries/${id.value}/logo`, {
+      method: 'DELETE',
+      headers: { 'x-admin-token': token.value },
+    })
+    showFeedback(t('galleries.feedback.logoRemoved'))
+    await load()
+  }
+  catch (err: unknown) {
+    alert(describeError(err, 'galleries.feedback.logoFailed'))
+  }
+  finally { uploadingLogo.value = false }
+}
+
+function onLogoFileChange(e: Event) {
+  const file = (e.target as HTMLInputElement).files?.[0]
+  if (file) void uploadLogo(file)
+}
+
+function onLogoDrop(e: DragEvent) {
+  e.preventDefault()
+  dragLogoActive.value = false
+  const file = e.dataTransfer?.files?.[0]
+  if (file) void uploadLogo(file)
+}
+
 const descriptionKey = computed<keyof Form>(() => `description${activeLocale.value.charAt(0).toUpperCase()}${activeLocale.value.slice(1)}` as keyof Form)
 const hoursKey = computed<keyof Form>(() => `openingHours${activeLocale.value.charAt(0).toUpperCase()}${activeLocale.value.slice(1)}` as keyof Form)
 
@@ -352,6 +418,44 @@ function restoreField(field: keyof Form, value: string | number | boolean) {
                   @click="removeImage"
                 >
                   {{ t('galleries.actions.removeImage') }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- LOGO -->
+      <section>
+        <div class="eyebrow mb-3">{{ t('galleries.sectionLogo') }}</div>
+        <div
+          class="relative overflow-hidden border rounded-sm transition-colors"
+          :class="dragLogoActive ? 'border-gold bg-gold-soft/20' : 'border-white/10 bg-[var(--color-edition-dark)]'"
+          @dragover.prevent="dragLogoActive = true"
+          @dragleave.prevent="dragLogoActive = false"
+          @drop="onLogoDrop"
+        >
+          <div class="flex gap-4 p-4">
+            <div class="relative shrink-0 w-24 h-24 overflow-hidden rounded-sm bg-white/5 flex items-center justify-center">
+              <img v-if="view.logoUrl" :src="view.logoUrl" :alt="`${view.name} logo`" class="w-full h-full object-contain p-2">
+              <span v-else class="text-[10px] uppercase tracking-[0.18em] font-mono text-white/30">—</span>
+            </div>
+            <div class="flex-1 min-w-0 flex flex-col justify-between">
+              <p class="text-sm text-white/60 leading-relaxed">{{ t('galleries.dropzoneHint') }}</p>
+              <p class="text-[11px] text-white/35 mt-2">{{ t('galleries.fieldLogoHelp') }}</p>
+              <div class="flex items-center gap-3 mt-4">
+                <label class="inline-flex items-center gap-2 px-4 py-2 bg-[var(--color-accent-gold)] text-[var(--color-edition)] text-xs uppercase tracking-[0.18em] font-medium rounded-sm cursor-pointer hover:bg-[var(--color-accent-gold)]/90 transition-colors">
+                  <input ref="logoFileInput" type="file" accept="image/jpeg,image/png,image/webp" class="sr-only" :disabled="uploadingLogo" @change="onLogoFileChange">
+                  {{ uploadingLogo ? t('galleries.actions.uploading') : t('galleries.actions.uploadLogo') }}
+                </label>
+                <button
+                  v-if="override?.logoFilename"
+                  type="button"
+                  class="text-xs text-white/50 hover:text-red-300 font-mono uppercase tracking-[0.18em] transition-colors"
+                  :disabled="uploadingLogo"
+                  @click="removeLogo"
+                >
+                  {{ t('galleries.actions.removeLogo') }}
                 </button>
               </div>
             </div>

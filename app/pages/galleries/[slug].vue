@@ -2,7 +2,7 @@
 import type { Gallery } from '#types/gallery'
 import { exhibitions } from '@data/exhibitions'
 
-type GalleryView = Gallery & { imageUrl: string }
+type GalleryView = Gallery & { imageUrl: string, logoUrl: string | null }
 
 const { t } = useI18n()
 const localePath = useLocalePath()
@@ -49,6 +49,12 @@ useScrollReveal()
           >
             &larr; {{ t('nav.galleries') }}
           </NuxtLink>
+          <img
+            v-if="gallery.logoUrl"
+            :src="gallery.logoUrl"
+            :alt="`${gallery.name} logo`"
+            class="h-12 md:h-14 w-auto mb-3 object-contain"
+          >
           <h1>{{ gallery.name }}</h1>
         </div>
       </div>

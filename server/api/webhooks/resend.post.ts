@@ -53,6 +53,16 @@ export default defineEventHandler(async (event) => {
   const bookingIdTag = tags?.find(t => t.name === 'booking_id')?.value ?? null
   const channelTag = tags?.find(t => t.name === 'channel')?.value ?? null
 
+  // Resend webhooks fire at the account level: if the same Resend account is
+  // shared with another project (e.g. leadstime.fr), every event lands here.
+  // Drop anything not sent from an Irekiak domain.
+  const fromRaw = String(data.from ?? '').toLowerCase()
+  const fromDomain = fromRaw.match(/@([\w.-]+)/)?.[1] ?? ''
+  const IREKIAK_DOMAINS = new Set(['irekiak.art', 'irekiak.eus'])
+  if (fromDomain && !IREKIAK_DOMAINS.has(fromDomain)) {
+    return { ok: true, skipped: 'foreign-domain', from: fromDomain }
+  }
+
   try {
     await db.insert(emailEvents).values({
       id: randomUUID(),

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ExhibitionCard } from '#types/exhibition'
+import { isUploadedImage } from '~/utils/image-source'
 import { splitParagraphs } from '~/utils/text'
 
 interface Props {
@@ -13,9 +14,7 @@ const { t } = useI18n()
 const paragraphs = computed(() => splitParagraphs(tr(props.card.description)))
 const title = computed(() => tr(props.card.title))
 const alt = computed(() => `${props.card.artist} — ${title.value}`)
-// Upload endpoint serves images already resized / webp-encoded; skip NuxtImg's
-// ipx optimisation pass for those (static /images/* still benefit from it).
-const isUploaded = computed(() => props.card.imageUrl.startsWith('/api/'))
+const isUploaded = computed(() => isUploadedImage(props.card.imageUrl))
 </script>
 
 <template>

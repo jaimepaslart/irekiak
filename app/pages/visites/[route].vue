@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { tourRoutes } from '@data/tours'
 import { galleries } from '@data/galleries'
+import { isUploadedImage } from '~/utils/image-source'
 
 interface AvailabilitySlot {
   id: string
@@ -132,7 +133,7 @@ usePageSeo('tours')
                    transition-all duration-300 hover:border-white/30 snap-start"
           >
             <NuxtImg
-              v-if="!gallery.image.startsWith('/api/')"
+              v-if="!isUploadedImage(gallery.image)"
               :src="gallery.image"
               :alt="gallery.name"
               width="256"

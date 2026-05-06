@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Gallery } from '#types/gallery'
 import type { Exhibition } from '#types/exhibition'
+import { isUploadedImage } from '~/utils/image-source'
 
 type GalleryView = Gallery & { imageUrl: string, logoUrl: string | null }
 
@@ -11,9 +12,6 @@ const route = useRoute()
 
 const slug = computed(() => String(route.params.slug ?? ''))
 
-// Both endpoints apply admin overrides on top of the static data files; reading
-// data/exhibitions.ts directly here would show stale info after a gallerist
-// edits via /admin (artist name, title, description, image).
 const { data: gallery } = await useAsyncData<GalleryView | null>(
   () => `gallery-${slug.value}`,
   () => $fetch<GalleryView>(`/api/galleries/${slug.value}`).catch(() => null),
@@ -26,12 +24,7 @@ const { data: galleryExhibitions } = await useAsyncData<Exhibition[]>(
   { default: () => [] as Exhibition[] },
 )
 
-// Uploaded covers are already resized / webp-encoded by the upload endpoint and
-// served from /api/images/* — bypass NuxtImg's ipx pass, which expects a file
-// under public/ and 404s on Nitro-served paths.
-const isUploadedCover = computed(() =>
-  Boolean(gallery.value?.image?.startsWith('/api/')),
-)
+const isUploadedCover = computed(() => isUploadedImage(gallery.value?.image))
 
 usePageSeo('galleries')
 useScrollReveal()
@@ -160,7 +153,7 @@ useScrollReveal()
                 class="p-5 border border-white/15 rounded-sm"
               >
                 <p class="text-white font-semibold text-lg mb-2">{{ artist.name }}</p>
-                <p v-if="tr(artist.bio)" class="text-white/60 text-sm leading-relaxed">
+                <p v-if="artist.bio" class="text-white/60 text-sm leading-relaxed">
                   {{ tr(artist.bio) }}
                 </p>
               </div>

@@ -2,6 +2,7 @@
 import { tourRoutes } from '@data/tours'
 import { currentEdition } from '@data/editions'
 import type { ExhibitionCard } from '#types/exhibition'
+import { isUploadedImage } from '~/utils/image-source'
 
 const { t } = useI18n()
 const localePath = useLocalePath()
@@ -136,7 +137,7 @@ onBeforeUnmount(() => {
           aria-hidden="i === currentIndex ? 'false' : 'true'"
         >
           <NuxtImg
-            v-if="!card.imageUrl.startsWith('/api/')"
+            v-if="!isUploadedImage(card.imageUrl)"
             :src="card.imageUrl"
             :alt="`${card.artist} — ${tr(card.title)}`"
             format="webp"

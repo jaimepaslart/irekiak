@@ -27,10 +27,12 @@ function mergeTranslated(
   }
 }
 
+function uploadedImageUrl(filename: string): string {
+  return `/api/images/exhibitions/${filename}`
+}
+
 function resolveImageUrl(override: ExhibitionOverrideRow | null, exh: Exhibition): string {
-  if (override?.imageFilename) {
-    return `/api/images/exhibitions/${override.imageFilename}`
-  }
+  if (override?.imageFilename) return uploadedImageUrl(override.imageFilename)
   const gallery = galleriesById.get(exh.galleryId)
   return exh.images[0] ?? gallery?.image ?? '/images/og/og-home.jpg'
 }
@@ -92,34 +94,23 @@ export function listExhibitionCards(): ExhibitionCard[] {
   return sortedExhibitions.map(exh => buildCard(exh, byId.get(exh.id) ?? null))
 }
 
-const EMPTY_BIO: TranslatedText = { eu: '', es: '', fr: '', en: '' }
-
-// Full Exhibition shape (with artists[] / medium / images) merged with admin
-// overrides — used by the gallery detail page so it doesn't show stale data
-// from data/exhibitions.ts after a gallerist edits via /admin.
-//
-// When the admin overrides `artistName`, the static bio (tied to the original
-// artist) is dropped instead of being shown next to a different name — the
-// override schema doesn't carry a replacement bio.
+// When the admin overrides `artistName`, the static bio is dropped instead
+// of being shown next to a different name — the override schema has no
+// replacement bio field.
 function mergeExhibition(exh: Exhibition, override: ExhibitionOverrideRow | null): Exhibition {
   if (!override) return exh
-  const overriddenImage = override.imageFilename
-    ? [`/api/images/exhibitions/${override.imageFilename}`, ...exh.images.slice(1)]
+  const images = override.imageFilename
+    ? [uploadedImageUrl(override.imageFilename), ...exh.images.slice(1)]
     : exh.images
-  let artists: Artist[] = exh.artists
-  if (override.artistName) {
-    const head: Artist = {
-      name: override.artistName,
-      bio: EMPTY_BIO,
-    }
-    artists = [head]
-  }
+  const artists: Artist[] = override.artistName
+    ? [{ name: override.artistName }]
+    : exh.artists
   return {
     ...exh,
     title: mergeTranslated(override, exh.title, 'title'),
     description: mergeTranslated(override, exh.description, 'description'),
     artists,
-    images: overriddenImage,
+    images,
   }
 }
 

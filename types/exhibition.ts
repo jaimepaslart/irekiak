@@ -2,7 +2,7 @@ import type { TranslatedText } from './gallery'
 
 export interface Artist {
   name: string
-  bio: TranslatedText
+  bio?: TranslatedText
   website?: string
   instagram?: string
   image?: string

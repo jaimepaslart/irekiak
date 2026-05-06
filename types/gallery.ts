@@ -1,5 +1,6 @@
-export type { TranslatedText, SupportedLocale } from './common'
 import type { TranslatedText } from './common'
+
+export type { TranslatedText, SupportedLocale } from './common'
 
 export interface GalleryContact {
   email: string

@@ -137,7 +137,6 @@ onMounted(async () => {
     }
   }
 
-  // @ts-expect-error markerClusterGroup is added by leaflet.markercluster
   const cluster = L.markerClusterGroup({
     showCoverageOnHover: false,
     spiderfyOnMaxZoom: true,

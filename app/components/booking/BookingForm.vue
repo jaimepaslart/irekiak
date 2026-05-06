@@ -50,6 +50,7 @@ function markTouched(field: string) {
 }
 
 function validate(): boolean {
+  // eslint-disable-next-line @typescript-eslint/no-dynamic-delete -- reactive object reset
   for (const k of Object.keys(errors)) delete errors[k]
 
   if (!form.firstName.trim()) errors.firstName = t('booking.errors.required')

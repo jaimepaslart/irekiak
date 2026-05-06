@@ -183,13 +183,13 @@ try {
   const routeCount = sqlite.prepare('SELECT COUNT(*) as n FROM tour_routes').get() as { n: number }
   if (routeCount.n === 0) {
     const parseMinutes = (s: string): number => {
-      const m = s.match(/(\d+)\s*h/i)
-      const mm = s.match(/(\d+)\s*min/i)
-      return (m ? parseInt(m[1]) * 60 : 0) + (mm ? parseInt(mm[1]) : 0)
+      const m = s.match(/(\d+)\s*h/i)?.[1]
+      const mm = s.match(/(\d+)\s*min/i)?.[1]
+      return (m ? parseInt(m) * 60 : 0) + (mm ? parseInt(mm) : 0)
     }
     const parseMeters = (s: string): number => {
-      const km = s.match(/([\d.]+)\s*km/i)
-      return km ? Math.round(parseFloat(km[1]) * 1000) : 0
+      const km = s.match(/([\d.]+)\s*km/i)?.[1]
+      return km ? Math.round(parseFloat(km) * 1000) : 0
     }
 
     const insertRoute = sqlite.prepare(`

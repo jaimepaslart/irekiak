@@ -54,7 +54,7 @@ onMounted(() => {
   // Honour prefers-reduced-motion: dots stay clickable but no autoplay.
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
   startTimer()
-  visibilityHandler = () => { document.hidden ? stopTimer() : startTimer() }
+  visibilityHandler = () => { if (document.hidden) stopTimer(); else startTimer() }
   document.addEventListener('visibilitychange', visibilityHandler)
 })
 
@@ -134,7 +134,7 @@ onBeforeUnmount(() => {
           :key="card.id"
           class="absolute inset-0 transition-opacity duration-[1200ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
           :class="i === currentIndex ? 'opacity-100' : 'opacity-0'"
-          aria-hidden="i === currentIndex ? 'false' : 'true'"
+          :aria-hidden="i !== currentIndex"
         >
           <NuxtImg
             v-if="!isUploadedImage(card.imageUrl)"

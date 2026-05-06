@@ -62,7 +62,7 @@ export default defineEventHandler(async (event) => {
       icsContent,
     })
   }
-  catch (err) {
+  catch {
     throw createError({
       statusCode: 502,
       statusMessage: 'Failed to send email, try again shortly',

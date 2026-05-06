@@ -21,7 +21,7 @@ const GALLERIES_DIR = join(UPLOADS_ROOT, 'galleries')
 const MAX_BYTES = 5 * 1024 * 1024
 const MAX_SVG_BYTES = 200 * 1024
 const ACCEPTED_FORMATS = new Set(['jpeg', 'png', 'webp'])
-const SVG_HEADER_RE = /^﻿?\s*(?:<\?xml[^?]*\?>\s*)?(?:<!DOCTYPE[^>]*>\s*)?(?:<!--[\s\S]*?-->\s*)*<svg/i
+const SVG_HEADER_RE = /^\uFEFF?\s*(?:<\?xml[^?]*\?>\s*)?(?:<!DOCTYPE[^>]*>\s*)?(?:<!--[\s\S]*?-->\s*)*<svg/i
 
 for (const dir of [EXHIBITIONS_DIR, GALLERIES_DIR]) {
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true })

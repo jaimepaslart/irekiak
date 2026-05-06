@@ -91,8 +91,9 @@ export default defineNuxtConfig({
     ],
   },
 
-  sitemap: {
-    hostname: 'https://irekiak.eus',
+  site: {
+    url: 'https://irekiak.eus',
+    name: 'Irekiak',
   },
 
   typescript: {

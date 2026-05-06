@@ -37,6 +37,21 @@ Définies dans le manager → Environment Variables — **pas dans `.env` serveu
 
 Nuxt injecte `PORT` automatiquement (Nitro respecte `process.env.PORT`).
 
+## Backup DB
+
+`deploy/backup-db.sh` runs on the VPS as `/usr/local/bin/irekiak-backup-db.sh` via cron at 04:00 UTC.
+Output: `/opt/irekiak/backups/irekiak-YYYY-MM-DD.db.gz`. 14-day rotation. Log: `/var/log/irekiak-backup.log`.
+
+Re-install (idempotent — replaces any existing entry):
+
+```sh
+scp deploy/backup-db.sh root@76.13.38.1:/usr/local/bin/irekiak-backup-db.sh
+ssh root@76.13.38.1 "chmod +x /usr/local/bin/irekiak-backup-db.sh && \
+  (crontab -l | grep -v irekiak-backup-db; echo '0 4 * * * /usr/local/bin/irekiak-backup-db.sh') | crontab -"
+```
+
+Restore: `gunzip -c /opt/irekiak/backups/irekiak-YYYY-MM-DD.db.gz > /opt/irekiak/data/irekiak.db && docker restart irekiak-app`.
+
 `DATABASE_PATH` non nécessaire — défaut relatif `.data/irekiak.db` dans le working dir.
 
 ## Setup initial (une fois)

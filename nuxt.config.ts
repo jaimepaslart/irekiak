@@ -19,6 +19,7 @@ export default defineNuxtConfig({
     '@nuxt/icon',
     '@nuxtjs/sitemap',
     '@nuxt/eslint',
+    '@vueuse/nuxt',
   ],
 
   css: [

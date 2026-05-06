@@ -60,13 +60,14 @@ const statusFilterModel = computed<string>({
 const dateFilter = ref<string>('all')
 const routeFilter = ref<string>('all')
 const searchQuery = ref<string>('')
+const debouncedSearch = refDebounced(searchQuery, 200)
 const currentPage = ref(1)
 const pageSize = 20
 
 const todayIso = new Date().toISOString().split('T')[0]!
 
 const filteredBookings = computed(() => {
-  const q = searchQuery.value.trim().toLowerCase()
+  const q = debouncedSearch.value.trim().toLowerCase()
   return rawBookings.value.filter((b) => {
     if (statusFilter.value === 'confirmed' && b.status !== 'confirmed') return false
     if (statusFilter.value === 'cancelled' && b.status !== 'cancelled') return false
@@ -150,7 +151,7 @@ function formatSlotDate(iso: string): string {
   return `${day} ${months[month] ?? ''}`
 }
 
-watch([statusFilter, dateFilter, routeFilter, searchQuery], () => {
+watch([statusFilter, dateFilter, routeFilter, debouncedSearch], () => {
   currentPage.value = 1
 })
 

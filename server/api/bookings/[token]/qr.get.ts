@@ -1,9 +1,9 @@
 import { eq } from 'drizzle-orm'
 import { createError, defineEventHandler, getRouterParam, setHeader } from 'h3'
 import QRCode from 'qrcode'
-import { useRuntimeConfig } from '#imports'
 import { db } from '../../../db'
 import { bookings } from '../../../db/schema'
+import { absoluteUrl } from '../../../utils/site-url'
 
 /**
  * GET /api/bookings/:token/qr — Returns SVG QR code pointing to /bookings/:token.
@@ -24,9 +24,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, statusMessage: 'Booking not found' })
   }
 
-  const config = useRuntimeConfig()
-  const siteUrl = (config.public?.siteUrl as string | undefined) ?? 'https://irekiak.art'
-  const url = `${siteUrl.replace(/\/$/, '')}/bookings/${token}`
+  const url = absoluteUrl(`/bookings/${token}`)
 
   const svg = await QRCode.toString(url, {
     type: 'svg',

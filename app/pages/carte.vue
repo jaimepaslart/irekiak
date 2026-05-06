@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { galleries } from '@data/galleries'
 import { tourRoutes } from '@data/tours'
 import { createGalleryMarker, createUserLocationMarker } from '~/components/map/MarkerIcon'
 import { googleDirectionsUrl } from '~/utils/maps'
@@ -14,10 +13,12 @@ usePageSeo('map')
 const MAP_CENTER: [number, number] = [43.32, -1.98]
 const MAP_ZOOM = 15
 
-const galleriesById = new Map(galleries.map(g => [g.id, g]))
-const colorByGalleryId = new Map(
-  galleries.map(g => [g.id, tourRoutes.find(r => r.galleryIds.includes(g.id))?.color ?? '#FFFFFF']),
-)
+const { data: galleries } = await useGalleries()
+
+const galleriesById = computed(() => new Map(galleries.value.map(g => [g.id, g])))
+const colorByGalleryId = computed(() => new Map(
+  galleries.value.map(g => [g.id, tourRoutes.find(r => r.galleryIds.includes(g.id))?.color ?? '#FFFFFF']),
+))
 
 const selectedGallery = ref<string | null>(null)
 const mapContainer = ref<HTMLElement | null>(null)
@@ -26,7 +27,7 @@ const showIntro = ref(true)
 const isLocating = ref(false)
 
 const selectedGalleryData = computed(() =>
-  selectedGallery.value ? galleriesById.get(selectedGallery.value) ?? null : null,
+  selectedGallery.value ? galleriesById.value.get(selectedGallery.value) ?? null : null,
 )
 
 let map: LeafletMap | null = null
@@ -70,7 +71,7 @@ function selectGallery(id: string) {
   selectedGallery.value = wasSelected ? null : id
 
   if (!wasSelected && map) {
-    const gallery = galleriesById.get(id)
+    const gallery = galleriesById.value.get(id)
     if (gallery) {
       map.flyTo([gallery.coordinates.lat, gallery.coordinates.lng], 17, { duration: 0.8 })
       markersByGalleryId.get(id)?.openPopup()
@@ -81,7 +82,7 @@ function selectGallery(id: string) {
 }
 
 function buildPopupHtml(galleryId: string): string {
-  const gallery = galleriesById.get(galleryId)
+  const gallery = galleriesById.value.get(galleryId)
   if (!gallery) return ''
   const detailHref = localePath(`/galleries/${gallery.slug}`)
   const learnMore = t('common.learnMore')
@@ -119,7 +120,7 @@ onMounted(async () => {
   for (const route of tourRoutes) {
     const latlngs = route.galleryIds
       .map((gid) => {
-        const g = galleriesById.get(gid)
+        const g = galleriesById.value.get(gid)
         return g ? [g.coordinates.lat, g.coordinates.lng] as [number, number] : null
       })
       .filter((v): v is [number, number] => v !== null)
@@ -143,8 +144,8 @@ onMounted(async () => {
     maxClusterRadius: 40,
   })
 
-  for (const gallery of galleries) {
-    const color = colorByGalleryId.get(gallery.id) ?? '#FFFFFF'
+  for (const gallery of galleries.value) {
+    const color = colorByGalleryId.value.get(gallery.id) ?? '#FFFFFF'
     const marker = L.marker(
       [gallery.coordinates.lat, gallery.coordinates.lng],
       { icon: createGalleryMarker(gallery.name, color) },

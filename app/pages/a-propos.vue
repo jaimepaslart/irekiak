@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import { galleries } from '@data/galleries'
-
 const { t } = useI18n()
 const localePath = useLocalePath()
 
 usePageSeo('about')
 useScrollReveal()
 
-const daggeMembers = [
+const { data: galleries } = await useGalleries()
+
+const daggeMembers = computed(() => [
   { name: 'Arteko' },
   { name: 'Arteztu' },
   { name: 'Cibrián' },
   { name: 'Ekain' },
   { name: 'Villa Magdalena', website: 'https://www.villamagdalena33.com/' },
-].map(m => ({ ...m, slug: galleries.find(g => g.name === m.name)?.slug }))
+].map(m => ({ ...m, slug: galleries.value.find(g => g.name === m.name)?.slug })))
 </script>
 
 <template>

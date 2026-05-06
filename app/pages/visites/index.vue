@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import type { TourSlot } from '#types/tour'
 import { tourRoutes, tourSlots } from '@data/tours'
-import { galleries } from '@data/galleries'
 import { currentEdition } from '@data/editions'
 
 const { t } = useI18n()
 const localePath = useLocalePath()
 const tr = useTranslated()
+
+const { data: galleries } = await useGalleries()
 
 usePageSeo('tours')
 useScrollReveal()
@@ -25,7 +26,7 @@ const slotsByRoute = computed(() => {
 })
 
 function galleriesForRoute(galleryIds: string[]) {
-  return galleries.filter(g => galleryIds.includes(g.id))
+  return galleries.value.filter(g => galleryIds.includes(g.id))
 }
 
 function dayEyebrowForDate(date: string): string {

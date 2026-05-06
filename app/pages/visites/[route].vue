@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { tourRoutes } from '@data/tours'
-import { galleries } from '@data/galleries'
 import { isUploadedImage } from '~/utils/image-source'
 
 interface AvailabilitySlot {
@@ -25,9 +24,11 @@ const tourRoute = computed(() =>
   tourRoutes.find(r => r.slug === routeParam.params.route),
 )
 
+const { data: galleries } = await useGalleries()
+
 const routeGalleries = computed(() =>
   tourRoute.value
-    ? galleries.filter(g => tourRoute.value!.galleryIds.includes(g.id))
+    ? galleries.value.filter(g => tourRoute.value!.galleryIds.includes(g.id))
     : [],
 )
 

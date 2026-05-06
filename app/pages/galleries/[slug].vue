@@ -25,6 +25,13 @@ const galleryExhibitions = computed(() =>
     : [],
 )
 
+// Uploaded covers are already resized / webp-encoded by the upload endpoint and
+// served from /api/images/* — bypass NuxtImg's ipx pass, which expects a file
+// under public/ and 404s on Nitro-served paths.
+const isUploadedCover = computed(() =>
+  Boolean(gallery.value?.image?.startsWith('/api/')),
+)
+
 usePageSeo('galleries')
 useScrollReveal()
 </script>
@@ -34,12 +41,19 @@ useScrollReveal()
     <!-- Hero -->
     <section class="relative h-[60vh] min-h-[400px] w-full overflow-hidden">
       <NuxtImg
+        v-if="!isUploadedCover"
         :src="gallery.image"
         :alt="gallery.name"
         class="absolute inset-0 w-full h-full object-cover"
         format="webp"
         quality="80"
       />
+      <img
+        v-else
+        :src="gallery.image"
+        :alt="gallery.name"
+        class="absolute inset-0 w-full h-full object-cover"
+      >
       <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
       <div class="absolute bottom-0 left-0 right-0 px-6 md:px-12 pb-12">
         <div class="max-w-[1200px] mx-auto">

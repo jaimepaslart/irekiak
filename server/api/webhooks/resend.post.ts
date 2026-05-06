@@ -63,8 +63,9 @@ export default defineEventHandler(async (event) => {
     return { ok: true, skipped: 'foreign-domain', from: fromDomain }
   }
 
+  let inserted = 0
   try {
-    await db.insert(emailEvents).values({
+    const result = await db.insert(emailEvents).values({
       id: randomUUID(),
       bookingId: bookingIdTag,
       resendId: resendId || null,
@@ -72,14 +73,16 @@ export default defineEventHandler(async (event) => {
       recipient,
       eventType: type,
       metadata: JSON.stringify(verified),
-    }).run()
+    }).onConflictDoNothing({ target: [emailEvents.resendId, emailEvents.eventType] }).run()
+    inserted = result.changes ?? 0
   }
   catch (err) {
     console.error('[webhook:resend] insert failed:', err)
   }
 
-  // Log bounces/complaints prominently
-  if (type === 'email.bounced' || type === 'email.complained') {
+  // Log bounces/complaints prominently. Skip on Svix retries (changes === 0)
+  // so the audit trail isn't polluted by duplicates.
+  if (inserted > 0 && (type === 'email.bounced' || type === 'email.complained')) {
     void logAudit({
       actor: 'system',
       action: `email.${type.replace('email.', '')}`,

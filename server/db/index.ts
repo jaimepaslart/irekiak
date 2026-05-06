@@ -130,6 +130,18 @@ sqlite.exec(`
   CREATE INDEX IF NOT EXISTS idx_email_events_type ON email_events(event_type);
 `)
 
+// Webhook idempotency: Svix retries on timeout/5xx, so the same (resend_id, event_type)
+// can land twice. The unique index + INSERT OR IGNORE in webhooks/resend.post.ts
+// dedupes silently. Only applied to events that carry a resend_id.
+try {
+  sqlite.exec(`CREATE UNIQUE INDEX IF NOT EXISTS uniq_email_events_resend
+    ON email_events(resend_id, event_type)
+    WHERE resend_id IS NOT NULL`)
+}
+catch (err) {
+  console.warn('[db] could not create uniq_email_events_resend index:', (err as Error).message)
+}
+
 // Idempotent additive migrations (SQLite: ALTER TABLE ADD COLUMN only runs
 // if the column doesn't already exist — we catch the "duplicate column" error).
 function safeAddColumn(table: string, columnDef: string): void {

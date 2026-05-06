@@ -1,3 +1,4 @@
+import { timingSafeEqual } from 'node:crypto'
 import { and, eq, lt } from 'drizzle-orm'
 import { createError, defineEventHandler, getHeader } from 'h3'
 import { useRuntimeConfig } from '#imports'
@@ -16,7 +17,12 @@ export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
   const expected = (config as unknown as { cronSecret?: string }).cronSecret
   const provided = getHeader(event, 'authorization')?.replace(/^Bearer\s+/i, '')
-  if (!expected || !provided || provided !== expected) {
+  if (!expected || !provided) {
+    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
+  }
+  const a = Buffer.from(provided)
+  const b = Buffer.from(expected)
+  if (a.length !== b.length || !timingSafeEqual(a, b)) {
     throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
   }
 

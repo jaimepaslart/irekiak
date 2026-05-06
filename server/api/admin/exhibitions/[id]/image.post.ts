@@ -6,6 +6,7 @@ import { requireAdminToken } from '../../../../utils/require-admin'
 import { logAudit } from '../../../../utils/audit'
 import { deleteExhibitionImage, saveExhibitionImage } from '../../../../utils/image-upload'
 import { isValidExhibitionId } from '../../../../utils/exhibition-overrides'
+import { uploadedExhibitionImageUrl } from '../../../../utils/image-paths'
 
 export default defineEventHandler(async (event) => {
   requireAdminToken(event)
@@ -52,7 +53,7 @@ export default defineEventHandler(async (event) => {
       metadata: { filename, replaced: oldFilename },
     })
 
-    return { filename, url: `/api/images/exhibitions/${filename}` }
+    return { filename, url: uploadedExhibitionImageUrl(filename) }
   }
   catch (err) {
     // DB write failed — clean up the orphan file we just saved

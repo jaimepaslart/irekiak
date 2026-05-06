@@ -5,6 +5,7 @@ import type { Artist, Exhibition, ExhibitionCard } from '#types/exhibition'
 import type { TranslatedText } from '#types/gallery'
 import { db } from '../db'
 import { exhibitionOverrides, type ExhibitionOverrideRow } from '../db/schema'
+import { uploadedExhibitionImageUrl } from './image-paths'
 
 const galleriesById = new Map(galleries.map(g => [g.id, g]))
 const galleryOrder = new Map(galleries.map((g, i) => [g.id, i + 1]))
@@ -27,12 +28,8 @@ function mergeTranslated(
   }
 }
 
-function uploadedImageUrl(filename: string): string {
-  return `/api/images/exhibitions/${filename}`
-}
-
 function resolveImageUrl(override: ExhibitionOverrideRow | null, exh: Exhibition): string {
-  if (override?.imageFilename) return uploadedImageUrl(override.imageFilename)
+  if (override?.imageFilename) return uploadedExhibitionImageUrl(override.imageFilename)
   const gallery = galleriesById.get(exh.galleryId)
   return exh.images[0] ?? gallery?.image ?? '/images/og/og-home.jpg'
 }
@@ -100,7 +97,7 @@ export function listExhibitionCards(): ExhibitionCard[] {
 function mergeExhibition(exh: Exhibition, override: ExhibitionOverrideRow | null): Exhibition {
   if (!override) return exh
   const images = override.imageFilename
-    ? [uploadedImageUrl(override.imageFilename), ...exh.images.slice(1)]
+    ? [uploadedExhibitionImageUrl(override.imageFilename), ...exh.images.slice(1)]
     : exh.images
   const artists: Artist[] = override.artistName
     ? [{ name: override.artistName }]

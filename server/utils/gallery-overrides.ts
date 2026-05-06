@@ -3,6 +3,7 @@ import { galleries } from '@data/galleries'
 import type { Gallery, TranslatedText } from '#types/gallery'
 import { db } from '../db'
 import { galleryContactOverrides, type GalleryContactOverrideRow } from '../db/schema'
+import { uploadedGalleryImageUrl } from './image-paths'
 
 /**
  * Merged view of a gallery: defaults from data/galleries.ts, with admin overrides
@@ -34,12 +35,12 @@ function mergeTranslated(
 }
 
 function resolveImageUrl(override: GalleryContactOverrideRow | null, base: Gallery): string {
-  if (override?.imageFilename) return `/api/images/galleries/${override.imageFilename}`
+  if (override?.imageFilename) return uploadedGalleryImageUrl(override.imageFilename)
   return base.image
 }
 
 function resolveLogoUrl(override: GalleryContactOverrideRow | null, base: Gallery): string | null {
-  if (override?.logoFilename) return `/api/images/galleries/${override.logoFilename}`
+  if (override?.logoFilename) return uploadedGalleryImageUrl(override.logoFilename)
   return base.logo ?? null
 }
 

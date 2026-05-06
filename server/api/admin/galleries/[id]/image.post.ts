@@ -6,6 +6,7 @@ import { requireAdminToken } from '../../../../utils/require-admin'
 import { logAudit } from '../../../../utils/audit'
 import { deleteGalleryImage, saveGalleryImage } from '../../../../utils/image-upload'
 import { isValidGalleryId } from '../../../../utils/gallery-overrides'
+import { uploadedGalleryImageUrl } from '../../../../utils/image-paths'
 
 export default defineEventHandler(async (event) => {
   requireAdminToken(event)
@@ -52,7 +53,7 @@ export default defineEventHandler(async (event) => {
       metadata: { filename, replaced: oldFilename },
     })
 
-    return { filename, url: `/api/images/galleries/${filename}` }
+    return { filename, url: uploadedGalleryImageUrl(filename) }
   }
   catch (err) {
     await deleteGalleryImage(filename)

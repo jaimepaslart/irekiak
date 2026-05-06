@@ -14,7 +14,8 @@ const localePath = useLocalePath()
     :to="localePath(`/galleries/${gallery.slug}`)"
     class="group block"
   >
-    <div class="relative aspect-[4/5] overflow-hidden rounded-sm mb-4 border border-white/10 transition-all duration-400
+    <div
+class="relative aspect-[4/5] overflow-hidden rounded-sm mb-4 border border-white/10 transition-all duration-400
                 group-hover:scale-[1.03] group-hover:border-white/30">
       <img
         :src="gallery.image"

@@ -21,7 +21,8 @@ useScrollReveal()
 
         <div>
           <p class="text-xs uppercase tracking-wider text-white/40 font-mono mb-3">Instagram</p>
-          <a href="https://www.instagram.com/irekiak.gallery.weekend" target="_blank" rel="noopener noreferrer"
+          <a
+href="https://www.instagram.com/irekiak.gallery.weekend" target="_blank" rel="noopener noreferrer"
             class="text-white hover:text-white/80 transition-colors">
             @irekiak.gallery.weekend
           </a>

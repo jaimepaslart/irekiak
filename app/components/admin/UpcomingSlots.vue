@@ -77,7 +77,7 @@ function barColor(variant: PreparedSlot['variant']) {
     {{ emptyLabel }}
   </div>
   <ol v-else class="relative pl-6 md:pl-8">
-    <span class="absolute top-2 bottom-2 left-[7px] md:left-[11px] w-px bg-gold-soft" aria-hidden="true"></span>
+    <span class="absolute top-2 bottom-2 left-[7px] md:left-[11px] w-px bg-gold-soft" aria-hidden="true"/>
     <li
       v-for="(s, i) in prepared"
       :key="s.slotId"
@@ -92,7 +92,7 @@ function barColor(variant: PreparedSlot['variant']) {
           'border-emerald-400': s.variant === 'full',
         }"
         aria-hidden="true"
-      ></span>
+      />
 
       <NuxtLink
         :to="`/admin/parcours/${s.routeSlug}/slot/${s.slotId}`"

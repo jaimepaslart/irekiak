@@ -202,7 +202,7 @@ function distanceLabel(meters: number) {
             <dt class="text-white/40 uppercase tracking-wider text-xs font-mono mb-1">{{ t('booking.language') || 'Langue' }}</dt>
             <dd class="text-white font-medium uppercase">{{ data.booking.language }}</dd>
           </div>
-          <div class="md:col-span-2" v-if="data.booking.specialNeeds">
+          <div v-if="data.booking.specialNeeds" class="md:col-span-2">
             <dt class="text-white/40 uppercase tracking-wider text-xs font-mono mb-1">{{ t('booking.specialNeeds') || 'Besoins spécifiques' }}</dt>
             <dd class="text-white/90">{{ data.booking.specialNeeds }}</dd>
           </div>

@@ -46,7 +46,7 @@ withDefaults(defineProps<Props>(), {
         <div
           class="h-px bg-[var(--color-accent-gold)]"
           :class="divider === 'short' ? 'mt-6 w-16 opacity-80' : 'mt-6 w-24 opacity-50'"
-        ></div>
+        />
       </div>
       <div v-if="$slots.actions" class="flex flex-wrap items-center gap-2 shrink-0">
         <slot name="actions" />

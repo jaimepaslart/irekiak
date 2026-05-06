@@ -156,7 +156,7 @@ onBeforeUnmount(() => {
         <div class="eyebrow text-gold mb-6">IREKIAK 2026 · {{ locale === 'es' ? 'EDICIÓN' : 'ÉDITION' }}</div>
         <h1 class="font-serif text-4xl md:text-5xl font-normal text-white leading-[1.05] tracking-[-0.01em] mb-3">{{ t('nav.admin') }}</h1>
         <p class="text-sm text-white/50 italic font-serif mb-1">{{ t('auth.loginRequired') }}</p>
-        <div class="h-px w-16 bg-[var(--color-accent-gold)] my-8"></div>
+        <div class="h-px w-16 bg-[var(--color-accent-gold)] my-8"/>
 
         <form class="space-y-6" @submit.prevent="login">
           <label class="block">

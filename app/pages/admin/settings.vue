@@ -97,7 +97,7 @@ const quickLinks = computed<QuickLink[]>(() => [
         <AdminTestEmailForm />
       </AdminSettingsSection>
 
-      <div class="h-px w-full bg-[var(--color-accent-gold)] opacity-5"></div>
+      <div class="h-px w-full bg-[var(--color-accent-gold)] opacity-5"/>
 
       <AdminSettingsSection
         icon="◉"
@@ -123,7 +123,7 @@ const quickLinks = computed<QuickLink[]>(() => [
         </div>
       </AdminSettingsSection>
 
-      <div class="h-px w-full bg-[var(--color-accent-gold)] opacity-5"></div>
+      <div class="h-px w-full bg-[var(--color-accent-gold)] opacity-5"/>
 
       <AdminSettingsSection
         icon="⚠"
@@ -156,7 +156,7 @@ const quickLinks = computed<QuickLink[]>(() => [
         </div>
       </AdminSettingsSection>
 
-      <div class="h-px w-full bg-[var(--color-accent-gold)] opacity-5"></div>
+      <div class="h-px w-full bg-[var(--color-accent-gold)] opacity-5"/>
 
       <AdminSettingsSection
         icon="↓"
@@ -174,7 +174,7 @@ const quickLinks = computed<QuickLink[]>(() => [
         </button>
       </AdminSettingsSection>
 
-      <div class="h-px w-full bg-[var(--color-accent-gold)] opacity-5"></div>
+      <div class="h-px w-full bg-[var(--color-accent-gold)] opacity-5"/>
 
       <AdminSettingsSection
         icon="→"
@@ -192,7 +192,7 @@ const quickLinks = computed<QuickLink[]>(() => [
             <span
               class="absolute inset-y-0 left-0 w-[2px] bg-[var(--color-accent-gold)] opacity-0 transition-opacity duration-500 group-hover:opacity-100"
               aria-hidden="true"
-            ></span>
+            />
             <div class="eyebrow mb-3">{{ link.eyebrow }}</div>
             <div class="flex items-center justify-between gap-3">
               <span class="font-serif text-lg text-white" style="font-weight: 400; letter-spacing: -0.01em;">

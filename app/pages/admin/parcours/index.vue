@@ -100,7 +100,7 @@ function arrivedLabel(count: number): string {
         <span
           class="absolute inset-y-0 left-0 w-[2px] bg-[var(--color-accent-gold)] opacity-0 transition-opacity duration-500 group-hover:opacity-100"
           aria-hidden="true"
-        ></span>
+        />
 
         <div class="eyebrow mb-5">
           {{ route.roman }} · {{ t('parcours.routeLabel') }}

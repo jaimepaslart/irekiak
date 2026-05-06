@@ -73,7 +73,7 @@ function toneBg(tone: TimelineEntry['tone']) {
         </span>
         <div class="min-w-0 flex-1">
           <p class="text-sm text-white/85 leading-snug">
-            <span v-html="e.text"></span>
+            <span v-html="e.text"/>
             <span v-if="e.link" class="arrow-nudge ml-1 text-white/30">→</span>
           </p>
           <div class="mt-1 flex items-center gap-2 text-[11px] text-white/40">

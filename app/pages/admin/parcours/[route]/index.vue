@@ -251,7 +251,7 @@ const decoratedOthers = computed<DecoratedSlot[]>(() => otherSlots.value.map(dec
             :to="decoratedNext.url"
             class="group relative block overflow-hidden border border-gold-soft bg-gold-soft rounded-sm p-7 md:p-9 editorial-in focus-gold transition-colors duration-300 hover:border-gold"
           >
-            <span class="absolute inset-y-0 left-0 w-[3px] bg-[var(--color-accent-gold)]" aria-hidden="true"></span>
+            <span class="absolute inset-y-0 left-0 w-[3px] bg-[var(--color-accent-gold)]" aria-hidden="true"/>
 
             <div class="flex items-start justify-between gap-6 mb-6">
               <div class="min-w-0">
@@ -307,7 +307,7 @@ const decoratedOthers = computed<DecoratedSlot[]>(() => otherSlots.value.map(dec
           </header>
 
           <ol class="relative pl-6 md:pl-8">
-            <span class="absolute top-2 bottom-2 left-[7px] md:left-[11px] w-px bg-gold-soft" aria-hidden="true"></span>
+            <span class="absolute top-2 bottom-2 left-[7px] md:left-[11px] w-px bg-gold-soft" aria-hidden="true"/>
 
             <li
               v-for="(s, i) in decoratedOthers"
@@ -323,7 +323,7 @@ const decoratedOthers = computed<DecoratedSlot[]>(() => otherSlots.value.map(dec
                   'border-emerald-400': s.variant === 'full',
                 }"
                 aria-hidden="true"
-              ></span>
+              />
 
               <NuxtLink
                 :to="s.url"

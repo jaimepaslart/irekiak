@@ -64,8 +64,6 @@ pnpm generate       # Génération statique
 pnpm typecheck      # Vérification TypeScript
 pnpm lint           # ESLint
 pnpm i18n:check     # Vérification traductions
-pnpm seo:check      # Audit SEO
-pnpm data:check     # Vérification données
 ```
 
 ## Booking system (refactor avril 2026)

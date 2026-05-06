@@ -390,11 +390,11 @@ const humanizedAudit = computed<TimelineEntry[]>(() => {
         </div>
       </div>
       <section class="mb-12">
-        <div class="h-5 w-40 bg-white/10 rounded mb-6 animate-pulse"></div>
+        <div class="h-5 w-40 bg-white/10 rounded mb-6 animate-pulse"/>
         <AdminSkeleton variant="row" :count="4" />
       </section>
       <section class="mb-12">
-        <div class="h-5 w-40 bg-white/10 rounded mb-6 animate-pulse"></div>
+        <div class="h-5 w-40 bg-white/10 rounded mb-6 animate-pulse"/>
         <AdminSkeleton variant="row" :count="6" />
       </section>
     </template>

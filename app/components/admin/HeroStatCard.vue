@@ -31,7 +31,7 @@ const barTone = computed(() => {
 
 <template>
   <div class="relative overflow-hidden border border-white/10 bg-[var(--color-edition-dark)] rounded-sm p-7 md:p-8 editorial-in">
-    <div class="absolute inset-y-0 left-0 w-[3px] bg-gold-soft"></div>
+    <div class="absolute inset-y-0 left-0 w-[3px] bg-gold-soft"/>
     <div class="eyebrow mb-4">
       {{ eyebrow }}
     </div>

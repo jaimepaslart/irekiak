@@ -7,5 +7,5 @@
   <div
     class="absolute inset-x-0 -top-10 -bottom-10 editorial-grain pointer-events-none opacity-60"
     aria-hidden="true"
-  ></div>
+  />
 </template>

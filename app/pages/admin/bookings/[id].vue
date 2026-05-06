@@ -160,9 +160,9 @@ const timelineEntries = computed<TimelineEntry[]>(() => {
 
     <template v-if="loading && !data">
       <div class="mb-8">
-        <div class="h-3 w-40 bg-white/10 rounded mb-4 animate-pulse"></div>
-        <div class="h-10 w-64 bg-white/10 rounded mb-3 animate-pulse"></div>
-        <div class="h-px w-24 bg-white/10 animate-pulse"></div>
+        <div class="h-3 w-40 bg-white/10 rounded mb-4 animate-pulse"/>
+        <div class="h-10 w-64 bg-white/10 rounded mb-3 animate-pulse"/>
+        <div class="h-px w-24 bg-white/10 animate-pulse"/>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <AdminSkeleton variant="card" :count="1" />
@@ -246,7 +246,7 @@ const timelineEntries = computed<TimelineEntry[]>(() => {
               class="w-2 h-2 rounded-full"
               :style="{ backgroundColor: data.route.color }"
               aria-hidden="true"
-            ></span>
+            />
           </div>
 
           <dl class="space-y-5 text-sm">

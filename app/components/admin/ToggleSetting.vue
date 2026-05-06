@@ -37,8 +37,8 @@ function toggle(e: Event) {
         :disabled="saving"
         @change="toggle"
       >
-      <div class="w-12 h-6 bg-white/10 peer-checked:bg-[var(--color-accent-gold)] rounded-full transition-colors peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--color-accent-gold)]"></div>
-      <div class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-6 shadow-sm"></div>
+      <div class="w-12 h-6 bg-white/10 peer-checked:bg-[var(--color-accent-gold)] rounded-full transition-colors peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--color-accent-gold)]"/>
+      <div class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-6 shadow-sm"/>
     </label>
   </div>
 </template>

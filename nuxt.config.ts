@@ -37,24 +37,10 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
-    '/visites/**': { ssr: false, prerender: false },
-    '/*/visites/**': { ssr: false, prerender: false },
-    '/carte': { ssr: false, prerender: false },
-    '/*/carte': { ssr: false, prerender: false },
-    '/admin/**': { prerender: false },
-    '/*/admin/**': { prerender: false },
-    '/bookings/**': { prerender: false },
-    '/*/bookings/**': { prerender: false },
-    '/retrouver': { prerender: false },
-    '/*/retrouver': { prerender: false },
-  },
-
-  nitro: {
-    prerender: {
-      crawlLinks: true,
-      routes: ['/', '/es', '/fr', '/en'],
-      failOnError: false,
-    },
+    '/visites/**': { ssr: false },
+    '/*/visites/**': { ssr: false },
+    '/carte': { ssr: false },
+    '/*/carte': { ssr: false },
   },
 
   shadcn: {

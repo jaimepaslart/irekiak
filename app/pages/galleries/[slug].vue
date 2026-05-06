@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Gallery } from '#types/gallery'
-import { exhibitions } from '@data/exhibitions'
+import type { Exhibition } from '#types/exhibition'
 
 type GalleryView = Gallery & { imageUrl: string, logoUrl: string | null }
 
@@ -11,18 +11,19 @@ const route = useRoute()
 
 const slug = computed(() => String(route.params.slug ?? ''))
 
-// Reads gallery from /api/galleries/[slug] which applies admin overrides on top of
-// data/galleries.ts. Prerendered at build (snapshot of overrides at build time).
+// Both endpoints apply admin overrides on top of the static data files; reading
+// data/exhibitions.ts directly here would show stale info after a gallerist
+// edits via /admin (artist name, title, description, image).
 const { data: gallery } = await useAsyncData<GalleryView | null>(
   () => `gallery-${slug.value}`,
   () => $fetch<GalleryView>(`/api/galleries/${slug.value}`).catch(() => null),
   { default: () => null },
 )
 
-const galleryExhibitions = computed(() =>
-  gallery.value
-    ? exhibitions.filter(e => e.galleryId === gallery.value!.id)
-    : [],
+const { data: galleryExhibitions } = await useAsyncData<Exhibition[]>(
+  () => `gallery-exhibitions-${slug.value}`,
+  () => $fetch<Exhibition[]>(`/api/galleries/${slug.value}/exhibitions`).catch(() => [] as Exhibition[]),
+  { default: () => [] as Exhibition[] },
 )
 
 // Uploaded covers are already resized / webp-encoded by the upload endpoint and
@@ -159,7 +160,9 @@ useScrollReveal()
                 class="p-5 border border-white/15 rounded-sm"
               >
                 <p class="text-white font-semibold text-lg mb-2">{{ artist.name }}</p>
-                <p class="text-white/60 text-sm leading-relaxed">{{ tr(artist.bio) }}</p>
+                <p v-if="tr(artist.bio)" class="text-white/60 text-sm leading-relaxed">
+                  {{ tr(artist.bio) }}
+                </p>
               </div>
             </div>
 

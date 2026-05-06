@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm'
 import { exhibitions } from '@data/exhibitions'
 import { galleries } from '@data/galleries'
-import type { Exhibition, ExhibitionCard } from '#types/exhibition'
+import type { Artist, Exhibition, ExhibitionCard } from '#types/exhibition'
 import type { TranslatedText } from '#types/gallery'
 import { db } from '../db'
 import { exhibitionOverrides, type ExhibitionOverrideRow } from '../db/schema'
@@ -90,4 +90,43 @@ export function listExhibitionCards(): ExhibitionCard[] {
   const overrides = db.select().from(exhibitionOverrides).all()
   const byId = new Map(overrides.map(o => [o.exhibitionId, o]))
   return sortedExhibitions.map(exh => buildCard(exh, byId.get(exh.id) ?? null))
+}
+
+const EMPTY_BIO: TranslatedText = { eu: '', es: '', fr: '', en: '' }
+
+// Full Exhibition shape (with artists[] / medium / images) merged with admin
+// overrides — used by the gallery detail page so it doesn't show stale data
+// from data/exhibitions.ts after a gallerist edits via /admin.
+//
+// When the admin overrides `artistName`, the static bio (tied to the original
+// artist) is dropped instead of being shown next to a different name — the
+// override schema doesn't carry a replacement bio.
+function mergeExhibition(exh: Exhibition, override: ExhibitionOverrideRow | null): Exhibition {
+  if (!override) return exh
+  const overriddenImage = override.imageFilename
+    ? [`/api/images/exhibitions/${override.imageFilename}`, ...exh.images.slice(1)]
+    : exh.images
+  let artists: Artist[] = exh.artists
+  if (override.artistName) {
+    const head: Artist = {
+      name: override.artistName,
+      bio: EMPTY_BIO,
+    }
+    artists = [head]
+  }
+  return {
+    ...exh,
+    title: mergeTranslated(override, exh.title, 'title'),
+    description: mergeTranslated(override, exh.description, 'description'),
+    artists,
+    images: overriddenImage,
+  }
+}
+
+export function listExhibitionsForGallery(galleryId: string): Exhibition[] {
+  const galleryExhibitions = exhibitions.filter(e => e.galleryId === galleryId)
+  if (galleryExhibitions.length === 0) return []
+  const overrides = db.select().from(exhibitionOverrides).all()
+  const byId = new Map(overrides.map(o => [o.exhibitionId, o]))
+  return galleryExhibitions.map(e => mergeExhibition(e, byId.get(e.id) ?? null))
 }

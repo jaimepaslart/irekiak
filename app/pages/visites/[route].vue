@@ -132,6 +132,7 @@ usePageSeo('tours')
                    transition-all duration-300 hover:border-white/30 snap-start"
           >
             <NuxtImg
+              v-if="!gallery.image.startsWith('/api/')"
               :src="gallery.image"
               :alt="gallery.name"
               width="256"
@@ -140,6 +141,14 @@ usePageSeo('tours')
               format="webp"
               quality="80"
             />
+            <img
+              v-else
+              :src="gallery.image"
+              :alt="gallery.name"
+              width="256"
+              height="160"
+              class="w-full h-40 object-cover"
+            >
             <div class="p-4">
               <p class="font-semibold text-white mb-1">{{ gallery.name }}</p>
               <p class="text-xs text-white/40">{{ gallery.address }}</p>

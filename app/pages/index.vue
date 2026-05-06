@@ -136,6 +136,7 @@ onBeforeUnmount(() => {
           aria-hidden="i === currentIndex ? 'false' : 'true'"
         >
           <NuxtImg
+            v-if="!card.imageUrl.startsWith('/api/')"
             :src="card.imageUrl"
             :alt="`${card.artist} — ${tr(card.title)}`"
             format="webp"
@@ -143,6 +144,13 @@ onBeforeUnmount(() => {
             :loading="i === 0 ? 'eager' : 'lazy'"
             class="absolute inset-0 w-full h-full object-cover"
           />
+          <img
+            v-else
+            :src="card.imageUrl"
+            :alt="`${card.artist} — ${tr(card.title)}`"
+            :loading="i === 0 ? 'eager' : 'lazy'"
+            class="absolute inset-0 w-full h-full object-cover"
+          >
         </div>
 
         <div class="absolute inset-0 bg-gradient-to-t from-[var(--color-edition)]/60 via-transparent to-transparent pointer-events-none" aria-hidden="true" />

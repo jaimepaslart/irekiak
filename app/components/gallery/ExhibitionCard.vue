@@ -24,7 +24,16 @@ const needsToggle = computed(() => description.value.length > COLLAPSED_CHAR_THR
 const isCollapsed = computed(() => needsToggle.value && !expanded.value)
 
 const expanded = ref(false)
+const descEl = ref<HTMLElement | null>(null)
+// Captured at click time so the max-height transition lands exactly on
+// the content's natural height — no magic number, no overshoot lag.
+const expandedHeightPx = ref(0)
 const descId = computed(() => `exh-desc-${props.card.id}`)
+
+function toggle() {
+  if (descEl.value) expandedHeightPx.value = descEl.value.scrollHeight
+  expanded.value = !expanded.value
+}
 </script>
 
 <template>
@@ -60,8 +69,10 @@ const descId = computed(() => `exh-desc-${props.card.id}`)
 
     <div
       :id="descId"
+      ref="descEl"
       class="desc-clamp relative space-y-3 text-white/70 leading-relaxed text-sm md:text-[15px] overflow-hidden"
       :class="isCollapsed ? 'desc-clamp--collapsed' : 'desc-clamp--open'"
+      :style="expanded && expandedHeightPx ? { maxHeight: `${expandedHeightPx}px` } : undefined"
     >
       <p v-for="(p, i) in paragraphs" :key="i">{{ p }}</p>
     </div>
@@ -72,7 +83,7 @@ const descId = computed(() => `exh-desc-${props.card.id}`)
       :aria-expanded="expanded"
       :aria-controls="descId"
       class="mt-2 -my-1 py-2 inline-flex items-center gap-2 min-h-[44px] text-xs text-white/65 hover:text-gold font-mono uppercase tracking-[0.18em] whitespace-nowrap transition-colors focus-gold self-start"
-      @click="expanded = !expanded"
+      @click="toggle"
     >
       {{ expanded ? t('home.exhibitionsReadLess') : t('home.exhibitionsReadMore') }}
       <span class="text-base leading-none" aria-hidden="true">{{ expanded ? '−' : '+' }}</span>

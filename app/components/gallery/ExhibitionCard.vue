@@ -11,19 +11,17 @@ const props = defineProps<Props>()
 const tr = useTranslated()
 const { t } = useI18n()
 
+// 280 chars ≈ 6 lines at text-sm in a 1/3-grid column — matches the
+// collapsed max-height. SSR-stable so the button hydrates without flash.
+const COLLAPSED_CHAR_THRESHOLD = 280
+
 const description = computed(() => tr(props.card.description))
 const paragraphs = computed(() => splitParagraphs(description.value))
 const title = computed(() => tr(props.card.title))
 const alt = computed(() => `${props.card.artist} — ${title.value}`)
 const isUploaded = computed(() => isUploadedImage(props.card.imageUrl))
-
-// SSR-stable heuristic: a card needs the toggle when its description is
-// long enough to spill past the collapsed clamp (~6 lines @ text-sm).
-// Computed at render time so the button renders identically on server
-// and client — no hydration flash.
-const needsToggle = computed(() =>
-  paragraphs.value.length > 1 || description.value.length > 280,
-)
+const needsToggle = computed(() => description.value.length > COLLAPSED_CHAR_THRESHOLD)
+const isCollapsed = computed(() => needsToggle.value && !expanded.value)
 
 const expanded = ref(false)
 const descId = computed(() => `exh-desc-${props.card.id}`)
@@ -63,7 +61,7 @@ const descId = computed(() => `exh-desc-${props.card.id}`)
     <div
       :id="descId"
       class="desc-clamp relative space-y-3 text-white/70 leading-relaxed text-sm md:text-[15px] overflow-hidden"
-      :class="expanded || !needsToggle ? 'desc-clamp--open' : 'desc-clamp--collapsed'"
+      :class="isCollapsed ? 'desc-clamp--collapsed' : 'desc-clamp--open'"
     >
       <p v-for="(p, i) in paragraphs" :key="i">{{ p }}</p>
     </div>
@@ -73,7 +71,7 @@ const descId = computed(() => `exh-desc-${props.card.id}`)
       type="button"
       :aria-expanded="expanded"
       :aria-controls="descId"
-      class="mt-3 inline-flex items-center gap-2 text-xs text-white/55 hover:text-gold font-mono uppercase tracking-[0.18em] transition-colors focus-gold self-start"
+      class="mt-2 -my-1 py-2 inline-flex items-center gap-2 min-h-[44px] text-xs text-white/65 hover:text-gold font-mono uppercase tracking-[0.18em] whitespace-nowrap transition-colors focus-gold self-start"
       @click="expanded = !expanded"
     >
       {{ expanded ? t('home.exhibitionsReadLess') : t('home.exhibitionsReadMore') }}
@@ -103,11 +101,9 @@ const descId = computed(() => `exh-desc-${props.card.id}`)
 }
 
 .desc-clamp--open {
-  max-height: 100rem;
+  max-height: 40rem;
 }
 
-/* Fade the last lines of the collapsed text into the section background so
-   the cut-off feels intentional rather than abrupt. */
 .desc-clamp--collapsed::after {
   content: '';
   position: absolute;
@@ -117,9 +113,11 @@ const descId = computed(() => `exh-desc-${props.card.id}`)
   pointer-events: none;
 }
 
+/* Vestibular-safe: skip the clamp entirely so users see the full text
+   without any height animation or fade overlay. */
 @media (prefers-reduced-motion: reduce) {
-  .desc-clamp {
-    transition: none;
-  }
+  .desc-clamp,
+  .desc-clamp--collapsed { max-height: none; transition: none; }
+  .desc-clamp--collapsed::after { display: none; }
 }
 </style>

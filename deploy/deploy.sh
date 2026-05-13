@@ -12,7 +12,7 @@ set -euo pipefail
 # === Config ===
 SSH_TARGET="root@76.13.38.1"
 REMOTE_DIR="/opt/irekiak"
-HEALTH_URL="https://irekiak.art/api/bookings/availability"
+HEALTH_URL="https://irekiak.eus/api/bookings/availability"
 
 # Curl GET (not HEAD) — Nitro returns 404 on HEAD for some API routes
 hc() { curl -s -o /dev/null -w '%{http_code}' -m "$1" "$2" 2>/dev/null || echo "000"; }
@@ -139,4 +139,4 @@ fi
 # === Success ===
 NEW_COMMIT=$(git rev-parse --short HEAD)
 ok "Deployed $PREV_COMMIT → $NEW_COMMIT"
-ok "Live: https://irekiak.art/ (HTTP $FINAL_CODE)"
+ok "Live: https://irekiak.eus/ (HTTP $FINAL_CODE)"

@@ -1,9 +1,8 @@
-# Pré-lancement : le site est servi depuis irekiak.art en attendant le basculement vers irekiak.eus.
-# Au moment du basculement, remplacer ce fichier par :
-#   User-agent: *
-#   Allow: /
-#   Disallow: /admin/
-#   Disallow: /visites/
-#   Sitemap: https://irekiak.eus/sitemap.xml
 User-agent: *
-Disallow: /
+Allow: /
+Disallow: /admin/
+Disallow: /api/admin/
+Disallow: /bookings/
+Disallow: /retrouver
+
+Sitemap: https://irekiak.eus/sitemap.xml

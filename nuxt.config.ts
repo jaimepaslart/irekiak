@@ -82,6 +82,18 @@ export default defineNuxtConfig({
     name: 'Irekiak',
   },
 
+  sitemap: {
+    exclude: [
+      '/admin/**',
+      '/**/admin/**',
+      '/api/**',
+      '/bookings/**',
+      '/**/bookings/**',
+      '/retrouver',
+      '/**/retrouver',
+    ],
+  },
+
   typescript: {
     strict: true,
   },

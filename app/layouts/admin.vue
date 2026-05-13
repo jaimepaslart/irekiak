@@ -1,4 +1,8 @@
 <script setup lang="ts">
+useHead({
+  meta: [{ name: 'robots', content: 'noindex, nofollow, noarchive, nosnippet' }],
+})
+
 const STORAGE_KEY = 'irekiak_admin_token'
 const STORAGE_KEY_TS = 'irekiak_admin_token_ts'
 const SESSION_TIMEOUT_MS = 60 * 60 * 1000

@@ -57,8 +57,8 @@ export const tokens: BrandTokens = {
 }
 
 const EVENT_DATES = '29 — 31 MAI 2026'
-const LOGO_URL = 'https://irekiak.art/logo-email-bg.png'
-const SITE_URL = 'https://irekiak.art'
+const LOGO_URL = 'https://irekiak.eus/logo-email-bg.png'
+const SITE_URL = 'https://irekiak.eus'
 
 export function escapeHtml(value: string | number | null | undefined): string {
   if (value === null || value === undefined) return ''

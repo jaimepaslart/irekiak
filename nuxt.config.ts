@@ -41,6 +41,13 @@ export default defineNuxtConfig({
     '/*/visites/**': { ssr: false },
     '/carte': { ssr: false },
     '/*/carte': { ssr: false },
+    // Hors index pour admin / bookings / retrouver (déjà bloqués dans robots.txt + sitemap.exclude)
+    '/admin/**': { headers: { 'X-Robots-Tag': 'noindex, nofollow, noarchive, nosnippet' }, robots: false },
+    '/*/admin/**': { headers: { 'X-Robots-Tag': 'noindex, nofollow, noarchive, nosnippet' }, robots: false },
+    '/bookings/**': { headers: { 'X-Robots-Tag': 'noindex, nofollow, noarchive, nosnippet' }, robots: false },
+    '/*/bookings/**': { headers: { 'X-Robots-Tag': 'noindex, nofollow, noarchive, nosnippet' }, robots: false },
+    '/retrouver': { headers: { 'X-Robots-Tag': 'noindex, nofollow' }, robots: false },
+    '/*/retrouver': { headers: { 'X-Robots-Tag': 'noindex, nofollow' }, robots: false },
   },
 
   shadcn: {

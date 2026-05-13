@@ -37,7 +37,7 @@ const daggeMembers = computed(() => [
             aria-hidden="true"
             class="hidden md:block font-extralight text-[140px] lg:text-[160px] leading-none text-white/10 tabular-nums select-none pointer-events-none -mt-4"
           >
-            2010
+            2021
           </div>
 
           <div class="space-y-5 md:space-y-6 max-w-[640px]">

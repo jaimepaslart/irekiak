@@ -28,3 +28,7 @@ logs
 
 # Backup snapshots (WP mirror, DNS dumps, IMAP)
 backups/
+
+# Python bytecode
+__pycache__/
+*.pyc

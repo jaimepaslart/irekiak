@@ -46,7 +46,9 @@
       "@parcel/watcher",
       "esbuild",
       "better-sqlite3",
-      "sharp"
+      "sharp",
+      "chromedriver",
+      "unrs-resolver"
     ]
   },
   "devDependencies": {

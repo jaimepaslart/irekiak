@@ -1,1 +1,7 @@
-onlyBuiltDependencies: '@parcel/watcher'
+onlyBuiltDependencies:
+  - '@parcel/watcher'
+  - esbuild
+  - better-sqlite3
+  - sharp
+  - chromedriver
+  - unrs-resolver

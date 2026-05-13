@@ -14,8 +14,11 @@ SSH_TARGET="root@76.13.38.1"
 REMOTE_DIR="/opt/irekiak"
 HEALTH_URL="https://irekiak.eus/api/bookings/availability"
 
-# Curl GET (not HEAD) — Nitro returns 404 on HEAD for some API routes
-hc() { curl -s -o /dev/null -w '%{http_code}' -m "$1" "$2" 2>/dev/null || echo "000"; }
+# Curl GET (not HEAD) — Nitro returns 404 on HEAD for some API routes.
+# Force-resolve to VPS IP to bypass any stale local DNS cache (eg juste après
+# le flip A record .eus, le resolver local peut encore avoir l'ancien IP).
+VPS_IP="76.13.38.1"
+hc() { curl -s -o /dev/null -w '%{http_code}' -m "$1" --resolve "irekiak.eus:443:${VPS_IP}" "$2" 2>/dev/null || echo "000"; }
 
 # === Couleurs ===
 BLUE='\033[36m'

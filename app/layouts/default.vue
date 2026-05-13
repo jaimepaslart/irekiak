@@ -1,16 +1,25 @@
 <script setup lang="ts">
 const { t, locale } = useI18n()
 const route = useRoute()
+const localeHead = useLocaleHead({ dir: true, lang: true, seo: true })
 
 const SITE_URL = 'https://irekiak.eus'
-const OG_IMAGE = `${SITE_URL}/images/og/irekiak-og-default.jpg`
+const OG_IMAGE = `${SITE_URL}/logo-big.webp`
 
 const canonical = computed(() => `${SITE_URL}${route.path}`)
 const ogLocale = computed(() => ({ eu: 'eu_ES', es: 'es_ES', fr: 'fr_FR', en: 'en_US' }[locale.value] ?? 'eu_ES'))
 
 useHead({
+  htmlAttrs: {
+    lang: () => localeHead.value.htmlAttrs?.lang,
+    dir: () => localeHead.value.htmlAttrs?.dir,
+  },
   link: [
     { rel: 'canonical', href: canonical },
+    ...(localeHead.value.link ?? []),
+  ],
+  meta: [
+    ...(localeHead.value.meta ?? []),
   ],
 })
 

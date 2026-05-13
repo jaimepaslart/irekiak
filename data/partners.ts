@@ -40,7 +40,7 @@ export const partners: Partner[] = [
     name: 'Kutxa Fundazioa',
     logo: '/images/partners/kutxa.png',
     website: 'https://kutxafundazioa.eus',
-    tier: 'support',
+    tier: 'organizer',
   },
   {
     id: 'el-aguila',

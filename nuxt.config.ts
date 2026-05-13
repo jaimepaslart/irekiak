@@ -49,6 +49,7 @@ export default defineNuxtConfig({
   },
 
   i18n: {
+    baseUrl: 'https://irekiak.eus',
     locales: [
       { code: 'eu', name: 'Euskara', language: 'eu-ES', file: 'eu.json' },
       { code: 'es', name: 'Español', language: 'es-ES', file: 'es.json' },

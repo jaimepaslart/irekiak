@@ -24,9 +24,6 @@ export default defineNuxtConfig({
 
   css: [
     '~/assets/css/tailwind.css',
-    'leaflet/dist/leaflet.css',
-    'leaflet.markercluster/dist/MarkerCluster.css',
-    'leaflet.markercluster/dist/MarkerCluster.Default.css',
   ],
 
   vite: {

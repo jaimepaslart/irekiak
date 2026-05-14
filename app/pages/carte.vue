@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import 'leaflet/dist/leaflet.css'
+import 'leaflet.markercluster/dist/MarkerCluster.css'
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 import { tourRoutes } from '@data/tours'
 import { createGalleryMarker, createUserLocationMarker } from '~/components/map/MarkerIcon'
 import { googleDirectionsUrl } from '~/utils/maps'

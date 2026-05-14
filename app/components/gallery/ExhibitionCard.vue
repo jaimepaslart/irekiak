@@ -45,8 +45,11 @@ function toggle() {
         :alt="alt"
         format="webp"
         loading="lazy"
+        width="640"
+        height="800"
         class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
-        sizes="sm:100vw md:50vw lg:33vw"
+        sizes="sm:90vw md:45vw lg:33vw"
+        densities="x1 x2"
       />
       <img
         v-else

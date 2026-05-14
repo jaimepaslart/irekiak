@@ -11,6 +11,12 @@ const tr = useTranslated()
 useScrollReveal()
 usePageSeo('home')
 
+useHead({
+  link: [
+    { rel: 'preload', as: 'image', href: '/logo-big.webp', fetchpriority: 'high' },
+  ],
+})
+
 const { announcement } = await useAnnouncement()
 
 const { data: heroCards } = await useAsyncData('exhibitions-hero', () =>
@@ -81,6 +87,9 @@ onBeforeUnmount(() => {
           src="/logo-big.webp"
           alt=""
           aria-hidden="true"
+          width="220"
+          height="248"
+          fetchpriority="high"
           class="h-auto w-full max-w-[220px] lg:max-w-[220px] mb-10 animate-fade-in-up"
           style="animation-delay: 150ms"
         >
@@ -123,7 +132,9 @@ onBeforeUnmount(() => {
           src="/images/exhibitions/sugerencias-prusianas-monologo-prusiano-i.jpg"
           alt="Rafa Satrústegui — Sugerencias prusianas"
           format="webp"
-          sizes="sm:100vw md:100vw lg:58vw"
+          width="1200"
+          height="900"
+          sizes="lg:58vw"
           loading="eager"
           class="absolute inset-0 w-full h-full object-cover img-fade-in"
         />
@@ -141,7 +152,9 @@ onBeforeUnmount(() => {
             :src="card.imageUrl"
             :alt="`${card.artist} — ${tr(card.title)}`"
             format="webp"
-            sizes="sm:100vw md:100vw lg:58vw"
+            width="1200"
+            height="900"
+            sizes="lg:58vw"
             :loading="i === 0 ? 'eager' : 'lazy'"
             class="absolute inset-0 w-full h-full object-cover"
           />
